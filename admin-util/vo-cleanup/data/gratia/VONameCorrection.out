@@ -1,0 +1,1199 @@
+
+=========================================================
+VOName being analized
+=========================================================
+--------------
+set @voname="TG-%"
+--------------
+
+
+=========================================================
+JUR recs still with bad VOName
+This stops the VOName from being deleted from the
+VONameCorrection and VO table until the JUR records are dropped.
+=========================================================
+--------------
+select distinct VOName, 
+       count(*) as JUR_records
+from JobUsageRecord 
+where VOName like @voname
+group by VOName
+--------------
+
++--------------+-------------+
+| VOName       | JUR_records |
++--------------+-------------+
+| TG-MCA05S010 |           9 | 
++--------------+-------------+
+
+=========================================================
+VO table count of the VOName
+=========================================================
+--------------
+select count(*) as GratiaVO_cnt
+from VO
+where VOName like @voname
+--------------
+
++--------------+
+| GratiaVO_cnt |
++--------------+
+|           79 | 
++--------------+
+
+=========================================================
+VONameCorrection table count of the VOName
+=========================================================
+--------------
+select count(*) as ProbeVO_cnt
+from VONameCorrection
+where VOName like @voname
+--------------
+
++-------------+
+| ProbeVO_cnt |
++-------------+
+|          79 | 
++-------------+
+========================================================
+Query - Unused VONameCorrection table entries.
+========================================================
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VC.VOName as ProbeVO
+  ,VC.ReportableVOName
+  ,VC.corrid
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.VOid = VO.VOid
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+order by 
+  GratiaVO
+ ,ProbeVO       
+ ,ReportableVOName
+--------------
+
++-----------+------------------+------------------+--------+
+| GratiaVO  | ProbeVO          | ReportableVOName | corrid |
++-----------+------------------+------------------+--------+
+| auger     | auger            | auger            |     53 | 
+| cdf       | cdf              | cdf              |     62 | 
+| cdms      | cdms             | cdms             |     66 | 
+| cern      | cern             | cern             |     68 | 
+| cms       | uscms            | uscms            |    267 | 
+| cms       | uscmsPool        | uscmsPool        |    270 | 
+| cms       | uscmsPool1       | uscmsPool1       |    273 | 
+| cms       | uscmspool0       | uscmspool0       |    276 | 
+| cms       | uscmspool1       | NULL             |    277 | 
+| des       | des              | des              |     80 | 
+| dosar     | dosar            | dosar            |     83 | 
+| engage    | engagement       | engagement       |     97 | 
+| fermilab  | fermilab         | fermilab         |    103 | 
+| fmri      | fmri             | fmri             |    109 | 
+| gadu      | gadu             | gadu             |    112 | 
+| geant4    | geant4           | geant4           |    115 | 
+| grase     | grase            | grase            |    128 | 
+| gridex    | gridex           | gridex           |    135 | 
+| grow      | grow             | grow             |    138 | 
+| hypercp   | hypercp          | hypercp          |    142 | 
+| i2u2      | i2u2             | I2U2             |    143 | 
+| ilc       | ilc              | ilc              |    147 | 
+| infn      | infn             | infn             |    150 | 
+| ivdgl     | ivdgl            | ivdgl            |    154 | 
+| ktev      | ktev             | ktev             |    169 | 
+| ligo      | ligo             | ligo             |    178 | 
+| ligo      | ux001            | ux001            |    281 | 
+| magrid    | magrid           | NULL             |    182 | 
+| miniboone | miniboone        | miniboone        |    188 | 
+| osg       | osg              | osg              |    221 | 
+| osgedu    | osgedu           | osgedu           |    225 | 
+| other     | 1202574          | NULL             |     27 | 
+| other     | 1203635          | NULL             |     28 | 
+| other     | 1205281          | NULL             |     30 | 
+| other     | blane            | blane            |     57 | 
+| other     | gin.ggf.org      | gin.ggf.org      |    118 | 
+| other     | james            | james            |    156 | 
+| other     | km               | km               |    165 | 
+| other     | lee              | lee              |    172 | 
+| other     | mm               | mm               |    199 | 
+| other     | mschram06/29/2   | NULL             |    326 | 
+| other     | park             | park             |    231 | 
+| other     | smith            | smith            |    245 | 
+| other     | ss               | ss               |    247 | 
+| other     | wang             | wang             |    284 | 
+| sbgrid    | /SBGrid/Role=RSV | SBGrid           |    350 | 
+| sdss      | sdss             | sdss             |    242 | 
+| tigre     | tigrepool0       | tigrepool0       |    255 | 
+| unknown   | Unknown          | Unknown          |     41 | 
+| usatlas   | osgusatlas00     | NULL             |    228 | 
+| usatlas   | osgusatlas00     | ATLAS            |    229 | 
+| usatlas   | usatlas          | usatlas          |    264 | 
++-----------+------------------+------------------+--------+
+========================================================
+Query - VONameCorrection table entries not in VO.
+========================================================
+--------------
+SELECT 
+   VC.VOName as ProbeVO
+  ,VC.ReportableVOName
+  ,VC.corrid
+  ,VC.void
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.void not in (
+  SELECT distinct(void) FROM VO)
+order by 
+  ProbeVO       
+ ,VC.corrid
+ ,VC.void
+ ,ReportableVOName
+--------------
+
+========================================================
+Query - Used VONameCorrection table entries.
+========================================================
+--------------
+SELECT 
+  count(*) as nbr_of_entries
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.VOid = VO.VOid
+and (
+     VC.corrid in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+  )
+--------------
+
++----------------+
+| nbr_of_entries |
++----------------+
+|            843 | 
++----------------+
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VC.VOName as ProbeVO
+  ,VC.ReportableVOName
+  ,VC.corrid
+
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.VOid = VO.VOid
+and (
+     VC.corrid in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+  )
+order by 
+  GratiaVO
+ ,ProbeVO       
+ ,ReportableVOName
+ ,VC.corrid
+--------------
+
++-----------------+-------------------------------------------------------+--------------------------------------------------------------------------------------------------------------+--------+
+| GratiaVO        | ProbeVO                                               | ReportableVOName                                                                                             | corrid |
++-----------------+-------------------------------------------------------+--------------------------------------------------------------------------------------------------------------+--------+
+| ATLAS           | ATLAS                                                 | ATLAS                                                                                                        |    630 | 
+| EXAMPLE         | EXAMPLE                                               | NULL                                                                                                         |    648 | 
+| Engage          | /Engage/EIC/Role=NULL/Capability=NULL                 | Engage                                                                                                       |    854 | 
+| Engage          | /Engage/pheno/Role=NULL/Capability=NULL               | Engage                                                                                                       |    892 | 
+| GRASE           | /GRASE/Role=NULL/Capability=NULL                      | GRASE                                                                                                        |    533 | 
+| LBNE            | /Engage/LBNE/Role=NULL/Capability=NULL                | Engage                                                                                                       |    499 | 
+| SBGrid          | /SBGrid/Role=software/Capability=NULL                 | SBGrid                                                                                                       |    613 | 
+| SBGrid          | /SBGrid/WeNMR/Role=NULL/Capability=NULL               | SBGrid                                                                                                       |    861 | 
+| SBGrid          | /SBGrid/eNMR/Role=NULL/Capability=NULL                | SBGrid                                                                                                       |    683 | 
+| SGVO            | SGVO                                                  | SGVO                                                                                                         |    851 | 
+| TG-ASC050039N   | TG-ASC050039N                                         | NULL                                                                                                         |    762 | 
+| TG-ASC090089    | TG-ASC090089                                          | NULL                                                                                                         |    752 | 
+| TG-AST070052N   | TG-AST070052N                                         | NULL                                                                                                         |    777 | 
+| TG-AST090100    | TG-AST090100                                          | NULL                                                                                                         |    769 | 
+| TG-AST100043    | TG-AST100043                                          | NULL                                                                                                         |    820 | 
+| TG-AST110006    | TG-AST110006                                          | NULL                                                                                                         |    794 | 
+| TG-ATM010005N   | TG-ATM010005N                                         | NULL                                                                                                         |    797 | 
+| TG-ATM090002    | TG-ATM090002                                          | NULL                                                                                                         |    772 | 
+| TG-ATM090060    | TG-ATM090060                                          | NULL                                                                                                         |    781 | 
+| TG-ATM100051    | TG-ATM100051                                          | NULL                                                                                                         |    796 | 
+| TG-ATM110019    | TG-ATM110019                                          | NULL                                                                                                         |    770 | 
+| TG-BCS110002    | TG-BCS110002                                          | NULL                                                                                                         |    810 | 
+| TG-CCR110003    | TG-CCR110003                                          | NULL                                                                                                         |    751 | 
+| TG-CDA090008    | TG-CDA090008                                          | NULL                                                                                                         |    754 | 
+| TG-CDA100007    | TG-CDA100007                                          | NULL                                                                                                         |    744 | 
+| TG-CDA110012    | TG-CDA110012                                          | NULL                                                                                                         |    760 | 
+| TG-CHE070074N   | TG-CHE070074N                                         | NULL                                                                                                         |    757 | 
+| TG-CHE080066N   | TG-CHE080066N                                         | NULL                                                                                                         |    745 | 
+| TG-CHE090006    | TG-CHE090006                                          | NULL                                                                                                         |    775 | 
+| TG-CHE100058    | TG-CHE100058                                          | NULL                                                                                                         |    788 | 
+| TG-CHE100095    | TG-CHE100095                                          | NULL                                                                                                         |    736 | 
+| TG-CHE100113    | TG-CHE100113                                          | NULL                                                                                                         |    817 | 
+| TG-CHE100142    | TG-CHE100142                                          | NULL                                                                                                         |    771 | 
+| TG-CHE110021    | TG-CHE110021                                          | NULL                                                                                                         |    822 | 
+| TG-CHE110064    | TG-CHE110064                                          | NULL                                                                                                         |    799 | 
+| TG-CTS070034N   | TG-CTS070034N                                         | NULL                                                                                                         |    803 | 
+| TG-CTS090062    | TG-CTS090062                                          | NULL                                                                                                         |    779 | 
+| TG-CTS090079    | TG-CTS090079                                          | NULL                                                                                                         |    747 | 
+| TG-CTS100012    | TG-CTS100012                                          | NULL                                                                                                         |    782 | 
+| TG-CTS100026    | TG-CTS100026                                          | NULL                                                                                                         |    761 | 
+| TG-CTS100027    | TG-CTS100027                                          | NULL                                                                                                         |    764 | 
+| TG-DMR080070    | TG-DMR080070                                          | NULL                                                                                                         |    780 | 
+| TG-DMR090073    | TG-DMR090073                                          | NULL                                                                                                         |    763 | 
+| TG-DMR090097    | TG-DMR090097                                          | NULL                                                                                                         |    784 | 
+| TG-DMR100080    | TG-DMR100080                                          | NULL                                                                                                         |    749 | 
+| TG-DMR110013    | TG-DMR110013                                          | NULL                                                                                                         |    750 | 
+| TG-DMR110027    | TG-DMR110027                                          | NULL                                                                                                         |    824 | 
+| TG-DMR110052    | TG-DMR110052                                          | NULL                                                                                                         |    773 | 
+| TG-DMR110067    | TG-DMR110067                                          | NULL                                                                                                         |    787 | 
+| TG-DMR110072    | TG-DMR110072                                          | NULL                                                                                                         |    801 | 
+| TG-DMR110095    | TG-DMR110095                                          | NULL                                                                                                         |    813 | 
+| TG-DMS100018    | TG-DMS100018                                          | NULL                                                                                                         |    768 | 
+| TG-DMS110002    | TG-DMS110002                                          | NULL                                                                                                         |    743 | 
+| TG-DMS110019    | TG-DMS110019                                          | NULL                                                                                                         |    790 | 
+| TG-EAR080018T   | TG-EAR080018T                                         | NULL                                                                                                         |    741 | 
+| TG-EAR100012    | TG-EAR100012                                          | NULL                                                                                                         |    776 | 
+| TG-EAR100021    | TG-EAR100021                                          | NULL                                                                                                         |    785 | 
+| TG-EAR110015    | TG-EAR110015                                          | NULL                                                                                                         |    753 | 
+| TG-IBN050000N   | TG-IBN050000N                                         | NULL                                                                                                         |    742 | 
+| TG-IBN090004    | TG-IBN090004                                          | NULL                                                                                                         |    755 | 
+| TG-IBN100006    | TG-IBN100006                                          | NULL                                                                                                         |    765 | 
+| TG-MCA03S007    | TG-MCA03S007                                          | NULL                                                                                                         |    831 | 
+| TG-MCA05S010    | TG-MCA05S010                                          | NULL                                                                                                         |    586 | 
+| TG-MCA07S022    | TG-MCA07S022                                          | NULL                                                                                                         |    836 | 
+| TG-MCA07S029    | TG-MCA07S029                                          | NULL                                                                                                         |    759 | 
+| TG-MCB040051N   | TG-MCB040051N                                         | NULL                                                                                                         |    766 | 
+| TG-MCB070015N   | TG-MCB070015N                                         | NULL                                                                                                         |    808 | 
+| TG-MCB090163    | TG-MCB090163                                          | NULL                                                                                                         |    739 | 
+| TG-MCB100143    | TG-MCB100143                                          | NULL                                                                                                         |    786 | 
+| TG-MCB110037    | TG-MCB110037                                          | NULL                                                                                                         |    823 | 
+| TG-MCB110072    | TG-MCB110072                                          | NULL                                                                                                         |    738 | 
+| TG-MCB110112    | TG-MCB110112                                          | NULL                                                                                                         |    821 | 
+| TG-MCB110118    | TG-MCB110118                                          | NULL                                                                                                         |    746 | 
+| TG-PHY100030    | TG-PHY100030                                          | NULL                                                                                                         |    756 | 
+| TG-PHY110005    | TG-PHY110005                                          | NULL                                                                                                         |    825 | 
+| TG-PHY110010    | TG-PHY110010                                          | NULL                                                                                                         |    798 | 
+| TG-PHY110015    | TG-PHY110015                                          | NULL                                                                                                         |    778 | 
+| TG-PHY110021    | TG-PHY110021                                          | NULL                                                                                                         |    748 | 
+| TG-PHY110022    | TG-PHY110022                                          | NULL                                                                                                         |    783 | 
+| TG-PHY110024    | TG-PHY110024                                          | NULL                                                                                                         |    758 | 
+| TG-PHY110034    | TG-PHY110034                                          | NULL                                                                                                         |    740 | 
+| TG-SES110002    | TG-SES110002                                          | NULL                                                                                                         |    795 | 
+| TG-STA060008N   | TG-STA060008N                                         | NULL                                                                                                         |    737 | 
+| TG-STA060013N   | TG-STA060013N                                         | NULL                                                                                                         |    774 | 
+| TG-TRA090014    | TG-TRA090014                                          | NULL                                                                                                         |    767 | 
+| TG-TRA100018    | TG-TRA100018                                          | NULL                                                                                                         |    804 | 
+| TG-TRA110019    | TG-TRA110019                                          | NULL                                                                                                         |    791 | 
+| TG-TRA900337N   | TG-TRA900337N                                         | NULL                                                                                                         |    793 | 
+| TG-xxxxx        | TG-xxxxx                                              | NULL                                                                                                         |    789 | 
+| UT-NTNL0033     | UT-NTNL0033                                           | NULL                                                                                                         |    886 | 
+| Unknown         | Unknown                                               | error opening the file, /home/hcc/.globus/job/cit-gatekeeper.ultralight.org/30088.1320805577/x509_up         |    882 | 
+| Unknown         | Unknown                                               | error opening the file, /opt/osg/home/osg/.globus/job/osg-nemo-ce.phys.uwm.edu/12915.1304606060/x509_up      |    663 | 
+| Unknown         | Unknown                                               | error opening the file, /opt/osg/home/osg/.globus/job/osg-nemo-ce.phys.uwm.edu/6811.1286423227/x509_up       |    606 | 
+| Unknown         | Unknown                                               | error reading the file, /home/CMS/uscmspool0846/.globus/job/antaeus.hpcc.ttu.edu/29439.1311319561/x509_up    |    721 | 
+| Unknown         | Unknown                                               | error reading the file, /home/CMS/uscmspool2041/.globus/job/antaeus.hpcc.ttu.edu/3409.1312906504/x509_up     |    814 | 
+| Unknown         | Unknown                                               | error reading the file, /home/GRIDUSERS/samgrid/.globus/job/antaeus.hpcc.ttu.edu/22300.1312218135/x509_up    |    729 | 
+| Unknown         | Unknown                                               | error reading the file, /home/samgrid/.globus/job/gluskap.phys.uconn.edu/13544.1278275952/x509_up            |    579 | 
+| Unknown         | Unknown                                               | error reading the file, /nfs/gridusers/uscms511/.globus/job/heposg01.colorado.edu/726.1318782608/x509_up     |    874 | 
+| Unknown         | Unknown                                               | error reading the file, /storage/app/home/usatlas1/.globus/job/tier2-01.ochep.ou.edu/4874.1306315024/x509_up |    671 | 
+| Unknown         | Unknown                                               | error reading the file, /storage/app/home/usatlas1/.globus/job/tier2-01.ochep.ou.edu/4884.1306315024/x509_up |    670 | 
+| ab              | ab                                                    | NULL                                                                                                         |    845 | 
+| ac              | ac                                                    | NULL                                                                                                         |    844 | 
+| accelerator     | /fermilab/accelerator/Role=NULL/Capability=NULL       | fermilab                                                                                                     |    311 | 
+| accelerator     | accelerator                                           | FERMILAB                                                                                                     |     42 | 
+| adesmet         | adesmet                                               | adesmet                                                                                                      |    719 | 
+| alice           | /alice/Role=NULL/Capability=NULL                      | alice                                                                                                        |    390 | 
+| alice           | /alice/Role=lcgadmin/Capability=NULL                  | alice                                                                                                        |    389 | 
+| alice           | alice                                                 | NULL                                                                                                         |    615 | 
+| alice           | alice                                                 | ALICE                                                                                                        |    462 | 
+| alice           | alice                                                 | alice                                                                                                        |    381 | 
+| allen           | allen                                                 | allen                                                                                                        |    475 | 
+| along           | along                                                 | NULL                                                                                                         |    592 | 
+| ankur           | ankur                                                 | ankur                                                                                                        |    722 | 
+| argoneut        | argoneut                                              | FERMILAB                                                                                                     |    673 | 
+| armino          | armino                                                | NULL                                                                                                         |    877 | 
+| as2             | as2                                                   | NULL                                                                                                         |    625 | 
+| astro           | /fermilab/astro/Role=NULL/Capability=NULL             | fermilab                                                                                                     |    523 | 
+| astro           | astro                                                 | NULL                                                                                                         |     46 | 
+| atlas           | /atlas/phys-gener/Role=production/Capability=NULL     | atlas                                                                                                        |    893 | 
+| auger           | /auger/FNAL/Role=NULL/Capability=NULL                 | auger                                                                                                        |    546 | 
+| auger           | /auger/Role=NULL/Capability=NULL                      | auger                                                                                                        |    578 | 
+| auger           | /auger/Role=Production/Capability=NULL                | auger                                                                                                        |    552 | 
+| auger           | /auger/Role=SoftwareManager/Capability=NULL           | auger                                                                                                        |    574 | 
+| auger           | auger                                                 | NULL                                                                                                         |     51 | 
+| auger           | auger                                                 | AUGER                                                                                                        |     52 | 
+| austriangrid    | austriangrid                                          | NULL                                                                                                         |     54 | 
+| avery           | avery                                                 | avery                                                                                                        |    896 | 
+| aw              | aw                                                    | NULL                                                                                                         |    842 | 
+| barnet          | barnet                                                | barnet                                                                                                       |    709 | 
+| baru-tro        | baru-tro                                              | NULL                                                                                                         |    889 | 
+| begrid          | begrid                                                | NULL                                                                                                         |     55 | 
+| belle           | /belle/Role=NULL/Capability=NULL                      | belle                                                                                                        |    607 | 
+| belle           | /belle/Role=lcgadmin/Capability=NULL                  | belle                                                                                                        |    617 | 
+| belle           | belle                                                 | belle                                                                                                        |    622 | 
+| bgs0            | bgs0                                                  | NULL                                                                                                         |    725 | 
+| biomed          | /biomed/Role=NULL/Capability=NULL                     | biomed                                                                                                       |    416 | 
+| bmueller        | bmueller                                              | bmueller                                                                                                     |    815 | 
+| bnebgen         | bnebgen                                               | NULL                                                                                                         |    812 | 
+| bockelman       | bockelman                                             | bockelman                                                                                                    |    689 | 
+| bt              | bt                                                    | bt                                                                                                           |    700 | 
+| c670            | c670                                                  | LIGO                                                                                                         |    610 | 
+| c670            | c670                                                  | Ligo                                                                                                         |    635 | 
+| c670            | c670                                                  | hcc                                                                                                          |    611 | 
+| camcs           | camcs                                                 | DOSAR                                                                                                        |    532 | 
+| cc              | cc                                                    | NULL                                                                                                         |    843 | 
+| cdf             | /cdf/Role=NULL/Capability=NULL                        | cdf                                                                                                          |      4 | 
+| cdf             | /cdf/glidecaf/Role=development/Capability=NULL        | cdf                                                                                                          |      5 | 
+| cdf             | /cdf/glidecaf/Role=fermigrid/Capability=NULL          | cdf                                                                                                          |    322 | 
+| cdf             | /cdf/glidecaf/Role=namcaf/Capability=NULL             | cdf                                                                                                          |      6 | 
+| cdf             | /cdf/glidecaf/Role=testcaf/Capability=NULL            | cdf                                                                                                          |      7 | 
+| cdf             | cdf                                                   | NULL                                                                                                         |     60 | 
+| cdf             | cdf                                                   | CDF                                                                                                          |     61 | 
+| cdms            | /fermilab/cdms/Role=NULL/Capability=NULL              | fermilab                                                                                                     |    331 | 
+| cdms            | cdms                                                  | NULL                                                                                                         |     63 | 
+| cdms            | cdms                                                  | CDMS                                                                                                         |     64 | 
+| cdms            | cdms                                                  | FERMILAB                                                                                                     |     65 | 
+| cec24testing    | cec24testing                                          | alice                                                                                                        |    868 | 
+| cern            | cern                                                  | NULL                                                                                                         |     67 | 
+| cigi            | /cigi/Role=NULL/Capability=NULL                       | cigi                                                                                                         |    354 | 
+| cigi            | cigi                                                  | CIGI                                                                                                         |     71 | 
+| ck              | ck                                                    | NULL                                                                                                         |    614 | 
+| cmmap           | cmmap                                                 | NULL                                                                                                         |    655 | 
+| cms             | /cms                                                  | cms                                                                                                          |    291 | 
+| cms             | /cms/HeavyIons/Role=NULL/Capability=NULL              | cms                                                                                                          |    385 | 
+| cms             | /cms/Role=NULL/Capability=NULL                        | cms                                                                                                          |      8 | 
+| cms             | /cms/Role=cmsphedex/Capability=NULL                   | cms                                                                                                          |    639 | 
+| cms             | /cms/Role=cmsprod/Capability=NULL                     | cms                                                                                                          |    398 | 
+| cms             | /cms/Role=cmssoft/Capability=NULL                     | cms                                                                                                          |    317 | 
+| cms             | /cms/Role=cmst1admin/Capability=NULL                  | cms                                                                                                          |    526 | 
+| cms             | /cms/Role=cmsuser/Capability=NULL                     | cms                                                                                                          |    337 | 
+| cms             | /cms/Role=hiproduction/Capability=NULL                | cms                                                                                                          |    608 | 
+| cms             | /cms/Role=hit1production/Capability=NULL              | cms                                                                                                          |    619 | 
+| cms             | /cms/Role=lcgadmin/Capability=NULL                    | cms                                                                                                          |      9 | 
+| cms             | /cms/Role=pilot/Capability=NULL                       | cms                                                                                                          |    527 | 
+| cms             | /cms/Role=priorityuser/Capability=NULL                | cms                                                                                                          |    473 | 
+| cms             | /cms/Role=production/Capability=NULL                  | cms                                                                                                          |     10 | 
+| cms             | /cms/Role=t1access/Capability=NULL                    | cms                                                                                                          |    375 | 
+| cms             | /cms/Role=t1production/Capability=NULL                | cms                                                                                                          |    580 | 
+| cms             | /cms/TEAM/Role=NULL/Capability=NULL                   | cms                                                                                                          |    536 | 
+| cms             | /cms/analysis/Role=NULL/Capability=NULL               | cms                                                                                                          |    353 | 
+| cms             | /cms/becms/Role=NULL/Capability=NULL                  | cms                                                                                                          |    336 | 
+| cms             | /cms/dbs/Role=NULL/Capability=NULL                    | cms                                                                                                          |    534 | 
+| cms             | /cms/dbs/Role=dbs_writer/Capability=NULL              | cms                                                                                                          |    491 | 
+| cms             | /cms/dbs/Role=ph_analysis_writer/Capability=NULL      | cms                                                                                                          |    661 | 
+| cms             | /cms/dcms/Role=NULL/Capability=NULL                   | cms                                                                                                          |    313 | 
+| cms             | /cms/dcms/Role=cmsphedex/Capability=NULL              | cms                                                                                                          |    340 | 
+| cms             | /cms/dcms/Role=production/Capability=NULL             | cms                                                                                                          |    480 | 
+| cms             | /cms/escms/Role=NULL/Capability=NULL                  | cms                                                                                                          |    372 | 
+| cms             | /cms/integration/Role=NULL/Capability=NULL            | cms                                                                                                          |    602 | 
+| cms             | /cms/itcms/Role=NULL/Capability=NULL                  | cms                                                                                                          |    358 | 
+| cms             | /cms/muon/Role=NULL/Capability=NULL                   | cms                                                                                                          |    623 | 
+| cms             | /cms/muon/Role=production/Capability=NULL             | cms                                                                                                          |    524 | 
+| cms             | /cms/production/Role=NULL/Capability=NULL             | cms                                                                                                          |    571 | 
+| cms             | /cms/ptcms/Role=NULL/Capability=NULL                  | cms                                                                                                          |    528 | 
+| cms             | /cms/twcms/Role=NULL/Capability=NULL                  | cms                                                                                                          |    356 | 
+| cms             | /cms/uscms/Role=NULL/Capability=NULL                  | cms                                                                                                          |     11 | 
+| cms             | /cms/uscms/Role=cmsphedex/Capability=NULL             | cms                                                                                                          |    367 | 
+| cms             | /cms/uscms/Role=cmsprod/Capability=NULL               | cms                                                                                                          |    302 | 
+| cms             | /cms/uscms/Role=cmssoft/Capability=NULL               | cms                                                                                                          |     12 | 
+| cms             | /cms/uscms/Role=cmsuser/Capability=NULL               | cms                                                                                                          |     13 | 
+| cms             | cms                                                   | NULL                                                                                                         |     72 | 
+| cms             | cms                                                   | CMS                                                                                                          |     73 | 
+| cms             | cms                                                   | cms                                                                                                          |     74 | 
+| cms             | cms                                                   | uscms                                                                                                        |     75 | 
+| cms             | cms0                                                  | NULL                                                                                                         |    876 | 
+| cms             | cms0                                                  | CMS                                                                                                          |    867 | 
+| cms             | cms0                                                  | cms                                                                                                          |    604 | 
+| cms             | cms1                                                  | cms                                                                                                          |    605 | 
+| cms             | cms2                                                  | cms                                                                                                          |    632 | 
+| cms             | uscms                                                 | NULL                                                                                                         |    265 | 
+| cms             | uscms                                                 | CMS                                                                                                          |    266 | 
+| cms             | uscms                                                 | cms                                                                                                          |    335 | 
+| cms             | uscms1                                                | cms                                                                                                          |    365 | 
+| cms             | uscmsPool                                             | NULL                                                                                                         |    268 | 
+| cms             | uscmsPool                                             | CMS                                                                                                          |    269 | 
+| cms             | uscmsPool                                             | Engage                                                                                                       |    478 | 
+| cms             | uscmsPool                                             | cms                                                                                                          |    479 | 
+| cms             | uscmsPool                                             | grid                                                                                                         |    415 | 
+| cms             | uscmsPool                                             | osgedu                                                                                                       |    581 | 
+| cms             | uscmsPool1                                            | NULL                                                                                                         |    271 | 
+| cms             | uscmsPool1                                            | CMS                                                                                                          |    272 | 
+| cms             | uscmsPool1                                            | cms                                                                                                          |    476 | 
+| cms             | uscmsPool1                                            | grid                                                                                                         |    423 | 
+| cms             | uscmsPool1                                            | osgedu                                                                                                       |    582 | 
+| cms             | uscmsPool2                                            | CMS                                                                                                          |    585 | 
+| cms             | uscmsPool2                                            | cms                                                                                                          |    544 | 
+| cms             | uscmspool0                                            | NULL                                                                                                         |    274 | 
+| cms             | uscmspool0                                            | CMS                                                                                                          |    275 | 
+| cms             | uscmspool0                                            | cms                                                                                                          |    306 | 
+| cms             | uscmspool1                                            | CMS                                                                                                          |    278 | 
+| cms             | uscmspool1                                            | cms                                                                                                          |    328 | 
+| cms             | uscmspool2                                            | cms                                                                                                          |    451 | 
+| cnm20323        | cnm20323                                              | NULL                                                                                                         |    599 | 
+| compbiogrid     | /CompBioGrid/Role=NULL/Capability=NULL                | CompBioGrid                                                                                                  |    401 | 
+| compbiogrid     | CompBioGrid                                           | CompBioGrid                                                                                                  |     34 | 
+| compbiogrid     | compbiogrid                                           | CompBioGrid                                                                                                  |     76 | 
+| cse435          | cse435                                                | cse435                                                                                                       |    863 | 
+| cse496          | cse496                                                | cse496                                                                                                       |    471 | 
+| cstaff          | cstaff                                                | Ligo                                                                                                         |    733 | 
+| cstaff          | cstaff                                                | OSG                                                                                                          |    870 | 
+| cweiss          | cweiss                                                | cweiss                                                                                                       |    819 | 
+| cx32            | cx32                                                  | NULL                                                                                                         |    885 | 
+| danb            | danb                                                  | danb                                                                                                         |    724 | 
+| danielpark2     | danielpark2                                           | NULL                                                                                                         |    589 | 
+| datagrid-es     | datagrid-es                                           | NULL                                                                                                         |     77 | 
+| dech            | /dech/Role=NULL/Capability=NULL                       | dech                                                                                                         |    603 | 
+| default         | default                                               | NULL                                                                                                         |    649 | 
+| default         | default                                               | Engage                                                                                                       |    807 | 
+| des             | /des/production/Role=NULL/Capability=NULL             | des                                                                                                          |    314 | 
+| des             | des                                                   | NULL                                                                                                         |     78 | 
+| des             | des                                                   | DES                                                                                                          |     79 | 
+| dhinckley       | dhinckley                                             | dhinckley                                                                                                    |    716 | 
+| dosar           | /dosar/Role=NULL/Capability=NULL                      | dosar                                                                                                        |    393 | 
+| dosar           | dosar                                                 | DOSAR                                                                                                        |     82 | 
+| dosar           | tubio                                                 | NULL                                                                                                         |    493 | 
+| dosar           | tubio                                                 | DOSAR                                                                                                        |    508 | 
+| dteam           | /dteam/Role=NULL/Capability=NULL                      | dteam                                                                                                        |    297 | 
+| dteam           | dteam                                                 | NULL                                                                                                         |     84 | 
+| dteam           | dteam                                                 | DTEAM                                                                                                        |     85 | 
+| dteam           | dteam                                                 | dteam                                                                                                        |     86 | 
+| dteam           | dteamprd                                              | NULL                                                                                                         |     87 | 
+| ducharme        | ducharme                                              | ducharme                                                                                                     |    442 | 
+| dyna            | dyna                                                  | NULL                                                                                                         |    895 | 
+| dzero           | /dzero/Role=NULL/Capability=NULL                      | dzero                                                                                                        |    357 | 
+| dzero           | /dzero/users/Role=D0Production/Capability=NULL        | dzero                                                                                                        |    293 | 
+| dzero           | /dzero/users/Role=NULL/Capability=NULL                | dzero                                                                                                        |     14 | 
+| dzero           | /dzero/users/Role=analysis/Capability=NULL            | dzero                                                                                                        |    364 | 
+| dzero           | dzero                                                 | NULL                                                                                                         |     88 | 
+| dzero           | dzero                                                 | DZERO                                                                                                        |     89 | 
+| dzero           | dzero                                                 | DZero                                                                                                        |     90 | 
+| dzero           | dzero                                                 | dzero                                                                                                        |     91 | 
+| ebm             | ebm                                                   | NULL                                                                                                         |    644 | 
+| el              | el                                                    | NULL                                                                                                         |    846 | 
+| ema             | ema                                                   | mech950                                                                                                      |    498 | 
+| engage          | /Engage/NEES/Role=NULL/Capability=NULL                | Engage                                                                                                       |    634 | 
+| engage          | /Engage/Oceanography/HARP/Role=NULL/Capability=NULL   | Engage                                                                                                       |    486 | 
+| engage          | /Engage/Role=NULL/Capability=NULL                     | Engage                                                                                                       |      1 | 
+| engage          | /Engage/UCSDGrid/Role=NULL/Capability=NULL            | Engage                                                                                                       |    629 | 
+| engage          | Engage                                                | Engage                                                                                                       |     35 | 
+| engage          | engage                                                | ENGAGE                                                                                                       |     93 | 
+| engage          | engage                                                | Engage                                                                                                       |     94 | 
+| engage          | engage                                                | engage                                                                                                       |     95 | 
+| engage          | engagement                                            | Engagement                                                                                                   |     96 | 
+| enmr            | enmr                                                  | NULL                                                                                                         |    636 | 
+| epacg           | epacg                                                 | NULL                                                                                                         |    695 | 
+| escience        | eScience                                              | NULL                                                                                                         |     92 | 
+| escience        | escience                                              | NULL                                                                                                         |     98 | 
+| evayi           | evayi                                                 | NULL                                                                                                         |    638 | 
+| example         | example                                               | NULL                                                                                                         |    641 | 
+| external        | external                                              | external                                                                                                     |    688 | 
+| fabrikant       | fabrikant                                             | fabrikant                                                                                                    |    488 | 
+| fermilab        | /fermilab/Role=NULL/Capability=NULL                   | fermilab                                                                                                     |     15 | 
+| fermilab        | /fermilab/argoneut/Role=pilot/Capability=NULL         | fermilab                                                                                                     |    672 | 
+| fermilab        | /fermilab/gm2/Role=pilot/Capability=NULL              | fermilab                                                                                                     |    682 | 
+| fermilab        | /fermilab/grid/Role=NULL/Capability=NULL              | fermilab                                                                                                     |    325 | 
+| fermilab        | /fermilab/grid/Role=Storage/Capability=NULL           | fermilab                                                                                                     |    595 | 
+| fermilab        | /fermilab/grid/Role=admin/Capability=NULL             | fermilab                                                                                                     |    522 | 
+| fermilab        | /fermilab/grid/Role=rsv/Capability=NULL               | fermilab                                                                                                     |    652 | 
+| fermilab        | /fermilab/lbne/Role=pilot/Capability=NULL             | fermilab                                                                                                     |    576 | 
+| fermilab        | /fermilab/mars/mu2e/Role=NULL/Capability=NULL         | fermilab                                                                                                     |    674 | 
+| fermilab        | /fermilab/minos/Role=Analysis/Capability=NULL         | fermilab                                                                                                     |    723 | 
+| fermilab        | /fermilab/mu2e/Role=pilot/Capability=NULL             | fermilab                                                                                                     |    668 | 
+| fermilab        | /fermilab/mu2e/mars/Role=NULL/Capability=NULL         | fermilab                                                                                                     |    624 | 
+| fermilab        | Fermilab                                              | NULL                                                                                                         |     36 | 
+| fermilab        | fermilab                                              | NULL                                                                                                         |     99 | 
+| fermilab        | fermilab                                              | FERMILAB                                                                                                     |    100 | 
+| fermilab        | fermilab                                              | FermiLab                                                                                                     |    101 | 
+| fermilab        | fermilab                                              | Fermilab                                                                                                     |    102 | 
+| fgstore         | /fermilab/storage/Role=NULL/Capability=NULL           | fermilab                                                                                                     |    377 | 
+| fgstore         | fgstore                                               | FERMILAB                                                                                                     |    378 | 
+| fgtest          | /fermilab/test/Role=NULL/Capability=NULL              | fermilab                                                                                                     |    359 | 
+| fgtest          | /fermilab/test/Role=Storage/Capability=NULL           | fermilab                                                                                                     |    464 | 
+| fgtest          | /fermilab/test/Role=pilot/Capability=NULL             | fermilab                                                                                                     |    455 | 
+| fgtest          | fermilab-test                                         | NULL                                                                                                         |    104 | 
+| fgtest          | fermilab-test                                         | FERMILAB                                                                                                     |    105 | 
+| fgtest          | fgtest                                                | FERMILAB                                                                                                     |    465 | 
+| flowscience     | flowscience                                           | flowscience                                                                                                  |    407 | 
+| fmri            | fmri                                                  | NULL                                                                                                         |    106 | 
+| fmri            | fmri                                                  | FMRI                                                                                                         |    107 | 
+| fmri            | fmri                                                  | fMRI                                                                                                         |    108 | 
+| foo             | foo                                                   | NULL                                                                                                         |    665 | 
+| fox             | fox                                                   | fox                                                                                                          |    792 | 
+| g035            | g035                                                  | NULL                                                                                                         |    596 | 
+| gabi            | gabi                                                  | NULL                                                                                                         |    677 | 
+| gadu            | gadu                                                  | NULL                                                                                                         |    110 | 
+| gadu            | gadu                                                  | GADU                                                                                                         |    111 | 
+| gay             | gay                                                   | gay                                                                                                          |    474 | 
+| gcedu           | /gcedu/Role=NULL/Capability=NULL                      | gcedu                                                                                                        |    855 | 
+| gcedu           | gcedu                                                 | GridColombia                                                                                                 |    884 | 
+| gcvo            | gcvo                                                  | GCEDU                                                                                                        |    869 | 
+| geant4          | /geant4/Role=NULL/Capability=NULL                     | geant4                                                                                                       |    371 | 
+| geant4          | /geant4/Role=lcgadmin/Capability=NULL                 | geant4                                                                                                       |    351 | 
+| geant4          | geant4                                                | GEANT4                                                                                                       |    113 | 
+| geant4          | geant4                                                | Geant4                                                                                                       |    114 | 
+| genec           | genec                                                 | genec                                                                                                        |    802 | 
+| germangrid      | germangrid                                            | NULL                                                                                                         |    116 | 
+| ghan            | ghan                                                  | NULL                                                                                                         |    865 | 
+| glideinwms      | glideinwms                                            | glideinwms                                                                                                   |    862 | 
+| glow            | /GLOW/Role=NULL/Capability=NULL                       | GLOW                                                                                                         |    339 | 
+| glow            | /GLOW/Role=htpc/Capability=NULL                       | GLOW                                                                                                         |    512 | 
+| glow            | GLOW                                                  | GLOW                                                                                                         |     37 | 
+| glow            | glow                                                  | NULL                                                                                                         |    119 | 
+| glow            | glow                                                  | GLOW                                                                                                         |    120 | 
+| glow            | glow                                                  | glow                                                                                                         |    121 | 
+| gluex           | /Gluex/Role=NULL/Capability=NULL                      | Gluex                                                                                                        |    509 | 
+| gluex           | /Gluex/production/Role=NULL/Capability=NULL           | Gluex                                                                                                        |    621 | 
+| gluex           | gluex                                                 | GLUEX                                                                                                        |    481 | 
+| gluex           | gluex                                                 | Gluex                                                                                                        |    507 | 
+| gluex           | gluex                                                 | gluex                                                                                                        |    712 | 
+| gopala          | gopala                                                | NULL                                                                                                         |    691 | 
+| gpn             | /gpn/Role=NULL/Capability=NULL                        | gpn                                                                                                          |    346 | 
+| gpn             | gpn                                                   | NULL                                                                                                         |    122 | 
+| gpn             | gpn                                                   | GPN                                                                                                          |    123 | 
+| gpn             | gpn                                                   | gpn                                                                                                          |    124 | 
+| grase           | grase                                                 | NULL                                                                                                         |    125 | 
+| grase           | grase                                                 | GRASE                                                                                                        |    126 | 
+| grase           | grase                                                 | Grase                                                                                                        |    127 | 
+| gray7           | gray7                                                 | NULL                                                                                                         |    531 | 
+| grid            | grid                                                  | cms                                                                                                          |    848 | 
+| grid-fr         | grid-fr                                               | NULL                                                                                                         |    130 | 
+| grid14          | grid14                                                | NULL                                                                                                         |    834 | 
+| grid14          | grid14                                                | GLOW                                                                                                         |    853 | 
+| grid14          | grid14                                                | atlas                                                                                                        |    887 | 
+| grid15          | grid15                                                | atlas                                                                                                        |    890 | 
+| grid16          | grid16                                                | Engage                                                                                                       |    849 | 
+| grid17          | grid17                                                | Engage                                                                                                       |    835 | 
+| grid17          | grid17                                                | LIGO                                                                                                         |    875 | 
+| grid17          | grid17                                                | atlas                                                                                                        |    871 | 
+| gridex          | /gridex/Role=NULL/Capability=NULL                     | gridex                                                                                                       |     16 | 
+| gridex          | gridex                                                | NULL                                                                                                         |    131 | 
+| gridex          | gridex                                                | GRIDEX                                                                                                       |    132 | 
+| gridex          | gridex                                                | GridEX                                                                                                       |    133 | 
+| gridex          | gridex                                                | GridEx                                                                                                       |    134 | 
+| gridunesp       | /GridUNESP/Role=NULL/Capability=NULL                  | GridUNESP                                                                                                    |    515 | 
+| gridunesp       | GridUNESP                                             | GridUNESP                                                                                                    |    516 | 
+| gridunesp       | gridunesp                                             | GridUNESP                                                                                                    |    593 | 
+| gridunesp       | local                                                 | GridUNESP                                                                                                    |    542 | 
+| grow            | grow                                                  | NULL                                                                                                         |    136 | 
+| grow            | grow                                                  | GROW                                                                                                         |    137 | 
+| gthain          | gthain                                                | gthain                                                                                                       |    735 | 
+| hcc             | /hcc/Role=NULL/Capability=NULL                        | hcc                                                                                                          |    538 | 
+| hcc             | /hcc/Role=collab/Capability=NULL                      | hcc                                                                                                          |    678 | 
+| hcc             | /hcc/cse435/Role=NULL/Capability=NULL                 | hcc                                                                                                          |    878 | 
+| hcc             | /hcc/testgroup/Role=collab/Capability=NULL            | hcc                                                                                                          |    679 | 
+| hcc             | hcc                                                   | HCC                                                                                                          |    545 | 
+| hcc             | hcc                                                   | hcc                                                                                                          |    540 | 
+| hguanhua        | hguanhua                                              | hguanhua                                                                                                     |    811 | 
+| ht              | ht                                                    | NULL                                                                                                         |    829 | 
+| huang           | huang                                                 | NULL                                                                                                         |    645 | 
+| huihui          | huihui                                                | huihui                                                                                                       |    828 | 
+| hypercp         | /fermilab/hypercp/Role=NULL/Capability=NULL           | fermilab                                                                                                     |    303 | 
+| hypercp         | hypercp                                               | FERMILAB                                                                                                     |    141 | 
+| icecube         | /icecube/Role=NULL/Capability=NULL                    | icecube                                                                                                      |    369 | 
+| icecube         | /icecube/Role=lcgadmin/Capability=NULL                | icecube                                                                                                      |    374 | 
+| icecube         | /icecube/Role=production/Capability=NULL              | icecube                                                                                                      |    484 | 
+| icecube         | icecube                                               | ICECUBE                                                                                                      |    469 | 
+| icecube         | icecube                                               | IceCube                                                                                                      |    457 | 
+| idb             | idb                                                   | idb                                                                                                          |    405 | 
+| ifca            | ifca                                                  | NULL                                                                                                         |    454 | 
+| ilc             | /ilc/Role=NULL/Capability=NULL                        | ilc                                                                                                          |    332 | 
+| ilc             | /ilc/Role=production/Capability=NULL                  | ilc                                                                                                          |    852 | 
+| ilc             | /ilc/ilc4c/Role=NULL/Capability=NULL                  | ilc                                                                                                          |    304 | 
+| ilc             | /ilc/ild/Role=NULL/Capability=NULL                    | ilc                                                                                                          |    399 | 
+| ilc             | /ilc/sid/Role=NULL/Capability=NULL                    | ilc                                                                                                          |    316 | 
+| ilc             | ilc                                                   | NULL                                                                                                         |    145 | 
+| ilc             | ilc                                                   | ILC                                                                                                          |    146 | 
+| ilc4c           | ilc4c                                                 | ILC                                                                                                          |    403 | 
+| ilddet          | ilddet                                                | ILC                                                                                                          |    492 | 
+| infn            | infn                                                  | NULL                                                                                                         |    149 | 
+| ivdgl           | ivdgl                                                 | NULL                                                                                                         |    151 | 
+| ivdgl           | ivdgl                                                 | iVDGL                                                                                                        |    152 | 
+| ivdgl           | ivdgl                                                 | iVDgL                                                                                                        |    153 | 
+| ivdgl           | osgivdglmis0                                          | NULL                                                                                                         |    472 | 
+| ivdgl           | osgivdglmis0                                          | iVDgL                                                                                                        |    226 | 
+| ivdgl           | osgivdglmis0                                          | mis                                                                                                          |    460 | 
+| jaing           | jaing                                                 | NULL                                                                                                         |    664 | 
+| jchristianson   | jchristianson                                         | jchristianson                                                                                                |    734 | 
+| jd              | jd                                                    | NULL                                                                                                         |    840 | 
+| jdem            | /jdem/Role=NULL/Capability=NULL                       | jdem                                                                                                         |    376 | 
+| jdem            | jdem                                                  | JDEM                                                                                                         |    380 | 
+| jkong           | jkong                                                 | jkong                                                                                                        |    883 | 
+| jmb             | jmb                                                   | NULL                                                                                                         |    693 | 
+| jmcdaniel       | jmcdaniel                                             | jmcdaniel                                                                                                    |    707 | 
+| jmondal         | jmondal                                               | jmondal                                                                                                      |    711 | 
+| jms21           | jms21                                                 | NULL                                                                                                         |    627 | 
+| k47k4           | k47k4                                                 | NULL                                                                                                         |    647 | 
+| king            | king                                                  | NULL                                                                                                         |    684 | 
+| ksinterface     | ksinterface                                           | ksinterface                                                                                                  |    713 | 
+| ktev            | /fermilab/ktev/Role=NULL/Capability=NULL              | fermilab                                                                                                     |    310 | 
+| ktev            | ktev                                                  | NULL                                                                                                         |    166 | 
+| ktev            | ktev                                                  | FERMILAB                                                                                                     |    167 | 
+| ktev            | ktev                                                  | KTEV                                                                                                         |    168 | 
+| kuang           | kuang                                                 | kuang                                                                                                        |    717 | 
+| lbne            | /lbne/Role=Analysis/Capability=NULL                   | lbne                                                                                                         |    891 | 
+| lbne            | /lbne/Role=pilot/Capability=NULL                      | lbne                                                                                                         |    894 | 
+| lbne            | lbne                                                  | FERMILAB                                                                                                     |    577 | 
+| lbne            | lbne                                                  | LBNE                                                                                                         |    858 | 
+| lee             | lee                                                   | cms                                                                                                          |    653 | 
+| leiliz          | leiliz                                                | leiliz                                                                                                       |    830 | 
+| lhaupert        | lhaupert                                              | NULL                                                                                                         |    818 | 
+| ligo            | /LIGO/Role=NULL/Capability=NULL                       | LIGO                                                                                                         |    289 | 
+| ligo            | LIGO                                                  | NULL                                                                                                         |     38 | 
+| ligo            | LIGO                                                  | LIGO                                                                                                         |     39 | 
+| ligo            | ligo                                                  | NULL                                                                                                         |    175 | 
+| ligo            | ligo                                                  | LIGO                                                                                                         |    176 | 
+| ligo            | ligo                                                  | Ligo                                                                                                         |    177 | 
+| ligo            | ux001                                                 | NULL                                                                                                         |    279 | 
+| ligo            | ux001                                                 | Ligo                                                                                                         |    280 | 
+| liu             | liu                                                   | NULL                                                                                                         |    651 | 
+| lius8           | lius8                                                 | NULL                                                                                                         |    590 | 
+| llzhang         | llzhang                                               | llzhang                                                                                                      |    727 | 
+| loni_bc_02      | loni_bc_02                                            | NULL                                                                                                         |    560 | 
+| loni_binding04  | loni_binding04                                        | NULL                                                                                                         |    566 | 
+| loni_cactus05   | loni_cactus05                                         | NULL                                                                                                         |    567 | 
+| loni_cavitands  | loni_cavitands                                        | NULL                                                                                                         |    565 | 
+| loni_coastal01  | loni_coastal01                                        | NULL                                                                                                         |    557 | 
+| loni_coe_lsu_02 | loni_coe_lsu_02                                       | NULL                                                                                                         |    556 | 
+| loni_coptah     | loni_coptah                                           | NULL                                                                                                         |    572 | 
+| loni_density003 | loni_density003                                       | NULL                                                                                                         |    570 | 
+| loni_hep_09     | loni_hep_09                                           | dzero                                                                                                        |    568 | 
+| loni_i3sim04    | loni_i3sim04                                          | NULL                                                                                                         |    559 | 
+| loni_jhabig09   | loni_jhabig09                                         | NULL                                                                                                         |    554 | 
+| loni_metrics_09 | loni_metrics_09                                       | NULL                                                                                                         |    569 | 
+| loni_numrel04   | loni_numrel04                                         | NULL                                                                                                         |    561 | 
+| loni_qcp_dms09  | loni_qcp_dms09                                        | NULL                                                                                                         |    555 | 
+| loni_rel_mhd    | loni_rel_mhd                                          | NULL                                                                                                         |    558 | 
+| loni_resonator3 | loni_resonator3                                       | NULL                                                                                                         |    573 | 
+| loni_rhall09_1  | loni_rhall09_1                                        | NULL                                                                                                         |    553 | 
+| loni_training09 | loni_training09                                       | NULL                                                                                                         |    562 | 
+| loni_wickt      | loni_wickt                                            | NULL                                                                                                         |    563 | 
+| lqcd            | lqcd                                                  | LQCD                                                                                                         |    181 | 
+| lslipche        | lslipche                                              | NULL                                                                                                         |    832 | 
+| lsst            | /Engage/LSST/Role=NULL/Capability=NULL                | Engage                                                                                                       |    502 | 
+| lwang           | lwang                                                 | lwang                                                                                                        |    706 | 
+| m1248           | m1248                                                 | Star                                                                                                         |    676 | 
+| m670            | m670                                                  | Engage                                                                                                       |    675 | 
+| m670            | m670                                                  | LIGO                                                                                                         |    612 | 
+| m670            | m670                                                  | Ligo                                                                                                         |    631 | 
+| m670            | m670                                                  | hcc                                                                                                          |    888 | 
+| manoj           | manoj                                                 | manoj                                                                                                        |    708 | 
+| map             | /fermilab/map/Role=NULL/Capability=NULL               | fermilab                                                                                                     |    539 | 
+| mariachi        | /mariachi                                             | mariachi                                                                                                     |    392 | 
+| matt            | matt                                                  | NULL                                                                                                         |    600 | 
+| mburke          | mburke                                                | NULL                                                                                                         |    880 | 
+| mh              | mh                                                    | NULL                                                                                                         |    837 | 
+| mille           | mille                                                 | NULL                                                                                                         |    459 | 
+| minerva         | /fermilab/minerva/Role=Analysis/Capability=NULL       | fermilab                                                                                                     |    494 | 
+| minerva         | /fermilab/minerva/Role=NULL/Capability=NULL           | fermilab                                                                                                     |    362 | 
+| minerva         | /fermilab/minerva/Role=pilot/Capability=NULL          | fermilab                                                                                                     |    501 | 
+| minerva         | minerva                                               | FERMILAB                                                                                                     |    363 | 
+| miniboone       | /fermilab/miniboone/Role=NULL/Capability=NULL         | fermilab                                                                                                     |    295 | 
+| miniboone       | /fermilab/miniboone/Role=Production/Capability=NULL   | fermilab                                                                                                     |    323 | 
+| miniboone       | miniboone                                             | NULL                                                                                                         |    185 | 
+| miniboone       | miniboone                                             | FERMILAB                                                                                                     |    186 | 
+| miniboone       | miniboone                                             | MINIBOONE                                                                                                    |    187 | 
+| minos           | /fermilab/minos/Role=NULL/Capability=NULL             | fermilab                                                                                                     |    312 | 
+| minos           | /fermilab/minos/Role=Production/Capability=NULL       | fermilab                                                                                                     |    301 | 
+| minos           | /fermilab/minos/Role=pilot/Capability=NULL            | fermilab                                                                                                     |    329 | 
+| minos           | minos                                                 | NULL                                                                                                         |    189 | 
+| minos           | minos                                                 | FERMILAB                                                                                                     |    190 | 
+| mipp            | /fermilab/mipp/Role=NULL/Capability=NULL              | fermilab                                                                                                     |    521 | 
+| mipp            | /fermilab/mipp/Role=Production/Capability=NULL        | fermilab                                                                                                     |    307 | 
+| mipp            | mipp                                                  | NULL                                                                                                         |    191 | 
+| mipp            | mipp                                                  | FERMILAB                                                                                                     |    192 | 
+| mipp            | mipp                                                  | MIPP                                                                                                         |    193 | 
+| mis             | /mis/Role=NULL/Capability=NULL                        | mis                                                                                                          |     17 | 
+| mis             | mis                                                   | NULL                                                                                                         |    194 | 
+| mis             | mis                                                   | MIS                                                                                                          |    195 | 
+| mis             | mis                                                   | mis                                                                                                          |    196 | 
+| mpccc           | mpccc                                                 | Ligo                                                                                                         |    643 | 
+| mpccc           | mpccc                                                 | OSG                                                                                                          |    618 | 
+| mpccc           | mpccc                                                 | Star                                                                                                         |    859 | 
+| mrp9            | mrp9                                                  | NULL                                                                                                         |    659 | 
+| mu2e            | /fermilab/mu2e/Role=NULL/Capability=NULL              | fermilab                                                                                                     |    468 | 
+| mu2e            | mu2e                                                  | FERMILAB                                                                                                     |    483 | 
+| nanohub         | /nanohub/Role=NULL/Capability=NULL                    | nanohub                                                                                                      |     18 | 
+| nanohub         | nano011/16/2                                          | NULL                                                                                                         |    349 | 
+| nanohub         | nanohub                                               | NULL                                                                                                         |    203 | 
+| nanohub         | nanohub                                               | NANOHUB                                                                                                      |    204 | 
+| nanohub         | nanohub                                               | NanoHub                                                                                                      |    205 | 
+| nanohub         | nanohub                                               | Nanohub                                                                                                      |    206 | 
+| nanohub         | nanohub                                               | nanohub                                                                                                      |    207 | 
+| nebiogrid       | /NEBioGrid/Role=MatchMaker/Capability=NULL            | NEBioGrid                                                                                                    |    482 | 
+| nebiogrid       | /NEBioGrid/Role=NULL/Capability=NULL                  | NEBioGrid                                                                                                    |    397 | 
+| nebiogrid       | /NEBioGrid/Role=nebiogrid/Capability=NULL             | NEBioGrid                                                                                                    |    396 | 
+| nebiogrid       | nebiogrid                                             | NEBioGrid                                                                                                    |    410 | 
+| nebiogrid       | nebiogrid                                             | nebiogrid                                                                                                    |    505 | 
+| nees            | /fermilab/nees/Role=NULL/Capability=NULL              | fermilab                                                                                                     |    520 | 
+| nees            | /nees/Role=NULL/Capability=NULL                       | nees                                                                                                         |    680 | 
+| nees            | nees                                                  | FERMILAB                                                                                                     |    694 | 
+| nickwu          | nickwu                                                | nickwu                                                                                                       |    827 | 
+| nova            | /fermilab/nova/Role=pilot/Capability=NULL             | fermilab                                                                                                     |    504 | 
+| nova            | nova                                                  | FERMILAB                                                                                                     |    510 | 
+| numi            | /fermilab/numi/Role=NULL/Capability=NULL              | fermilab                                                                                                     |    347 | 
+| numi            | numi                                                  | FERMILAB                                                                                                     |    348 | 
+| nwicg           | /NWICG                                                | NWICG                                                                                                        |    366 | 
+| nwicg           | nwicg                                                 | NWICG                                                                                                        |    211 | 
+| nwicg           | nwicg                                                 | nwicg                                                                                                        |    212 | 
+| nysgrid         | /NYSGRID/Role=NULL/Capability=NULL                    | NYSGRID                                                                                                      |    290 | 
+| nysgrid         | nysgrid                                               | NYSGRID                                                                                                      |    213 | 
+| nysgrid         | nysgrid                                               | nysgrid                                                                                                      |    214 | 
+| ocucs           | ocucs                                                 | DOSAR                                                                                                        |    530 | 
+| odonovan        | odonovan                                              | odonovan                                                                                                     |    856 | 
+| oiv_test1       | /oiv_test1                                            | oiv_test1                                                                                                    |    344 | 
+| ops             | /ops/Role=NULL/Capability=NULL                        | ops                                                                                                          |    296 | 
+| ops             | /ops/Role=lcgadmin/Capability=NULL                    | ops                                                                                                          |     19 | 
+| ops             | /ops/Role=pilot/Capability=NULL                       | ops                                                                                                          |    549 | 
+| ops             | ops                                                   | NULL                                                                                                         |    215 | 
+| ops             | ops                                                   | OPS                                                                                                          |    216 | 
+| ops             | ops                                                   | ops                                                                                                          |    217 | 
+| ops             | opssgm                                                | NULL                                                                                                         |    218 | 
+| osg             | /osg/Role=NULL/Capability=NULL                        | osg                                                                                                          |     20 | 
+| osg             | /osg/Role=pilot/Capability=NULL                       | osg                                                                                                          |    495 | 
+| osg             | osg                                                   | NULL                                                                                                         |    219 | 
+| osg             | osg                                                   | OSG                                                                                                          |    220 | 
+| osgedu          | /osgedu/2011OSGSummerSchool/Role=NULL/Capability=NULL | osgedu                                                                                                       |    685 | 
+| osgedu          | /osgedu/Role=NULL/Capability=NULL                     | osgedu                                                                                                       |     21 | 
+| osgedu          | osgedu                                                | OSGEDU                                                                                                       |    224 | 
+| osgu000         | osgu000                                               | NULL                                                                                                         |    732 | 
+| osgu000         | osgu000                                               | atlas                                                                                                        |    731 | 
+| other           | /zeus/Role=NULL/Capability=NULL                       | zeus                                                                                                         |    308 | 
+| other           | 1180053                                               | NULL                                                                                                         |     23 | 
+| other           | 1183335                                               | NULL                                                                                                         |     24 | 
+| other           | 1189588                                               | NULL                                                                                                         |     25 | 
+| other           | 1198495                                               | NULL                                                                                                         |     26 | 
+| other           | 1204018                                               | NULL                                                                                                         |     29 | 
+| other           | 492                                                   | NULL                                                                                                         |     31 | 
+| other           | 568                                                   | NULL                                                                                                         |     32 | 
+| other           | 913                                                   | NULL                                                                                                         |     33 | 
+| other           | RSV                                                   | RSV                                                                                                          |    315 | 
+| other           | aa                                                    | NULL                                                                                                         |    477 | 
+| other           | aceace                                                | NULL                                                                                                         |    330 | 
+| other           | ahouston                                              | ahouston                                                                                                     |    430 | 
+| other           | am                                                    | NULL                                                                                                         |    355 | 
+| other           | ap                                                    | NULL                                                                                                         |     43 | 
+| other           | aru0                                                  | NULL                                                                                                         |     44 | 
+| other           | as                                                    | NULL                                                                                                         |     45 | 
+| other           | batelaan                                              | batelaan                                                                                                     |    417 | 
+| other           | belashchenko                                          | belashchenko                                                                                                 |    426 | 
+| other           | berkowitz                                             | berkowitz                                                                                                    |    432 | 
+| other           | biocore                                               | biocore                                                                                                      |    466 | 
+| other           | bjs                                                   | NULL                                                                                                         |    496 | 
+| other           | blane                                                 | NULL                                                                                                         |     56 | 
+| other           | bleak                                                 | bleak                                                                                                        |    437 | 
+| other           | bobaru                                                | bobaru                                                                                                       |    444 | 
+| other           | boxu1                                                 | NULL                                                                                                         |     58 | 
+| other           | brian                                                 | brian                                                                                                        |    404 | 
+| other           | bsc-cns                                               | NULL                                                                                                         |     59 | 
+| other           | bsteffen                                              | bsteffen                                                                                                     |    428 | 
+| other           | camcs                                                 | NULL                                                                                                         |    360 | 
+| other           | chandra                                               | chandra                                                                                                      |    418 | 
+| other           | chem9                                                 | NULL                                                                                                         |     69 | 
+| other           | chen                                                  | NULL                                                                                                         |    338 | 
+| other           | choi                                                  | NULL                                                                                                         |    517 | 
+| other           | choueiry                                              | choueiry                                                                                                     |    413 | 
+| other           | ciemat                                                | NULL                                                                                                         |     70 | 
+| other           | csci4440                                              | csci4440                                                                                                     |    463 | 
+| other           | cse856                                                | cse856                                                                                                       |    467 | 
+| other           | cyt701                                                | NULL                                                                                                         |    394 | 
+| other           | ddowney                                               | ddowney                                                                                                      |    436 | 
+| other           | dhkim1                                                | NULL                                                                                                         |     81 | 
+| other           | dweitzel                                              | dweitzel                                                                                                     |    439 | 
+| other           | dzenis                                                | dzenis                                                                                                       |    443 | 
+| other           | ebabin                                                | ebabin                                                                                                       |    438 | 
+| other           | ecucs                                                 | NULL                                                                                                         |    511 | 
+| other           | erbb                                                  | NULL                                                                                                         |    383 | 
+| other           | furtney                                               | furtney                                                                                                      |    408 | 
+| other           | gilda                                                 | NULL                                                                                                         |    489 | 
+| other           | gin.ggf.org                                           | GIN.GGF.ORG                                                                                                  |    117 | 
+| other           | gladyshev                                             | gladyshev                                                                                                    |    445 | 
+| other           | goddard                                               | goddard                                                                                                      |    412 | 
+| other           | gvitu                                                 | NULL                                                                                                         |    139 | 
+| other           | harbison                                              | harbison                                                                                                     |    420 | 
+| other           | hep                                                   | NULL                                                                                                         |    140 | 
+| other           | icbr                                                  | NULL                                                                                                         |    334 | 
+| other           | ifh1                                                  | NULL                                                                                                         |    144 | 
+| other           | imt                                                   | NULL                                                                                                         |    148 | 
+| other           | james                                                 | NULL                                                                                                         |    155 | 
+| other           | jb                                                    | NULL                                                                                                         |    157 | 
+| other           | jc                                                    | NULL                                                                                                         |    158 | 
+| other           | jcd2                                                  | NULL                                                                                                         |    159 | 
+| other           | jcyin                                                 | NULL                                                                                                         |    588 | 
+| other           | jen7                                                  | NULL                                                                                                         |    160 | 
+| other           | jiang                                                 | jiang                                                                                                        |    427 | 
+| other           | jjs                                                   | NULL                                                                                                         |    384 | 
+| other           | jl                                                    | NULL                                                                                                         |    537 | 
+| other           | johns                                                 | NULL                                                                                                         |    387 | 
+| other           | js                                                    | NULL                                                                                                         |    402 | 
+| other           | jwang7                                                | jwang7                                                                                                       |    422 | 
+| other           | kai                                                   | kai                                                                                                          |    446 | 
+| other           | kfki rmki ca                                          | NULL                                                                                                         |    161 | 
+| other           | kim                                                   | NULL                                                                                                         |    162 | 
+| other           | kim1                                                  | NULL                                                                                                         |    551 | 
+| other           | kiss2                                                 | NULL                                                                                                         |    163 | 
+| other           | km                                                    | NULL                                                                                                         |    164 | 
+| other           | kucc                                                  | NULL                                                                                                         |    170 | 
+| other           | lee                                                   | NULL                                                                                                         |    171 | 
+| other           | li                                                    | NULL                                                                                                         |    388 | 
+| other           | ligy                                                  | NULL                                                                                                         |    547 | 
+| other           | lin                                                   | NULL                                                                                                         |    500 | 
+| other           | lipca                                                 | NULL                                                                                                         |    179 | 
+| other           | localUsers                                            | localUsers                                                                                                   |    180 | 
+| other           | lsl1                                                  | NULL                                                                                                         |    601 | 
+| other           | mb                                                    | NULL                                                                                                         |    183 | 
+| other           | mech950                                               | mech950                                                                                                      |    421 | 
+| other           | mei                                                   | mei                                                                                                          |    458 | 
+| other           | mfurtney                                              | mfurtney                                                                                                     |    450 | 
+| other           | mfv                                                   | NULL                                                                                                         |    184 | 
+| other           | mit                                                   | NULL                                                                                                         |    197 | 
+| other           | mm                                                    | NULL                                                                                                         |    198 | 
+| other           | mpi                                                   | NULL                                                                                                         |    200 | 
+| other           | mrs                                                   | NULL                                                                                                         |    201 | 
+| other           | mshafiullah                                           | mshafiullah                                                                                                  |    424 | 
+| other           | mt5                                                   | NULL                                                                                                         |    202 | 
+| other           | nakul02                                               | NULL                                                                                                         |    575 | 
+| other           | national center for supercomputing applications       | NULL                                                                                                         |    208 | 
+| other           | nogradi                                               | nogradi                                                                                                      |    449 | 
+| other           | ntu                                                   | NULL                                                                                                         |    210 | 
+| other           | ocucs                                                 | NULL                                                                                                         |    361 | 
+| other           | oglesby                                               | oglesby                                                                                                      |    470 | 
+| other           | park                                                  | NULL                                                                                                         |    230 | 
+| other           | pg                                                    | NULL                                                                                                         |    233 | 
+| other           | ph                                                    | NULL                                                                                                         |    234 | 
+| other           | physmei                                               | physmei                                                                                                      |    406 | 
+| other           | plukashev                                             | plukashev                                                                                                    |    409 | 
+| other           | pragma                                                | PRAGMA                                                                                                       |    235 | 
+| other           | psk6                                                  | NULL                                                                                                         |    453 | 
+| other           | purdue university                                     | NULL                                                                                                         |    236 | 
+| other           | rdig                                                  | NULL                                                                                                         |    237 | 
+| other           | reid                                                  | reid                                                                                                         |    419 | 
+| other           | rowe                                                  | rowe                                                                                                         |    414 | 
+| other           | rsv                                                   | rsv                                                                                                          |    461 | 
+| other           | rv                                                    | NULL                                                                                                         |    238 | 
+| other           | sabirianov                                            | sabirianov                                                                                                   |    490 | 
+| other           | sahara                                                | NULL                                                                                                         |    587 | 
+| other           | saint                                                 | NULL                                                                                                         |    591 | 
+| other           | sk                                                    | NULL                                                                                                         |    243 | 
+| other           | sm                                                    | NULL                                                                                                         |    497 | 
+| other           | smith                                                 | NULL                                                                                                         |    244 | 
+| other           | ss                                                    | NULL                                                                                                         |    246 | 
+| other           | starace                                               | starace                                                                                                      |    425 | 
+| other           | stevenlubin2                                          | NULL                                                                                                         |    598 | 
+| other           | sun                                                   | NULL                                                                                                         |    252 | 
+| other           | swanson                                               | swanson                                                                                                      |    429 | 
+| other           | trgrid                                                | NULL                                                                                                         |    256 | 
+| other           | ts                                                    | NULL                                                                                                         |    257 | 
+| other           | tsymbal                                               | tsymbal                                                                                                      |    441 | 
+| other           | ub2                                                   | NULL                                                                                                         |    258 | 
+| other           | ucm                                                   | NULL                                                                                                         |    259 | 
+| other           | vam                                                   | NULL                                                                                                         |    282 | 
+| other           | wang                                                  | NULL                                                                                                         |    283 | 
+| other           | wilso                                                 | NULL                                                                                                         |    609 | 
+| other           | woldt                                                 | woldt                                                                                                        |    433 | 
+| other           | wolf2                                                 | NULL                                                                                                         |    285 | 
+| other           | wood                                                  | wood                                                                                                         |    487 | 
+| other           | wpeng                                                 | wpeng                                                                                                        |    440 | 
+| other           | wu                                                    | NULL                                                                                                         |    395 | 
+| other           | xzeng                                                 | xzeng                                                                                                        |    411 | 
+| other           | yang                                                  | NULL                                                                                                         |    368 | 
+| other           | ysm                                                   | NULL                                                                                                         |    447 | 
+| other           | zeng                                                  | zeng                                                                                                         |    434 | 
+| other           | zeus                                                  | zeus                                                                                                         |    286 | 
+| other           | zhang                                                 | NULL                                                                                                         |    287 | 
+| other           | zhang                                                 | atlas                                                                                                        |    548 | 
+| other           | zhou                                                  | NULL                                                                                                         |    583 | 
+| other EGEE      | /lhcb/Role=NULL/Capability=NULL                       | lhcb                                                                                                         |    327 | 
+| other EGEE      | /lhcb/Role=lcgadmin/Capability=NULL                   | lhcb                                                                                                         |    321 | 
+| other EGEE      | /lhcb/Role=pilot/Capability=NULL                      | lhcb                                                                                                         |    319 | 
+| other EGEE      | /lhcb/Role=production/Capability=NULL                 | lhcb                                                                                                         |    318 | 
+| other EGEE      | /lhcb/Role=user/Capability=NULL                       | lhcb                                                                                                         |    320 | 
+| other EGEE      | /superbvo.org/Role=NULL/Capability=NULL               | superbvo.org                                                                                                 |    519 | 
+| other EGEE      | /superbvo.org/Role=SoftwareManager/Capability=NULL    | superbvo.org                                                                                                 |    518 | 
+| other EGEE      | lhcb                                                  | LHCb                                                                                                         |    173 | 
+| other EGEE      | lhcb                                                  | lhcb                                                                                                         |    174 | 
+| other EGEE      | osgu000                                               | LOCAL                                                                                                        |    227 | 
+| other EGEE      | osgu000                                               | superbvo.org                                                                                                 |    513 | 
+| ou2             | ou2                                                   | NULL                                                                                                         |    564 | 
+| ou2             | ou2                                                   | DOSAR                                                                                                        |    626 | 
+| ouame           | ouame                                                 | NULL                                                                                                         |    529 | 
+| pari            | pari                                                  | NULL                                                                                                         |    686 | 
+| parii           | parii                                                 | NULL                                                                                                         |    728 | 
+| parii           | parii                                                 | DOSAR                                                                                                        |    873 | 
+| patriot         | /fermilab/patriot/Role=NULL/Capability=NULL           | fermilab                                                                                                     |    341 | 
+| patriot         | patriot                                               | FERMILAB                                                                                                     |    232 | 
+| pegrid          | /pegrid/Role=NULL/Capability=NULL                     | pegrid                                                                                                       |    535 | 
+| pegrid          | pegrid                                                | PEGRID                                                                                                       |    506 | 
+| pegrid          | pegrid0                                               | PEGRID                                                                                                       |    391 | 
+| pgoyal          | pgoyal                                                | pgoyal                                                                                                       |    703 | 
+| pilatlas        | pilatlas                                              | NULL                                                                                                         |    669 | 
+| prdatlas        | prdatlas                                              | NULL                                                                                                         |    620 | 
+| pxq             | pxq                                                   | pxq                                                                                                          |    833 | 
+| qpei            | qpei                                                  | qpei                                                                                                         |    699 | 
+| renci           | renci                                                 | renci                                                                                                        |    687 | 
+| rsakidja        | rsakidja                                              | rsakidja                                                                                                     |    701 | 
+| rsvuser         | rsvuser                                               | RSVUSER                                                                                                      |    633 | 
+| sabs            | sabs                                                  | sabs                                                                                                         |    809 | 
+| sagrid          | sagrid                                                | NULL                                                                                                         |    597 | 
+| sbgrid          | /SBGrid                                               | SBGrid                                                                                                       |    343 | 
+| sbgrid          | /SBGrid/Role=NULL/Capability=NULL                     | SBGrid                                                                                                       |    379 | 
+| sbgrid          | /SBGrid/Role=RSV/Capability=NULL                      | SBGrid                                                                                                       |    382 | 
+| sbgrid          | /SBGrid/Role=VO-Admin/Capability=NULL                 | SBGrid                                                                                                       |    386 | 
+| sbgrid          | sbgrid                                                | SBGRID                                                                                                       |    345 | 
+| sbgrid          | sbgrid                                                | SBGrid                                                                                                       |    239 | 
+| sbgrid          | sbgrid                                                | sbgrid                                                                                                       |    342 | 
+| sc              | sc                                                    | NULL                                                                                                         |    616 | 
+| sc11            | sc11                                                  | NULL                                                                                                         |    881 | 
+| scidac          | scidac                                                | NULL                                                                                                         |    642 | 
+| sdss            | /sdss/production/Role=NULL/Capability=NULL            | sdss                                                                                                         |    305 | 
+| sdss            | sdss                                                  | NULL                                                                                                         |    240 | 
+| sdss            | sdss                                                  | SDSS                                                                                                         |    241 | 
+| seneslab        | seneslab                                              | seneslab                                                                                                     |    697 | 
+| sgmenmr         | sgmenmr                                               | NULL                                                                                                         |    654 | 
+| sgmenmrcirmmp   | sgmenmrcirmmp                                         | NULL                                                                                                         |    658 | 
+| sgmsagrid       | sgmsagrid                                             | NULL                                                                                                         |    714 | 
+| shah            | shah                                                  | NULL                                                                                                         |    637 | 
+| siddet          | siddet                                                | ILC                                                                                                          |    448 | 
+| singlyMappedOSG | grid                                                  | NULL                                                                                                         |    129 | 
+| singlyMappedOSG | grid                                                  | grid                                                                                                         |    431 | 
+| sipe0           | sipe0                                                 | NULL                                                                                                         |    628 | 
+| sipe0           | sipe0                                                 | DOSAR                                                                                                        |    690 | 
+| sl              | sl                                                    | NULL                                                                                                         |    839 | 
+| soarbuild       | soarbuild                                             | soarbuild                                                                                                    |    715 | 
+| sp              | sp                                                    | NULL                                                                                                         |    838 | 
+| sqzhu           | sqzhu                                                 | sqzhu                                                                                                        |    816 | 
+| star            | /star/Role=NULL/Capability=NULL                       | star                                                                                                         |     22 | 
+| star            | star                                                  | NULL                                                                                                         |    248 | 
+| star            | star                                                  | STAR                                                                                                         |    249 | 
+| star            | star                                                  | Star                                                                                                         |    250 | 
+| star            | star                                                  | star                                                                                                         |    251 | 
+| superbvo.org    | /superbvo.org/Role=ProductionManager/Capability=NULL  | superbvo.org                                                                                                 |    662 | 
+| superbvo.org    | superbvo.org                                          | superbvo.org                                                                                                 |    860 | 
+| sura            | sura                                                  | sgvo                                                                                                         |    666 | 
+| sura            | sura                                                  | suragrid                                                                                                     |    718 | 
+| sura0           | sura0                                                 | SGVO                                                                                                         |    692 | 
+| sura0           | sura0                                                 | suragrid                                                                                                     |    681 | 
+| suragrid        | /suragrid/Role=NULL/Capability=NULL                   | suragrid                                                                                                     |    660 | 
+| suragrid        | suragrid                                              | SURAGRID                                                                                                     |    667 | 
+| suragrid        | suragrid                                              | SURAGrid                                                                                                     |    826 | 
+| suragrid        | suragrid                                              | SURAgrid                                                                                                     |    309 | 
+| symp            | symp                                                  | NULL                                                                                                         |    872 | 
+| t2k.org         | /t2k.org/Role=NULL/Capability=NULL                    | t2k.org                                                                                                      |    525 | 
+| test            | test                                                  | NULL                                                                                                         |    650 | 
+| test_proj       | test_proj                                             | NULL                                                                                                         |    640 | 
+| tgyro           | /Engage/Fusion/TGYRO/Role=NULL/Capability=NULL        | Engage                                                                                                       |    400 | 
+| th              | th                                                    | NULL                                                                                                         |    841 | 
+| theory          | /fermilab/theory/Role=NULL/Capability=NULL            | fermilab                                                                                                     |    299 | 
+| theory          | theory                                                | FERMILAB                                                                                                     |    300 | 
+| thomp           | thomp                                                 | NULL                                                                                                         |    543 | 
+| tigre           | /tigre                                                | tigre                                                                                                        |    373 | 
+| tigre           | TIGRE                                                 | TIGRE                                                                                                        |    370 | 
+| tigre           | tigre                                                 | TIGRE                                                                                                        |    456 | 
+| tigre           | tigrepool0                                            | NULL                                                                                                         |    253 | 
+| tigre           | tigrepool0                                            | TIGRE                                                                                                        |    254 | 
+| tmayeshi        | tmayeshi                                              | tmayeshi                                                                                                     |    730 | 
+| turne           | turne                                                 | NULL                                                                                                         |    657 | 
+| unknown         | Unknown                                               | NULL                                                                                                         |     40 | 
+| uno             | uno                                                   | uno                                                                                                          |    435 | 
+| usatlas         | /atlas                                                | atlas                                                                                                        |    292 | 
+| usatlas         | /atlas/Role=NULL/Capability=NULL                      | atlas                                                                                                        |    294 | 
+| usatlas         | /atlas/Role=lcgadmin/Capability=NULL                  | atlas                                                                                                        |      2 | 
+| usatlas         | /atlas/Role=pilot/Capability=NULL                     | atlas                                                                                                        |    503 | 
+| usatlas         | /atlas/Role=production/Capability=NULL                | atlas                                                                                                        |    288 | 
+| usatlas         | /atlas/ca/Role=NULL/Capability=NULL                   | atlas                                                                                                        |    352 | 
+| usatlas         | /atlas/de/Role=NULL/Capability=NULL                   | atlas                                                                                                        |    514 | 
+| usatlas         | /atlas/lcg1/Role=NULL/Capability=NULL                 | atlas                                                                                                        |    584 | 
+| usatlas         | /atlas/phys-sm/Role=production/Capability=NULL        | atlas                                                                                                        |    550 | 
+| usatlas         | /atlas/ru/Role=NULL/Capability=NULL                   | atlas                                                                                                        |    541 | 
+| usatlas         | /atlas/usatlas/Role=NULL/Capability=NULL              | atlas                                                                                                        |    324 | 
+| usatlas         | /atlas/usatlas/Role=pilot/Capability=NULL             | atlas                                                                                                        |    333 | 
+| usatlas         | /atlas/usatlas/Role=production/Capability=NULL        | atlas                                                                                                        |      3 | 
+| usatlas         | /atlas/usatlas/Role=software/Capability=NULL          | atlas                                                                                                        |    298 | 
+| usatlas         | atlas                                                 | NULL                                                                                                         |     47 | 
+| usatlas         | atlas                                                 | ATLAS                                                                                                        |     48 | 
+| usatlas         | atlasprd                                              | NULL                                                                                                         |     49 | 
+| usatlas         | atlassgm                                              | NULL                                                                                                         |     50 | 
+| usatlas         | newUsatlasplt                                         | usatlas                                                                                                      |    209 | 
+| usatlas         | osgbabar00                                            | NULL                                                                                                         |    222 | 
+| usatlas         | osgbabar00                                            | ATLAS                                                                                                        |    223 | 
+| usatlas         | osgbabar00                                            | BABAR                                                                                                        |    452 | 
+| usatlas         | sgmatlas                                              | NULL                                                                                                         |    594 | 
+| usatlas         | usatlas                                               | NULL                                                                                                         |    260 | 
+| usatlas         | usatlas                                               | ATLAS                                                                                                        |    261 | 
+| usatlas         | usatlas                                               | USAtlas                                                                                                      |    262 | 
+| usatlas         | usatlas                                               | atlas                                                                                                        |    263 | 
+| uscmsPool1      | uscmsPool1                                            | SBGrid                                                                                                       |    720 | 
+| uscmsPool2      | uscmsPool2                                            | NULL                                                                                                         |    879 | 
+| users           | users                                                 | users                                                                                                        |    866 | 
+| ux453           | ux453                                                 | NULL                                                                                                         |    656 | 
+| wang1           | wang1                                                 | NULL                                                                                                         |    805 | 
+| webportal       | webportal                                             | webportal                                                                                                    |    698 | 
+| wenger          | wenger                                                | wenger                                                                                                       |    696 | 
+| xzhu            | xzhu                                                  | xzhu                                                                                                         |    705 | 
+| yethiraj        | yethiraj                                              | yethiraj                                                                                                     |    710 | 
+| yijieli         | yijieli                                               | yijieli                                                                                                      |    726 | 
+| yj7             | yj7                                                   | NULL                                                                                                         |    857 | 
+| yl              | yl                                                    | NULL                                                                                                         |    847 | 
+| yru1            | yru1                                                  | NULL                                                                                                         |    800 | 
+| yru1            | yru1                                                  | DOSAR                                                                                                        |    850 | 
+| yuguo1          | yuguo1                                                | NULL                                                                                                         |    646 | 
+| zheng           | zheng                                                 | NULL                                                                                                         |    864 | 
+| zhijun          | zhijun                                                | zhijun                                                                                                       |    704 | 
+| zorba           | zorba                                                 | zorba                                                                                                        |    702 | 
+| zwu7            | zwu7                                                  | zwu7                                                                                                         |    806 | 
++-----------------+-------------------------------------------------------+--------------------------------------------------------------------------------------------------------------+--------+
+--------------
+SELECT
+   CONCAT("DELETE FROM VONameCorrection WHERE corrid = ", a.corrid ,";")
+as delete_sql
+FROM
+ ( SELECT distinct(corrid)
+   FROM
+      VONameCorrection VC
+   where 
+       VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+ ) a
+order by delete_sql
+--------------
+
++--------------------------------------------------+
+| delete_sql                                       |
++--------------------------------------------------+
+| DELETE FROM VONameCorrection WHERE corrid = 103; | 
+| DELETE FROM VONameCorrection WHERE corrid = 109; | 
+| DELETE FROM VONameCorrection WHERE corrid = 112; | 
+| DELETE FROM VONameCorrection WHERE corrid = 115; | 
+| DELETE FROM VONameCorrection WHERE corrid = 118; | 
+| DELETE FROM VONameCorrection WHERE corrid = 128; | 
+| DELETE FROM VONameCorrection WHERE corrid = 135; | 
+| DELETE FROM VONameCorrection WHERE corrid = 138; | 
+| DELETE FROM VONameCorrection WHERE corrid = 142; | 
+| DELETE FROM VONameCorrection WHERE corrid = 143; | 
+| DELETE FROM VONameCorrection WHERE corrid = 147; | 
+| DELETE FROM VONameCorrection WHERE corrid = 150; | 
+| DELETE FROM VONameCorrection WHERE corrid = 154; | 
+| DELETE FROM VONameCorrection WHERE corrid = 156; | 
+| DELETE FROM VONameCorrection WHERE corrid = 165; | 
+| DELETE FROM VONameCorrection WHERE corrid = 169; | 
+| DELETE FROM VONameCorrection WHERE corrid = 172; | 
+| DELETE FROM VONameCorrection WHERE corrid = 178; | 
+| DELETE FROM VONameCorrection WHERE corrid = 182; | 
+| DELETE FROM VONameCorrection WHERE corrid = 188; | 
+| DELETE FROM VONameCorrection WHERE corrid = 199; | 
+| DELETE FROM VONameCorrection WHERE corrid = 221; | 
+| DELETE FROM VONameCorrection WHERE corrid = 225; | 
+| DELETE FROM VONameCorrection WHERE corrid = 228; | 
+| DELETE FROM VONameCorrection WHERE corrid = 229; | 
+| DELETE FROM VONameCorrection WHERE corrid = 231; | 
+| DELETE FROM VONameCorrection WHERE corrid = 242; | 
+| DELETE FROM VONameCorrection WHERE corrid = 245; | 
+| DELETE FROM VONameCorrection WHERE corrid = 247; | 
+| DELETE FROM VONameCorrection WHERE corrid = 255; | 
+| DELETE FROM VONameCorrection WHERE corrid = 264; | 
+| DELETE FROM VONameCorrection WHERE corrid = 267; | 
+| DELETE FROM VONameCorrection WHERE corrid = 270; | 
+| DELETE FROM VONameCorrection WHERE corrid = 273; | 
+| DELETE FROM VONameCorrection WHERE corrid = 276; | 
+| DELETE FROM VONameCorrection WHERE corrid = 277; | 
+| DELETE FROM VONameCorrection WHERE corrid = 27;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 281; | 
+| DELETE FROM VONameCorrection WHERE corrid = 284; | 
+| DELETE FROM VONameCorrection WHERE corrid = 28;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 30;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 326; | 
+| DELETE FROM VONameCorrection WHERE corrid = 350; | 
+| DELETE FROM VONameCorrection WHERE corrid = 41;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 53;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 57;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 62;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 66;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 68;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 80;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 83;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 97;  | 
++--------------------------------------------------+
+--------------
+SELECT *
+FROM VONameCorrection
+WHERE corrid in
+ ( SELECT distinct(corrid)
+   FROM
+      VONameCorrection VC
+   where 
+       VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+ )
+--------------
+
++--------+------------------+------------------+------+
+| corrid | VOName           | ReportableVOName | VOid |
++--------+------------------+------------------+------+
+|     27 | 1202574          | NULL             |  221 | 
+|     28 | 1203635          | NULL             |  221 | 
+|     30 | 1205281          | NULL             |  221 | 
+|     41 | Unknown          | Unknown          |  220 | 
+|     53 | auger            | auger            |   98 | 
+|     57 | blane            | blane            |  221 | 
+|     62 | cdf              | cdf              |  101 | 
+|     66 | cdms             | cdms             |  102 | 
+|     68 | cern             | cern             |  103 | 
+|     80 | des              | des              |  109 | 
+|     83 | dosar            | dosar            |  110 | 
+|     97 | engagement       | engagement       |  114 | 
+|    103 | fermilab         | fermilab         |  117 | 
+|    109 | fmri             | fmri             |  119 | 
+|    112 | gadu             | gadu             |  120 | 
+|    115 | geant4           | geant4           |  121 | 
+|    118 | gin.ggf.org      | gin.ggf.org      |  221 | 
+|    128 | grase            | grase            |  126 | 
+|    135 | gridex           | gridex           |  129 | 
+|    138 | grow             | grow             |  130 | 
+|    142 | hypercp          | hypercp          |  132 | 
+|    143 | i2u2             | I2U2             |  238 | 
+|    147 | ilc              | ilc              |  133 | 
+|    150 | infn             | infn             |  134 | 
+|    154 | ivdgl            | ivdgl            |  135 | 
+|    156 | james            | james            |  221 | 
+|    165 | km               | km               |  221 | 
+|    169 | ktev             | ktev             |  139 | 
+|    172 | lee              | lee              |  221 | 
+|    178 | ligo             | ligo             |  142 | 
+|    182 | magrid           | NULL             |  245 | 
+|    188 | miniboone        | miniboone        |  146 | 
+|    199 | mm               | mm               |  221 | 
+|    221 | osg              | osg              |  156 | 
+|    225 | osgedu           | osgedu           |  157 | 
+|    228 | osgusatlas00     | NULL             |  172 | 
+|    229 | osgusatlas00     | ATLAS            |  172 | 
+|    231 | park             | park             |  221 | 
+|    242 | sdss             | sdss             |  166 | 
+|    245 | smith            | smith            |  221 | 
+|    247 | ss               | ss               |  221 | 
+|    255 | tigrepool0       | tigrepool0       |  198 | 
+|    264 | usatlas          | usatlas          |  172 | 
+|    267 | uscms            | uscms            |  106 | 
+|    270 | uscmsPool        | uscmsPool        |  106 | 
+|    273 | uscmsPool1       | uscmsPool1       |  106 | 
+|    276 | uscmspool0       | uscmspool0       |  106 | 
+|    277 | uscmspool1       | NULL             |  106 | 
+|    281 | ux001            | ux001            |  142 | 
+|    284 | wang             | wang             |  221 | 
+|    326 | mschram06/29/2   | NULL             |  221 | 
+|    350 | /SBGrid/Role=RSV | SBGrid           |  234 | 
++--------+------------------+------------------+------+

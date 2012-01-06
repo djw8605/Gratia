@@ -1,0 +1,303 @@
+
+=========================================================
+VOName being analized
+=========================================================
+--------------
+set @voname="TG-%"
+--------------
+
+
+=========================================================
+JUR recs still with bad VOName
+This stops the VOName from being deleted from the
+VONameCorrection and VO table until the JUR records are dropped.
+=========================================================
+--------------
+select distinct VOName, 
+       count(*) as JUR_records
+from JobUsageRecord 
+where VOName like @voname
+group by VOName
+--------------
+
+
+=========================================================
+VO table count of the VOName
+=========================================================
+--------------
+select count(*) as GratiaVO_cnt
+from VO
+where VOName like @voname
+--------------
+
++--------------+
+| GratiaVO_cnt |
++--------------+
+|            0 | 
++--------------+
+
+=========================================================
+VONameCorrection table count of the VOName
+=========================================================
+--------------
+select count(*) as ProbeVO_cnt
+from VONameCorrection
+where VOName like @voname
+--------------
+
++-------------+
+| ProbeVO_cnt |
++-------------+
+|           0 | 
++-------------+
+========================================================
+Query - Unused VONameCorrection table entries.
+========================================================
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VC.VOName as ProbeVO
+  ,VC.ReportableVOName
+  ,VC.corrid
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.VOid = VO.VOid
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+order by 
+  GratiaVO
+ ,ProbeVO       
+ ,ReportableVOName
+--------------
+
++----------+-----------+------------------+--------+
+| GratiaVO | ProbeVO   | ReportableVOName | corrid |
++----------+-----------+------------------+--------+
+| atlas    | atlas     | NULL             |     13 | 
+| cms      | cms       | uscms            |     50 | 
+| null     | /atlas    | NULL             |     40 | 
+| null     | /fermilab | NULL             |     49 | 
+| usatlas3 | usatlas3  | NULL             |     41 | 
++----------+-----------+------------------+--------+
+========================================================
+Query - VONameCorrection table entries not in VO.
+========================================================
+--------------
+SELECT 
+   VC.VOName as ProbeVO
+  ,VC.ReportableVOName
+  ,VC.corrid
+  ,VC.void
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.void not in (
+  SELECT distinct(void) FROM VO)
+order by 
+  ProbeVO       
+ ,VC.corrid
+ ,VC.void
+ ,ReportableVOName
+--------------
+
+========================================================
+Query - Used VONameCorrection table entries.
+========================================================
+--------------
+SELECT 
+  count(*) as nbr_of_entries
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.VOid = VO.VOid
+and (
+     VC.corrid in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+  )
+--------------
+
++----------------+
+| nbr_of_entries |
++----------------+
+|             93 | 
++----------------+
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VC.VOName as ProbeVO
+  ,VC.ReportableVOName
+  ,VC.corrid
+
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.VOid = VO.VOid
+and (
+     VC.corrid in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+  )
+order by 
+  GratiaVO
+ ,ProbeVO       
+ ,ReportableVOName
+ ,VC.corrid
+--------------
+
++-----------------------------------------------------------+-----------------------------------------------------------+------------------+--------+
+| GratiaVO                                                  | ProbeVO                                                   | ReportableVOName | corrid |
++-----------------------------------------------------------+-----------------------------------------------------------+------------------+--------+
+| Engage                                                    | /Engage/LSST/Role=NULL/Capability=NULL                    | Engage           |     79 | 
+| GridUNESP                                                 | GridUNESP                                                 | GridUNESP        |     51 | 
+| LIGO                                                      | LIGO                                                      | NULL             |     77 | 
+| RSV                                                       | RSV                                                       | RSV              |     56 | 
+| SBGrid                                                    | /SBGrid/Role=NULL/Capability=NULL                         | SBGrid           |     86 | 
+| Unknown                                                   | Unknown                                                   | NULL             |      1 | 
+| aegis                                                     | aegis                                                     | NULL             |     38 | 
+| ap                                                        | ap                                                        | NULL             |      9 | 
+| apacgrid                                                  | apacgrid                                                  | NULL             |     26 | 
+| as                                                        | as                                                        | NULL             |     43 | 
+| atlas                                                     | /atlas/Role=NULL/Capability=NULL                          | atlas            |     68 | 
+| atlas                                                     | /atlas/Role=production/Capability=NULL                    | atlas            |     81 | 
+| atlas                                                     | /atlas/usatlas/Role=pilot/Capability=NULL                 | atlas            |     66 | 
+| atlas                                                     | /atlas/usatlas/Role=production/Capability=NULL            | atlas            |     58 | 
+| atlas                                                     | /atlas/usatlas/Role=software/Capability=NULL              | atlas            |     63 | 
+| atlas                                                     | atlas                                                     | ATLAS            |     42 | 
+| cdf                                                       | /cdf/Role=NULL/Capability=NULL                            | cdf              |     75 | 
+| cdf                                                       | /cdf/glidecaf/Role=development/Capability=NULL            | cdf              |     70 | 
+| cdf                                                       | /cdf/glidecaf/Role=fermigrid/Capability=NULL              | cdf              |     61 | 
+| cdf                                                       | cdf                                                       | CDF              |     23 | 
+| ciemat                                                    | ciemat                                                    | NULL             |     10 | 
+| cms                                                       | /cms/Role=NULL/Capability=NULL                            | cms              |     62 | 
+| cms                                                       | /cms/Role=lcgadmin/Capability=NULL                        | cms              |     89 | 
+| cms                                                       | /cms/Role=pilot/Capability=NULL                           | cms              |     93 | 
+| cms                                                       | /cms/Role=production/Capability=NULL                      | cms              |     82 | 
+| cms                                                       | /cms/becms/Role=NULL/Capability=NULL                      | cms              |     90 | 
+| cms                                                       | /cms/dcms/Role=NULL/Capability=NULL                       | cms              |     92 | 
+| cms                                                       | /cms/escms/Role=NULL/Capability=NULL                      | cms              |     94 | 
+| cms                                                       | /cms/twcms/Role=NULL/Capability=NULL                      | cms              |     91 | 
+| cms                                                       | /cms/uscms/Role=cmsuser/Capability=NULL                   | cms              |     54 | 
+| cms                                                       | cms                                                       | CMS              |     45 | 
+| dosar                                                     | /dosar/Role=NULL/Capability=NULL                          | dosar            |     74 | 
+| dosar                                                     | dosar                                                     | DOSAR            |     37 | 
+| dteam                                                     | dteam                                                     | DTEAM            |     19 | 
+| dteam                                                     | dteam                                                     | dteam            |     24 | 
+| dutchgrid                                                 | dutchgrid                                                 | NULL             |     16 | 
+| dzero                                                     | /dzero/users/Role=NULL/Capability=NULL                    | dzero            |     64 | 
+| dzero                                                     | dzero                                                     | DZERO            |     39 | 
+| dzero                                                     | dzero                                                     | dzero            |      2 | 
+| e-ciencia                                                 | e-ciencia                                                 | NULL             |     17 | 
+| engage                                                    | engage                                                    | ENGAGE           |     98 | 
+| engage                                                    | engage                                                    | Engage           |     35 | 
+| escience                                                  | escience                                                  | NULL             |      7 | 
+| fermilab                                                  | /fermilab/Role=NULL/Capability=NULL                       | fermilab         |     52 | 
+| fermilab                                                  | /fermilab/grid/Role=NULL/Capability=NULL                  | fermilab         |     53 | 
+| fermilab                                                  | /fermilab/grid/Role=admin/Capability=NULL                 | fermilab         |     71 | 
+| fermilab                                                  | /fermilab/test/Role=NULL/Capability=NULL                  | fermilab         |     60 | 
+| fermilab                                                  | fermilab                                                  | FERMILAB         |     30 | 
+| fermilab                                                  | fermilab                                                  | Fermilab         |     48 | 
+| fermilab-test                                             | fermilab-test                                             | FERMILAB         |     59 | 
+| geant4                                                    | geant4                                                    | GEANT4           |     83 | 
+| germangrid                                                | germangrid                                                | NULL             |      8 | 
+| gluex                                                     | gluex                                                     | Gluex            |     88 | 
+| gpn                                                       | gpn                                                       | gpn              |     34 | 
+| grid                                                      | grid                                                      | NULL             |     12 | 
+| grid-fr                                                   | grid-fr                                                   | NULL             |     14 | 
+| hcc                                                       | /hcc/Role=NULL/Capability=NULL                            | hcc              |     87 | 
+| hcc                                                       | hcc                                                       | hcc              |     85 | 
+| hellasgrid                                                | hellasgrid                                                | NULL             |     36 | 
+| hep                                                       | hep                                                       | NULL             |     22 | 
+| ifae                                                      | ifae                                                      | NULL             |     25 | 
+| infn                                                      | infn                                                      | NULL             |      6 | 
+| institute of physics of the academy of sciences of the cr | institute of physics of the academy of sciences of the cr | NULL             |     15 | 
+| kek                                                       | kek                                                       | NULL             |     33 | 
+| ligo                                                      | ligo                                                      | LIGO             |     29 | 
+| lipca                                                     | lipca                                                     | NULL             |     21 | 
+| lqcd                                                      | lqcd                                                      | LQCD             |     47 | 
+| mis                                                       | mis                                                       | MIS              |     31 | 
+| nanohub                                                   | nanohub                                                   | NANOHUB          |     27 | 
+| nebiogrid                                                 | nebiogrid                                                 | NEBioGrid        |     46 | 
+| ops                                                       | /ops/Role=NULL/Capability=NULL                            | ops              |     55 | 
+| ops                                                       | ops                                                       | OPS              |     44 | 
+| ops                                                       | ops                                                       | ops              |     69 | 
+| osg                                                       | /osg/Role=NULL/Capability=NULL                            | osg              |     67 | 
+| osg                                                       | /osg/Role=pilot/Capability=NULL                           | osg              |     57 | 
+| osg                                                       | osg                                                       | OSG              |      4 | 
+| osgedu                                                    | /osgedu/Role=NULL/Capability=NULL                         | osgedu           |     73 | 
+| osgedu                                                    | osgedu                                                    | OSGEDU           |     78 | 
+| pegrid                                                    | pegrid                                                    | PEGRID           |     80 | 
+| pic                                                       | pic                                                       | NULL             |     20 | 
+| rdig                                                      | rdig                                                      | NULL             |      5 | 
+| sbgrid                                                    | sbgrid                                                    | SBGrid           |     28 | 
+| sgvo                                                      | sgvo                                                      | SGVO             |     95 | 
+| star                                                      | star                                                      | STAR             |     32 | 
+| superbvo.org                                              | superbvo.org                                              | superbvo.org     |     84 | 
+| suragrid                                                  | suragrid                                                  | SURAGrid         |     97 | 
+| suragrid                                                  | suragrid                                                  | suragrid         |     96 | 
+| tigre                                                     | tigre                                                     | TIGRE            |     72 | 
+| usatlas                                                   | usatlas                                                   | ATLAS            |     18 | 
+| usatlas                                                   | usatlas                                                   | atlas            |     11 | 
+| usatlas                                                   | usatlas                                                   | usatlas          |     65 | 
+| uscms                                                     | uscms                                                     | CMS              |      3 | 
+| uscms                                                     | uscms                                                     | uscms            |     76 | 
++-----------------------------------------------------------+-----------------------------------------------------------+------------------+--------+
+--------------
+SELECT
+   CONCAT("DELETE FROM VONameCorrection WHERE corrid = ", a.corrid ,";")
+as delete_sql
+FROM
+ ( SELECT distinct(corrid)
+   FROM
+      VONameCorrection VC
+   where 
+       VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+ ) a
+order by delete_sql
+--------------
+
++-------------------------------------------------+
+| delete_sql                                      |
++-------------------------------------------------+
+| DELETE FROM VONameCorrection WHERE corrid = 13; | 
+| DELETE FROM VONameCorrection WHERE corrid = 40; | 
+| DELETE FROM VONameCorrection WHERE corrid = 41; | 
+| DELETE FROM VONameCorrection WHERE corrid = 49; | 
+| DELETE FROM VONameCorrection WHERE corrid = 50; | 
++-------------------------------------------------+
+--------------
+SELECT *
+FROM VONameCorrection
+WHERE corrid in
+ ( SELECT distinct(corrid)
+   FROM
+      VONameCorrection VC
+   where 
+       VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+ )
+--------------
+
++--------+-----------+------------------+------+
+| corrid | VOName    | ReportableVOName | VOid |
++--------+-----------+------------------+------+
+|     13 | atlas     | NULL             |   13 | 
+|     40 | /atlas    | NULL             |   37 | 
+|     41 | usatlas3  | NULL             |   38 | 
+|     49 | /fermilab | NULL             |   37 | 
+|     50 | cms       | uscms            |   41 | 
++--------+-----------+------------------+------+

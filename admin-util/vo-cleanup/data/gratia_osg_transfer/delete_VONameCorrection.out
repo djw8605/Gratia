@@ -1,0 +1,5 @@
+DELETE FROM VONameCorrection WHERE corrid = 13;
+DELETE FROM VONameCorrection WHERE corrid = 40;
+DELETE FROM VONameCorrection WHERE corrid = 41;
+DELETE FROM VONameCorrection WHERE corrid = 49;
+DELETE FROM VONameCorrection WHERE corrid = 50;

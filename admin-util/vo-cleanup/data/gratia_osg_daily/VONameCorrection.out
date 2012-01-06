@@ -1,0 +1,1715 @@
+
+=========================================================
+VOName being analized
+=========================================================
+--------------
+set @voname="TG-%"
+--------------
+
+
+=========================================================
+JUR recs still with bad VOName
+This stops the VOName from being deleted from the
+VONameCorrection and VO table until the JUR records are dropped.
+=========================================================
+--------------
+select distinct VOName, 
+       count(*) as JUR_records
+from JobUsageRecord 
+where VOName like @voname
+group by VOName
+--------------
+
++-------------------+-------------+
+| VOName            | JUR_records |
++-------------------+-------------+
+| TG-MCA05S010 (nr) |           1 | 
+| TG-MCA07S022 (nr) |           2 | 
++-------------------+-------------+
+
+=========================================================
+VO table count of the VOName
+=========================================================
+--------------
+select count(*) as GratiaVO_cnt
+from VO
+where VOName like @voname
+--------------
+
++--------------+
+| GratiaVO_cnt |
++--------------+
+|           52 | 
++--------------+
+
+=========================================================
+VONameCorrection table count of the VOName
+=========================================================
+--------------
+select count(*) as ProbeVO_cnt
+from VONameCorrection
+where VOName like @voname
+--------------
+
++-------------+
+| ProbeVO_cnt |
++-------------+
+|          52 | 
++-------------+
+========================================================
+Query - Unused VONameCorrection table entries.
+========================================================
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VC.VOName as ProbeVO
+  ,VC.ReportableVOName
+  ,VC.corrid
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.VOid = VO.VOid
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+order by 
+  GratiaVO
+ ,ProbeVO       
+ ,ReportableVOName
+--------------
+
++-------------------------------------------------+-------------------------------------------------+------------------+--------+
+| GratiaVO                                        | ProbeVO                                         | ReportableVOName | corrid |
++-------------------------------------------------+-------------------------------------------------+------------------+--------+
+| /cdf/Role=NULL/Capability=NULL                  | /cdf/Role=NULL/Capability=NULL                  | NULL             |      1 | 
+| /cdf/glidecaf/Role=namcaf/Capability=NULL       | /cdf/glidecaf/Role=namcaf/Capability=NULL       | NULL             |      2 | 
+| 1178843                                         | 1178843                                         | NULL             |      3 | 
+| 1180053                                         | 1180053                                         | NULL             |      4 | 
+| 1183335                                         | 1183335                                         | NULL             |      5 | 
+| 1189588                                         | 1189588                                         | NULL             |      6 | 
+| 1198495                                         | 1198495                                         | NULL             |      7 | 
+| 1202574                                         | 1202574                                         | NULL             |      8 | 
+| 1203635                                         | 1203635                                         | NULL             |      9 | 
+| 1204018                                         | 1204018                                         | NULL             |     10 | 
+| 492                                             | 492                                             | NULL             |     11 | 
+| 568                                             | 568                                             | NULL             |     12 | 
+| ATLAS                                           | ATLAS                                           | NULL             |     13 | 
+| ATLAS (nr)                                      | ATLAS (nr)                                      | NULL             |    488 | 
+| CMS                                             | CMS                                             | NULL             |     14 | 
+| CompBioGrid                                     | CompBioGrid                                     | NULL             |     15 | 
+| CompBioGrid (nr)                                | CompBioGrid (nr)                                | NULL             |    228 | 
+| DOSAR                                           | DOSAR                                           | NULL             |     16 | 
+| DZero                                           | DZero                                           | NULL             |     17 | 
+| Engage                                          | Engage                                          | NULL             |     18 | 
+| Engage                                          | Engage                                          | Engage           |     19 | 
+| Engage (nr)                                     | Engage (nr)                                     | NULL             |    227 | 
+| GLOW                                            | GLOW                                            | NULL             |     20 | 
+| GLOW (nr)                                       | GLOW (nr)                                       | NULL             |    387 | 
+| Gluex (nr)                                      | Gluex (nr)                                      | NULL             |    383 | 
+| GridEx                                          | GridEx                                          | NULL             |     21 | 
+| GridUNESP (nr)                                  | GridUNESP (nr)                                  | NULL             |    393 | 
+| LIGO                                            | LIGO                                            | NULL             |     22 | 
+| LSST (nr)                                       | LSST (nr)                                       | NULL             |    380 | 
+| MIS                                             | MIS                                             | NULL             |     23 | 
+| NEBioGrid (nr)                                  | NEBioGrid (nr)                                  | NULL             |    226 | 
+| NWICG (nr)                                      | NWICG (nr)                                      | NULL             |    209 | 
+| Other                                           | Other                                           | NULL             |     24 | 
+| RSV                                             | RSV                                             | NULL             |    183 | 
+| RSV (nr)                                        | RSV (nr)                                        | NULL             |    196 | 
+| SBGrid (nr)                                     | SBGrid (nr)                                     | NULL             |    216 | 
+| SGVO (nr)                                       | SGVO (nr)                                       | NULL             |    796 | 
+| TG-ASC050039N (nr)                              | TG-ASC050039N (nr)                              | NULL             |    644 | 
+| TG-AST070052N (nr)                              | TG-AST070052N (nr)                              | NULL             |    769 | 
+| TG-AST090100 (nr)                               | TG-AST090100 (nr)                               | NULL             |    736 | 
+| TG-AST100043 (nr)                               | TG-AST100043 (nr)                               | NULL             |    727 | 
+| TG-ATM010005N (nr)                              | TG-ATM010005N (nr)                              | NULL             |    761 | 
+| TG-ATM090002 (nr)                               | TG-ATM090002 (nr)                               | NULL             |    738 | 
+| TG-ATM090060 (nr)                               | TG-ATM090060 (nr)                               | NULL             |    770 | 
+| TG-ATM110019 (nr)                               | TG-ATM110019 (nr)                               | NULL             |    671 | 
+| TG-CDA100007 (nr)                               | TG-CDA100007 (nr)                               | NULL             |    657 | 
+| TG-CDA110012 (nr)                               | TG-CDA110012 (nr)                               | NULL             |    658 | 
+| TG-CHE070074N (nr)                              | TG-CHE070074N (nr)                              | NULL             |    693 | 
+| TG-CHE080066N (nr)                              | TG-CHE080066N (nr)                              | NULL             |    659 | 
+| TG-CHE090006 (nr)                               | TG-CHE090006 (nr)                               | NULL             |    701 | 
+| TG-CHE100058 (nr)                               | TG-CHE100058 (nr)                               | NULL             |    673 | 
+| TG-CHE100095 (nr)                               | TG-CHE100095 (nr)                               | NULL             |    646 | 
+| TG-CHE100113 (nr)                               | TG-CHE100113 (nr)                               | NULL             |    715 | 
+| TG-CHE110064 (nr)                               | TG-CHE110064 (nr)                               | NULL             |    647 | 
+| TG-CTS070034N (nr)                              | TG-CTS070034N (nr)                              | NULL             |    661 | 
+| TG-CTS090062 (nr)                               | TG-CTS090062 (nr)                               | NULL             |    719 | 
+| TG-CTS100012 (nr)                               | TG-CTS100012 (nr)                               | NULL             |    674 | 
+| TG-CTS100026 (nr)                               | TG-CTS100026 (nr)                               | NULL             |    702 | 
+| TG-CTS100027 (nr)                               | TG-CTS100027 (nr)                               | NULL             |    773 | 
+| TG-DMR080070 (nr)                               | TG-DMR080070 (nr)                               | NULL             |    675 | 
+| TG-DMR100080 (nr)                               | TG-DMR100080 (nr)                               | NULL             |    741 | 
+| TG-DMR110013 (nr)                               | TG-DMR110013 (nr)                               | NULL             |    662 | 
+| TG-DMR110027 (nr)                               | TG-DMR110027 (nr)                               | NULL             |    775 | 
+| TG-DMR110052 (nr)                               | TG-DMR110052 (nr)                               | NULL             |    676 | 
+| TG-DMR110072 (nr)                               | TG-DMR110072 (nr)                               | NULL             |    663 | 
+| TG-DMR110095 (nr)                               | TG-DMR110095 (nr)                               | NULL             |    695 | 
+| TG-DMS100018 (nr)                               | TG-DMS100018 (nr)                               | NULL             |    720 | 
+| TG-DMS110002 (nr)                               | TG-DMS110002 (nr)                               | NULL             |    730 | 
+| TG-EAR080018T (nr)                              | TG-EAR080018T (nr)                              | NULL             |    664 | 
+| TG-EAR110015 (nr)                               | TG-EAR110015 (nr)                               | NULL             |    649 | 
+| TG-IBN050000N (nr)                              | TG-IBN050000N (nr)                              | NULL             |    677 | 
+| TG-IBN090004 (nr)                               | TG-IBN090004 (nr)                               | NULL             |    703 | 
+| TG-IBN100006 (nr)                               | TG-IBN100006 (nr)                               | NULL             |    678 | 
+| TG-MCA03S007 (nr)                               | TG-MCA03S007 (nr)                               | NULL             |    764 | 
+| TG-MCA05S010 (nr)                               | TG-MCA05S010 (nr)                               | NULL             |    833 | 
+| TG-MCA07S022 (nr)                               | TG-MCA07S022 (nr)                               | NULL             |    787 | 
+| TG-MCA07S029 (nr)                               | TG-MCA07S029 (nr)                               | NULL             |    765 | 
+| TG-MCB040051N (nr)                              | TG-MCB040051N (nr)                              | NULL             |    722 | 
+| TG-MCB070015N (nr)                              | TG-MCB070015N (nr)                              | NULL             |    683 | 
+| TG-MCB090163 (nr)                               | TG-MCB090163 (nr)                               | NULL             |    665 | 
+| TG-MCB110037 (nr)                               | TG-MCB110037 (nr)                               | NULL             |    766 | 
+| TG-MCB110072 (nr)                               | TG-MCB110072 (nr)                               | NULL             |    650 | 
+| TG-MCB110112 (nr)                               | TG-MCB110112 (nr)                               | NULL             |    732 | 
+| TG-PHY100030 (nr)                               | TG-PHY100030 (nr)                               | NULL             |    689 | 
+| TG-PHY110005 (nr)                               | TG-PHY110005 (nr)                               | NULL             |    744 | 
+| TG-PHY110010 (nr)                               | TG-PHY110010 (nr)                               | NULL             |    652 | 
+| TG-PHY110021 (nr)                               | TG-PHY110021 (nr)                               | NULL             |    685 | 
+| TG-PHY110034 (nr)                               | TG-PHY110034 (nr)                               | NULL             |    653 | 
+| TG-STA060008N (nr)                              | TG-STA060008N (nr)                              | NULL             |    654 | 
+| TGYRO (nr)                                      | TGYRO (nr)                                      | NULL             |    375 | 
+| TIGRE (nr)                                      | TIGRE (nr)                                      | NULL             |    212 | 
+| UT-NTNL0033 (nr)                                | UT-NTNL0033 (nr)                                | NULL             |    856 | 
+| Unknown                                         | Unknown                                         | NULL             |     25 | 
+| Unknown                                         | Unknown                                         | Unknown          |     26 | 
+| Unknown (nr)                                    | Unknown (nr)                                    | NULL             |    440 | 
+| aa (nr)                                         | aa (nr)                                         | NULL             |    324 | 
+| ab (nr)                                         | ab (nr)                                         | NULL             |    776 | 
+| ac (nr)                                         | ac (nr)                                         | NULL             |    777 | 
+| accelerator                                     | accelerator                                     | NULL             |    181 | 
+| aceace                                          | aceace                                          | NULL             |    184 | 
+| aceace (nr)                                     | aceace (nr)                                     | NULL             |    198 | 
+| adesmet (nr)                                    | adesmet (nr)                                    | NULL             |    609 | 
+| ahouston (nr)                                   | ahouston (nr)                                   | NULL             |    287 | 
+| alice                                           | alice                                           | NULL             |    217 | 
+| along (nr)                                      | along (nr)                                      | NULL             |    452 | 
+| ankur (nr)                                      | ankur (nr)                                      | NULL             |    612 | 
+| ap                                              | ap                                              | NULL             |     27 | 
+| argoneut                                        | argoneut                                        | NULL             |    547 | 
+| armino (nr)                                     | armino (nr)                                     | NULL             |    853 | 
+| aru0                                            | aru0                                            | NULL             |     28 | 
+| as                                              | as                                              | NULL             |     29 | 
+| as2 (nr)                                        | as2 (nr)                                        | NULL             |    485 | 
+| atlas                                           | atlas                                           | NULL             |     30 | 
+| atlas (nr)                                      | atlas (nr)                                      | NULL             |    199 | 
+| atlasprd                                        | atlasprd                                        | NULL             |     31 | 
+| atlassgm                                        | atlassgm                                        | NULL             |     32 | 
+| auger                                           | auger                                           | NULL             |     33 | 
+| auger                                           | auger                                           | auger            |     34 | 
+| auger (nr)                                      | auger (nr)                                      | NULL             |    417 | 
+| austriangrid                                    | austriangrid                                    | NULL             |     35 | 
+| aw (nr)                                         | aw (nr)                                         | NULL             |    778 | 
+| baru-tro (nr)                                   | baru-tro (nr)                                   | NULL             |    859 | 
+| batelaan (nr)                                   | batelaan (nr)                                   | NULL             |    254 | 
+| begrid                                          | begrid                                          | NULL             |     36 | 
+| belashchenko (nr)                               | belashchenko (nr)                               | NULL             |    247 | 
+| belle                                           | belle                                           | NULL             |    480 | 
+| bgs0 (nr)                                       | bgs0 (nr)                                       | NULL             |    623 | 
+| biocore (nr)                                    | biocore (nr)                                    | NULL             |    297 | 
+| biomed (nr)                                     | biomed (nr)                                     | NULL             |    245 | 
+| bjs (nr)                                        | bjs (nr)                                        | NULL             |    362 | 
+| blane                                           | blane                                           | NULL             |     37 | 
+| bmueller (nr)                                   | bmueller (nr)                                   | NULL             |    706 | 
+| bockelman (nr)                                  | bockelman (nr)                                  | NULL             |    808 | 
+| bsc-cns                                         | bsc-cns                                         | NULL             |     38 | 
+| bt (nr)                                         | bt (nr)                                         | NULL             |    580 | 
+| c670 (nr)                                       | c670 (nr)                                       | NULL             |    477 | 
+| camcs (nr)                                      | camcs (nr)                                      | NULL             |    206 | 
+| cdf                                             | cdf                                             | NULL             |     39 | 
+| cdf                                             | cdf                                             | cdf              |     40 | 
+| cdms                                            | cdms                                            | NULL             |     41 | 
+| cdms                                            | cdms                                            | cdms             |     42 | 
+| cern                                            | cern                                            | NULL             |     43 | 
+| cern                                            | cern                                            | cern             |     44 | 
+| chandra (nr)                                    | chandra (nr)                                    | NULL             |    256 | 
+| chem9                                           | chem9                                           | NULL             |     45 | 
+| chen                                            | chen                                            | NULL             |    187 | 
+| chen (nr)                                       | chen (nr)                                       | NULL             |    195 | 
+| choi (nr)                                       | choi (nr)                                       | NULL             |    394 | 
+| choueiry (nr)                                   | choueiry (nr)                                   | NULL             |    232 | 
+| ciemat                                          | ciemat                                          | NULL             |     46 | 
+| cigi                                            | cigi                                            | NULL             |     47 | 
+| ck (nr)                                         | ck (nr)                                         | NULL             |    478 | 
+| cmmap (nr)                                      | cmmap (nr)                                      | NULL             |    532 | 
+| cms                                             | cms                                             | NULL             |     48 | 
+| cms                                             | cms                                             | cms              |     49 | 
+| cms0 (nr)                                       | cms0 (nr)                                       | NULL             |    470 | 
+| cms1 (nr)                                       | cms1 (nr)                                       | NULL             |    468 | 
+| cms2 (nr)                                       | cms2 (nr)                                       | NULL             |    492 | 
+| compbiogrid                                     | compbiogrid                                     | NULL             |     50 | 
+| compbiogrid                                     | compbiogrid                                     | compbiogrid      |     51 | 
+| csci4440 (nr)                                   | csci4440 (nr)                                   | NULL             |    293 | 
+| cse435 (nr)                                     | cse435 (nr)                                     | NULL             |    814 | 
+| cse496 (nr)                                     | cse496 (nr)                                     | NULL             |    343 | 
+| cstaff (nr)                                     | cstaff (nr)                                     | NULL             |    821 | 
+| cweiss (nr)                                     | cweiss (nr)                                     | NULL             |    718 | 
+| cx32 (nr)                                       | cx32 (nr)                                       | NULL             |    857 | 
+| cyt701 (nr)                                     | cyt701 (nr)                                     | NULL             |    225 | 
+| danb (nr)                                       | danb (nr)                                       | NULL             |    632 | 
+| danielpark2 (nr)                                | danielpark2 (nr)                                | NULL             |    466 | 
+| datagrid-es                                     | datagrid-es                                     | NULL             |     52 | 
+| ddowney (nr)                                    | ddowney (nr)                                    | NULL             |    311 | 
+| dech (nr)                                       | dech (nr)                                       | NULL             |    465 | 
+| default (nr)                                    | default (nr)                                    | NULL             |    513 | 
+| des                                             | des                                             | NULL             |     53 | 
+| des                                             | des                                             | des              |     54 | 
+| dhinckley (nr)                                  | dhinckley (nr)                                  | NULL             |    604 | 
+| dhkim1                                          | dhkim1                                          | NULL             |     55 | 
+| dosar                                           | dosar                                           | NULL             |     56 | 
+| dosar                                           | dosar                                           | dosar            |     57 | 
+| dteam                                           | dteam                                           | NULL             |     58 | 
+| dteam                                           | dteam                                           | dteam            |     59 | 
+| dteam (nr)                                      | dteam (nr)                                      | NULL             |    203 | 
+| dteamprd                                        | dteamprd                                        | NULL             |     60 | 
+| ducharme (nr)                                   | ducharme (nr)                                   | NULL             |    283 | 
+| dyna (nr)                                       | dyna (nr)                                       | NULL             |    861 | 
+| dzenis (nr)                                     | dzenis (nr)                                     | NULL             |    308 | 
+| dzero                                           | dzero                                           | NULL             |     61 | 
+| dzero                                           | dzero                                           | dzero            |     62 | 
+| ecucs (nr)                                      | ecucs (nr)                                      | NULL             |    385 | 
+| el (nr)                                         | el (nr)                                         | NULL             |    780 | 
+| engage                                          | engage                                          | NULL             |     63 | 
+| engage                                          | engage                                          | engage           |     64 | 
+| engagement                                      | engagement                                      | NULL             |     65 | 
+| enmr (nr)                                       | enmr (nr)                                       | NULL             |    496 | 
+| epacg (nr)                                      | epacg (nr)                                      | NULL             |    610 | 
+| escience                                        | escience                                        | NULL             |     66 | 
+| evayi (nr)                                      | evayi (nr)                                      | NULL             |    498 | 
+| example (nr)                                    | example (nr)                                    | NULL             |    504 | 
+| external (nr)                                   | external (nr)                                   | NULL             |    570 | 
+| fabrikant (nr)                                  | fabrikant (nr)                                  | NULL             |    353 | 
+| fermilab                                        | fermilab                                        | NULL             |     67 | 
+| fermilab                                        | fermilab                                        | fermilab         |     68 | 
+| fermilab-test                                   | fermilab-test                                   | NULL             |     69 | 
+| fermilab-test (nr)                              | fermilab-test (nr)                              | NULL             |    219 | 
+| fgstore                                         | fgstore                                         | NULL             |    334 | 
+| fgstore (nr)                                    | fgstore (nr)                                    | NULL             |    215 | 
+| fgtest                                          | fgtest                                          | NULL             |    401 | 
+| fgtest (nr)                                     | fgtest (nr)                                     | NULL             |    295 | 
+| fmri                                            | fmri                                            | NULL             |     70 | 
+| fmri                                            | fmri                                            | fmri             |     71 | 
+| fox (nr)                                        | fox (nr)                                        | NULL             |    633 | 
+| furtney (nr)                                    | furtney (nr)                                    | NULL             |    262 | 
+| gabi (nr)                                       | gabi (nr)                                       | NULL             |    548 | 
+| gadu                                            | gadu                                            | NULL             |     72 | 
+| gadu                                            | gadu                                            | gadu             |     73 | 
+| gay (nr)                                        | gay (nr)                                        | NULL             |    318 | 
+| gcedu                                           | gcedu                                           | NULL             |    851 | 
+| gcvo                                            | gcvo                                            | NULL             |    847 | 
+| geant4                                          | geant4                                          | NULL             |     74 | 
+| geant4                                          | geant4                                          | geant4           |     75 | 
+| genec (nr)                                      | genec (nr)                                      | NULL             |    642 | 
+| germangrid                                      | germangrid                                      | NULL             |     76 | 
+| gilda (nr)                                      | gilda (nr)                                      | NULL             |    372 | 
+| gin.ggf.org                                     | gin.ggf.org                                     | NULL             |     77 | 
+| gin.ggf.org                                     | gin.ggf.org                                     | gin.ggf.org      |     78 | 
+| glideinwms (nr)                                 | glideinwms (nr)                                 | NULL             |    809 | 
+| glow                                            | glow                                            | NULL             |     79 | 
+| glow                                            | glow                                            | glow             |     80 | 
+| gluex                                           | gluex                                           | NULL             |    339 | 
+| gluex (nr)                                      | gluex (nr)                                      | NULL             |    335 | 
+| goddard (nr)                                    | goddard (nr)                                    | NULL             |    236 | 
+| gpn                                             | gpn                                             | NULL             |     81 | 
+| gpn                                             | gpn                                             | gpn              |     82 | 
+| grase                                           | grase                                           | NULL             |     83 | 
+| grase                                           | grase                                           | grase            |     84 | 
+| grid                                            | grid                                            | NULL             |     85 | 
+| grid (nr)                                       | grid (nr)                                       | NULL             |    794 | 
+| grid-fr                                         | grid-fr                                         | NULL             |     86 | 
+| grid14 (nr)                                     | grid14 (nr)                                     | NULL             |    788 | 
+| grid15 (nr)                                     | grid15 (nr)                                     | NULL             |    860 | 
+| grid16 (nr)                                     | grid16 (nr)                                     | NULL             |    795 | 
+| grid17 (nr)                                     | grid17 (nr)                                     | NULL             |    789 | 
+| gridex                                          | gridex                                          | NULL             |     87 | 
+| gridex                                          | gridex                                          | gridex           |     88 | 
+| gridex (nr)                                     | gridex (nr)                                     | NULL             |    213 | 
+| gridunesp                                       | gridunesp                                       | NULL             |    414 | 
+| grow                                            | grow                                            | NULL             |     89 | 
+| grow                                            | grow                                            | grow             |     90 | 
+| gthain (nr)                                     | gthain (nr)                                     | NULL             |    630 | 
+| harbison (nr)                                   | harbison (nr)                                   | NULL             |    267 | 
+| hcc                                             | hcc                                             | NULL             |    405 | 
+| hep                                             | hep                                             | NULL             |     91 | 
+| hep                                             | hep                                             | hep              |     92 | 
+| hguanhua (nr)                                   | hguanhua (nr)                                   | NULL             |    686 | 
+| ht (nr)                                         | ht (nr)                                         | NULL             |    757 | 
+| huang (nr)                                      | huang (nr)                                      | NULL             |    508 | 
+| huihui (nr)                                     | huihui (nr)                                     | NULL             |    758 | 
+| hypercp                                         | hypercp                                         | NULL             |     93 | 
+| hypercp                                         | hypercp                                         | hypercp          |     94 | 
+| iVDgL                                           | iVDgL                                           | NULL             |     95 | 
+| icbr                                            | icbr                                            | NULL             |    185 | 
+| icbr (nr)                                       | icbr (nr)                                       | NULL             |    197 | 
+| icecube                                         | icecube                                         | NULL             |    210 | 
+| idb (nr)                                        | idb (nr)                                        | NULL             |    233 | 
+| ifh1                                            | ifh1                                            | NULL             |     96 | 
+| ilc                                             | ilc                                             | NULL             |     97 | 
+| ilc                                             | ilc                                             | ilc              |     98 | 
+| ilc4c                                           | ilc4c                                           | NULL             |    333 | 
+| ilc4c (nr)                                      | ilc4c (nr)                                      | NULL             |    230 | 
+| ilddet                                          | ilddet                                          | NULL             |    361 | 
+| infn                                            | infn                                            | NULL             |     99 | 
+| infn                                            | infn                                            | infn             |    100 | 
+| ivdgl                                           | ivdgl                                           | NULL             |    101 | 
+| ivdgl                                           | ivdgl                                           | ivdgl            |    102 | 
+| ivdgl (nr)                                      | ivdgl (nr)                                      | NULL             |    204 | 
+| james                                           | james                                           | NULL             |    103 | 
+| jcd2                                            | jcd2                                            | NULL             |    104 | 
+| jchristianson (nr)                              | jchristianson (nr)                              | NULL             |    631 | 
+| jcyin (nr)                                      | jcyin (nr)                                      | NULL             |    456 | 
+| jd (nr)                                         | jd (nr)                                         | NULL             |    781 | 
+| jdem                                            | jdem                                            | NULL             |    214 | 
+| jen7                                            | jen7                                            | NULL             |    105 | 
+| jiang (nr)                                      | jiang (nr)                                      | NULL             |    259 | 
+| jjs (nr)                                        | jjs (nr)                                        | NULL             |    218 | 
+| jkong (nr)                                      | jkong (nr)                                      | NULL             |    855 | 
+| jl (nr)                                         | jl (nr)                                         | NULL             |    412 | 
+| jmb (nr)                                        | jmb (nr)                                        | NULL             |    584 | 
+| jmcdaniel (nr)                                  | jmcdaniel (nr)                                  | NULL             |    590 | 
+| jmondal (nr)                                    | jmondal (nr)                                    | NULL             |    591 | 
+| jms21 (nr)                                      | jms21 (nr)                                      | NULL             |    486 | 
+| johns (nr)                                      | johns (nr)                                      | NULL             |    220 | 
+| js (nr)                                         | js (nr)                                         | NULL             |    229 | 
+| k47k4 (nr)                                      | k47k4 (nr)                                      | NULL             |    511 | 
+| kfki rmki ca                                    | kfki rmki ca                                    | NULL             |    106 | 
+| kim                                             | kim                                             | NULL             |    107 | 
+| king (nr)                                       | king (nr)                                       | NULL             |    565 | 
+| km                                              | km                                              | NULL             |    108 | 
+| ktev                                            | ktev                                            | NULL             |    109 | 
+| ktev                                            | ktev                                            | ktev             |    110 | 
+| kuang (nr)                                      | kuang (nr)                                      | NULL             |    616 | 
+| lbne                                            | lbne                                            | NULL             |    439 | 
+| lee                                             | lee                                             | NULL             |    111 | 
+| lee                                             | lee                                             | lee              |    112 | 
+| lee (nr)                                        | lee (nr)                                        | NULL             |    520 | 
+| leiliz (nr)                                     | leiliz (nr)                                     | NULL             |    759 | 
+| lhaupert (nr)                                   | lhaupert (nr)                                   | NULL             |    746 | 
+| lhcb                                            | lhcb                                            | NULL             |    113 | 
+| lhcb                                            | lhcb                                            | lhcb             |    114 | 
+| lhcb (nr)                                       | lhcb (nr)                                       | NULL             |    194 | 
+| li (nr)                                         | li (nr)                                         | NULL             |    221 | 
+| ligo                                            | ligo                                            | NULL             |    115 | 
+| ligo                                            | ligo                                            | ligo             |    116 | 
+| ligy (nr)                                       | ligy (nr)                                       | NULL             |    415 | 
+| lin (nr)                                        | lin (nr)                                        | NULL             |    379 | 
+| lipca                                           | lipca                                           | NULL             |    117 | 
+| liu (nr)                                        | liu (nr)                                        | NULL             |    518 | 
+| llzhang (nr)                                    | llzhang (nr)                                    | NULL             |    620 | 
+| local (nr)                                      | local (nr)                                      | NULL             |    408 | 
+| loni_binding04 (nr)                             | loni_binding04 (nr)                             | NULL             |    423 | 
+| loni_cactus05 (nr)                              | loni_cactus05 (nr)                              | NULL             |    422 | 
+| loni_cavitands (nr)                             | loni_cavitands (nr)                             | NULL             |    420 | 
+| loni_coptah (nr)                                | loni_coptah (nr)                                | NULL             |    432 | 
+| loni_density003 (nr)                            | loni_density003 (nr)                            | NULL             |    428 | 
+| loni_hep_09 (nr)                                | loni_hep_09 (nr)                                | NULL             |    426 | 
+| loni_i3sim04 (nr)                               | loni_i3sim04 (nr)                               | NULL             |    421 | 
+| loni_jhabig09 (nr)                              | loni_jhabig09 (nr)                              | NULL             |    431 | 
+| loni_metrics_09 (nr)                            | loni_metrics_09 (nr)                            | NULL             |    427 | 
+| loni_qcp_dms09 (nr)                             | loni_qcp_dms09 (nr)                             | NULL             |    429 | 
+| loni_resonator3 (nr)                            | loni_resonator3 (nr)                            | NULL             |    434 | 
+| loni_rhall09_1 (nr)                             | loni_rhall09_1 (nr)                             | NULL             |    419 | 
+| lsl1 (nr)                                       | lsl1 (nr)                                       | NULL             |    462 | 
+| lslipche (nr)                                   | lslipche (nr)                                   | NULL             |    767 | 
+| lsst                                            | lsst                                            | NULL             |    398 | 
+| lwang (nr)                                      | lwang (nr)                                      | NULL             |    592 | 
+| m1248 (nr)                                      | m1248 (nr)                                      | NULL             |    709 | 
+| m670 (nr)                                       | m670 (nr)                                       | NULL             |    558 | 
+| manoj (nr)                                      | manoj (nr)                                      | NULL             |    593 | 
+| map                                             | map                                             | NULL             |    850 | 
+| map (nr)                                        | map (nr)                                        | NULL             |    495 | 
+| mariachi                                        | mariachi                                        | NULL             |    223 | 
+| matt (nr)                                       | matt (nr)                                       | NULL             |    461 | 
+| mb                                              | mb                                              | NULL             |    118 | 
+| mb (nr)                                         | mb (nr)                                         | NULL             |    201 | 
+| mech950 (nr)                                    | mech950 (nr)                                    | NULL             |    246 | 
+| mei (nr)                                        | mei (nr)                                        | NULL             |    286 | 
+| mh (nr)                                         | mh (nr)                                         | NULL             |    782 | 
+| mille (nr)                                      | mille (nr)                                      | NULL             |    289 | 
+| minerva                                         | minerva                                         | NULL             |    207 | 
+| miniboone                                       | miniboone                                       | NULL             |    119 | 
+| miniboone                                       | miniboone                                       | miniboone        |    120 | 
+| minos                                           | minos                                           | NULL             |    121 | 
+| mipp                                            | mipp                                            | NULL             |    122 | 
+| mipp (nr)                                       | mipp (nr)                                       | NULL             |    200 | 
+| mis                                             | mis                                             | NULL             |    123 | 
+| mis                                             | mis                                             | mis              |    124 | 
+| mit                                             | mit                                             | NULL             |    125 | 
+| mm                                              | mm                                              | NULL             |    126 | 
+| mm                                              | mm                                              | mm               |    127 | 
+| mpccc (nr)                                      | mpccc (nr)                                      | NULL             |    481 | 
+| mpi                                             | mpi                                             | NULL             |    128 | 
+| mrp9 (nr)                                       | mrp9 (nr)                                       | NULL             |    544 | 
+| mt5                                             | mt5                                             | NULL             |    129 | 
+| mu2e                                            | mu2e                                            | NULL             |    349 | 
+| nano011/16/2                                    | nano011/16/2                                    | NULL             |    191 | 
+| nanohub                                         | nanohub                                         | NULL             |    130 | 
+| nanohub                                         | nanohub                                         | nanohub          |    131 | 
+| national center for supercomputing applications | national center for supercomputing applications | NULL             |    132 | 
+| nebiogrid                                       | nebiogrid                                       | NULL             |    306 | 
+| nees                                            | nees                                            | NULL             |    560 | 
+| nickwu (nr)                                     | nickwu (nr)                                     | NULL             |    748 | 
+| nova                                            | nova                                            | NULL             |    384 | 
+| ntu                                             | ntu                                             | NULL             |    133 | 
+| numi                                            | numi                                            | NULL             |    190 | 
+| nwicg                                           | nwicg                                           | NULL             |    134 | 
+| nwicg                                           | nwicg                                           | nwicg            |    135 | 
+| nysgrid                                         | nysgrid                                         | NULL             |    136 | 
+| ocucs (nr)                                      | ocucs (nr)                                      | NULL             |    205 | 
+| oglesby (nr)                                    | oglesby (nr)                                    | NULL             |    312 | 
+| oiv_test1                                       | oiv_test1                                       | NULL             |    189 | 
+| ops                                             | ops                                             | NULL             |    137 | 
+| ops                                             | ops                                             | ops              |    138 | 
+| opssgm                                          | opssgm                                          | NULL             |    139 | 
+| osg                                             | osg                                             | NULL             |    140 | 
+| osg                                             | osg                                             | osg              |    141 | 
+| osgbabar00                                      | osgbabar00                                      | NULL             |    142 | 
+| osgbabar00 (nr)                                 | osgbabar00 (nr)                                 | NULL             |    403 | 
+| osgedu                                          | osgedu                                          | NULL             |    143 | 
+| osgedu                                          | osgedu                                          | osgedu           |    144 | 
+| osgu000 (nr)                                    | osgu000 (nr)                                    | NULL             |    628 | 
+| osgusatlas00                                    | osgusatlas00                                    | NULL             |    145 | 
+| other                                           | other                                           | NULL             |    146 | 
+| other EGEE                                      | other EGEE                                      | NULL             |    402 | 
+| ou2 (nr)                                        | ou2 (nr)                                        | NULL             |    418 | 
+| ouame (nr)                                      | ouame (nr)                                      | NULL             |    416 | 
+| pari (nr)                                       | pari (nr)                                       | NULL             |    572 | 
+| parii (nr)                                      | parii (nr)                                      | NULL             |    625 | 
+| park                                            | park                                            | NULL             |    147 | 
+| park                                            | park                                            | park             |    148 | 
+| patriot                                         | patriot                                         | NULL             |    149 | 
+| pegrid (nr)                                     | pegrid (nr)                                     | NULL             |    382 | 
+| pegrid0 (nr)                                    | pegrid0 (nr)                                    | NULL             |    222 | 
+| pgoyal (nr)                                     | pgoyal (nr)                                     | NULL             |    594 | 
+| ph                                              | ph                                              | NULL             |    150 | 
+| physmei (nr)                                    | physmei (nr)                                    | NULL             |    237 | 
+| pilatlas (nr)                                   | pilatlas (nr)                                   | NULL             |    545 | 
+| plukashev (nr)                                  | plukashev (nr)                                  | NULL             |    234 | 
+| pragma                                          | pragma                                          | NULL             |    151 | 
+| prdatlas (nr)                                   | prdatlas (nr)                                   | NULL             |    546 | 
+| purdue university                               | purdue university                               | NULL             |    152 | 
+| pxq (nr)                                        | pxq (nr)                                        | NULL             |    772 | 
+| qpei (nr)                                       | qpei (nr)                                       | NULL             |    581 | 
+| rdig                                            | rdig                                            | NULL             |    153 | 
+| reid (nr)                                       | reid (nr)                                       | NULL             |    260 | 
+| renci (nr)                                      | renci (nr)                                      | NULL             |    571 | 
+| rowe (nr)                                       | rowe (nr)                                       | NULL             |    238 | 
+| rsakidja (nr)                                   | rsakidja (nr)                                   | NULL             |    595 | 
+| rsv (nr)                                        | rsv (nr)                                        | NULL             |    292 | 
+| rsvuser (nr)                                    | rsvuser (nr)                                    | NULL             |    489 | 
+| sabirianov (nr)                                 | sabirianov (nr)                                 | NULL             |    355 | 
+| sabs (nr)                                       | sabs (nr)                                       | NULL             |    682 | 
+| sagrid (nr)                                     | sagrid (nr)                                     | NULL             |    457 | 
+| sahara (nr)                                     | sahara (nr)                                     | NULL             |    464 | 
+| saint (nr)                                      | saint (nr)                                      | NULL             |    460 | 
+| sbgrid                                          | sbgrid                                          | NULL             |    182 | 
+| sc (nr)                                         | sc (nr)                                         | NULL             |    479 | 
+| sc11 (nr)                                       | sc11 (nr)                                       | NULL             |    854 | 
+| scidac (nr)                                     | scidac (nr)                                     | NULL             |    506 | 
+| sdss                                            | sdss                                            | NULL             |    154 | 
+| sdss                                            | sdss                                            | sdss             |    155 | 
+| seneslab (nr)                                   | seneslab (nr)                                   | NULL             |    582 | 
+| sgmatlas (nr)                                   | sgmatlas (nr)                                   | NULL             |    454 | 
+| sgmenmr (nr)                                    | sgmenmr (nr)                                    | NULL             |    522 | 
+| sgmenmrcirmmp (nr)                              | sgmenmrcirmmp (nr)                              | NULL             |    531 | 
+| sgmsagrid (nr)                                  | sgmsagrid (nr)                                  | NULL             |    611 | 
+| shah (nr)                                       | shah (nr)                                       | NULL             |    497 | 
+| siddet                                          | siddet                                          | NULL             |    329 | 
+| siddet (nr)                                     | siddet (nr)                                     | NULL             |    251 | 
+| sipe0 (nr)                                      | sipe0 (nr)                                      | NULL             |    487 | 
+| sl (nr)                                         | sl (nr)                                         | NULL             |    783 | 
+| sm (nr)                                         | sm (nr)                                         | NULL             |    374 | 
+| soarbuild (nr)                                  | soarbuild (nr)                                  | NULL             |    606 | 
+| sp (nr)                                         | sp (nr)                                         | NULL             |    784 | 
+| sqzhu (nr)                                      | sqzhu (nr)                                      | NULL             |    749 | 
+| ss                                              | ss                                              | NULL             |    156 | 
+| ss                                              | ss                                              | ss               |    157 | 
+| star                                            | star                                            | NULL             |    158 | 
+| star                                            | star                                            | star             |    159 | 
+| sun                                             | sun                                             | NULL             |    160 | 
+| superbvo.org                                    | superbvo.org                                    | NULL             |    806 | 
+| superbvo.org (nr)                               | superbvo.org (nr)                               | NULL             |    400 | 
+| sura (nr)                                       | sura (nr)                                       | NULL             |    542 | 
+| sura0 (nr)                                      | sura0 (nr)                                      | NULL             |    774 | 
+| suragrid                                        | suragrid                                        | NULL             |    186 | 
+| suragrid (nr)                                   | suragrid (nr)                                   | NULL             |    192 | 
+| symp (nr)                                       | symp (nr)                                       | NULL             |    826 | 
+| theory                                          | theory                                          | NULL             |    188 | 
+| thomp (nr)                                      | thomp (nr)                                      | NULL             |    411 | 
+| tigre                                           | tigre                                           | NULL             |    161 | 
+| tigre (nr)                                      | tigre (nr)                                      | NULL             |    202 | 
+| tigrepool0                                      | tigrepool0                                      | NULL             |    162 | 
+| tmayeshi (nr)                                   | tmayeshi (nr)                                   | NULL             |    626 | 
+| trgrid                                          | trgrid                                          | NULL             |    163 | 
+| tubio (nr)                                      | tubio (nr)                                      | NULL             |    368 | 
+| turne (nr)                                      | turne (nr)                                      | NULL             |    529 | 
+| unknown                                         | unknown                                         | NULL             |    164 | 
+| uno (nr)                                        | uno (nr)                                        | NULL             |    284 | 
+| usatlas                                         | usatlas                                         | NULL             |    165 | 
+| usatlas                                         | usatlas                                         | usatlas          |    166 | 
+| uscms                                           | uscms                                           | NULL             |    167 | 
+| uscms                                           | uscms                                           | uscms            |    168 | 
+| uscms1 (nr)                                     | uscms1 (nr)                                     | NULL             |    208 | 
+| uscmsPool                                       | uscmsPool                                       | NULL             |    169 | 
+| uscmsPool                                       | uscmsPool                                       | uscmsPool        |    170 | 
+| uscmsPool (nr)                                  | uscmsPool (nr)                                  | NULL             |    239 | 
+| uscmsPool1                                      | uscmsPool1                                      | NULL             |    171 | 
+| uscmsPool1                                      | uscmsPool1                                      | uscmsPool1       |    172 | 
+| uscmsPool2 (nr)                                 | uscmsPool2 (nr)                                 | NULL             |    410 | 
+| uscmspool0                                      | uscmspool0                                      | NULL             |    173 | 
+| uscmspool0                                      | uscmspool0                                      | uscmspool0       |    174 | 
+| uscmspool2 (nr)                                 | uscmspool2 (nr)                                 | NULL             |    269 | 
+| users (nr)                                      | users (nr)                                      | NULL             |    817 | 
+| ux001                                           | ux001                                           | NULL             |    175 | 
+| vam                                             | vam                                             | NULL             |    176 | 
+| wang                                            | wang                                            | NULL             |    177 | 
+| wang                                            | wang                                            | wang             |    178 | 
+| webportal (nr)                                  | webportal (nr)                                  | NULL             |    586 | 
+| wenger (nr)                                     | wenger (nr)                                     | NULL             |    583 | 
+| wilso (nr)                                      | wilso (nr)                                      | NULL             |    476 | 
+| wood (nr)                                       | wood (nr)                                       | NULL             |    352 | 
+| wu (nr)                                         | wu (nr)                                         | NULL             |    224 | 
+| xzeng (nr)                                      | xzeng (nr)                                      | NULL             |    235 | 
+| xzhu (nr)                                       | xzhu (nr)                                       | NULL             |    596 | 
+| yang (nr)                                       | yang (nr)                                       | NULL             |    211 | 
+| yethiraj (nr)                                   | yethiraj (nr)                                   | NULL             |    597 | 
+| yijieli (nr)                                    | yijieli (nr)                                    | NULL             |    622 | 
+| yj7 (nr)                                        | yj7 (nr)                                        | NULL             |    800 | 
+| yru1 (nr)                                       | yru1 (nr)                                       | NULL             |    687 | 
+| yuguo1 (nr)                                     | yuguo1 (nr)                                     | NULL             |    510 | 
+| zeng (nr)                                       | zeng (nr)                                       | NULL             |    248 | 
+| zeus                                            | zeus                                            | NULL             |    179 | 
+| zeus                                            | zeus                                            | zeus             |    180 | 
+| zeus (nr)                                       | zeus (nr)                                       | NULL             |    193 | 
+| zhijun (nr)                                     | zhijun (nr)                                     | NULL             |    598 | 
+| zhou (nr)                                       | zhou (nr)                                       | NULL             |    444 | 
+| zorba (nr)                                      | zorba (nr)                                      | NULL             |    599 | 
+| zwu7 (nr)                                       | zwu7 (nr)                                       | NULL             |    669 | 
++-------------------------------------------------+-------------------------------------------------+------------------+--------+
+========================================================
+Query - VONameCorrection table entries not in VO.
+========================================================
+--------------
+SELECT 
+   VC.VOName as ProbeVO
+  ,VC.ReportableVOName
+  ,VC.corrid
+  ,VC.void
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.void not in (
+  SELECT distinct(void) FROM VO)
+order by 
+  ProbeVO       
+ ,VC.corrid
+ ,VC.void
+ ,ReportableVOName
+--------------
+
+========================================================
+Query - Used VONameCorrection table entries.
+========================================================
+--------------
+SELECT 
+  count(*) as nbr_of_entries
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.VOid = VO.VOid
+and (
+     VC.corrid in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+  )
+--------------
+
++----------------+
+| nbr_of_entries |
++----------------+
+|              0 | 
++----------------+
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VC.VOName as ProbeVO
+  ,VC.ReportableVOName
+  ,VC.corrid
+
+FROM
+   VONameCorrection VC
+  ,VO VO
+where 
+  VC.VOid = VO.VOid
+and (
+     VC.corrid in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+  or VC.corrid in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+  )
+order by 
+  GratiaVO
+ ,ProbeVO       
+ ,ReportableVOName
+ ,VC.corrid
+--------------
+
+--------------
+SELECT
+   CONCAT("DELETE FROM VONameCorrection WHERE corrid = ", a.corrid ,";")
+as delete_sql
+FROM
+ ( SELECT distinct(corrid)
+   FROM
+      VONameCorrection VC
+   where 
+       VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+ ) a
+order by delete_sql
+--------------
+
++--------------------------------------------------+
+| delete_sql                                       |
++--------------------------------------------------+
+| DELETE FROM VONameCorrection WHERE corrid = 100; | 
+| DELETE FROM VONameCorrection WHERE corrid = 101; | 
+| DELETE FROM VONameCorrection WHERE corrid = 102; | 
+| DELETE FROM VONameCorrection WHERE corrid = 103; | 
+| DELETE FROM VONameCorrection WHERE corrid = 104; | 
+| DELETE FROM VONameCorrection WHERE corrid = 105; | 
+| DELETE FROM VONameCorrection WHERE corrid = 106; | 
+| DELETE FROM VONameCorrection WHERE corrid = 107; | 
+| DELETE FROM VONameCorrection WHERE corrid = 108; | 
+| DELETE FROM VONameCorrection WHERE corrid = 109; | 
+| DELETE FROM VONameCorrection WHERE corrid = 10;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 110; | 
+| DELETE FROM VONameCorrection WHERE corrid = 111; | 
+| DELETE FROM VONameCorrection WHERE corrid = 112; | 
+| DELETE FROM VONameCorrection WHERE corrid = 113; | 
+| DELETE FROM VONameCorrection WHERE corrid = 114; | 
+| DELETE FROM VONameCorrection WHERE corrid = 115; | 
+| DELETE FROM VONameCorrection WHERE corrid = 116; | 
+| DELETE FROM VONameCorrection WHERE corrid = 117; | 
+| DELETE FROM VONameCorrection WHERE corrid = 118; | 
+| DELETE FROM VONameCorrection WHERE corrid = 119; | 
+| DELETE FROM VONameCorrection WHERE corrid = 11;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 120; | 
+| DELETE FROM VONameCorrection WHERE corrid = 121; | 
+| DELETE FROM VONameCorrection WHERE corrid = 122; | 
+| DELETE FROM VONameCorrection WHERE corrid = 123; | 
+| DELETE FROM VONameCorrection WHERE corrid = 124; | 
+| DELETE FROM VONameCorrection WHERE corrid = 125; | 
+| DELETE FROM VONameCorrection WHERE corrid = 126; | 
+| DELETE FROM VONameCorrection WHERE corrid = 127; | 
+| DELETE FROM VONameCorrection WHERE corrid = 128; | 
+| DELETE FROM VONameCorrection WHERE corrid = 129; | 
+| DELETE FROM VONameCorrection WHERE corrid = 12;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 130; | 
+| DELETE FROM VONameCorrection WHERE corrid = 131; | 
+| DELETE FROM VONameCorrection WHERE corrid = 132; | 
+| DELETE FROM VONameCorrection WHERE corrid = 133; | 
+| DELETE FROM VONameCorrection WHERE corrid = 134; | 
+| DELETE FROM VONameCorrection WHERE corrid = 135; | 
+| DELETE FROM VONameCorrection WHERE corrid = 136; | 
+| DELETE FROM VONameCorrection WHERE corrid = 137; | 
+| DELETE FROM VONameCorrection WHERE corrid = 138; | 
+| DELETE FROM VONameCorrection WHERE corrid = 139; | 
+| DELETE FROM VONameCorrection WHERE corrid = 13;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 140; | 
+| DELETE FROM VONameCorrection WHERE corrid = 141; | 
+| DELETE FROM VONameCorrection WHERE corrid = 142; | 
+| DELETE FROM VONameCorrection WHERE corrid = 143; | 
+| DELETE FROM VONameCorrection WHERE corrid = 144; | 
+| DELETE FROM VONameCorrection WHERE corrid = 145; | 
+| DELETE FROM VONameCorrection WHERE corrid = 146; | 
+| DELETE FROM VONameCorrection WHERE corrid = 147; | 
+| DELETE FROM VONameCorrection WHERE corrid = 148; | 
+| DELETE FROM VONameCorrection WHERE corrid = 149; | 
+| DELETE FROM VONameCorrection WHERE corrid = 14;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 150; | 
+| DELETE FROM VONameCorrection WHERE corrid = 151; | 
+| DELETE FROM VONameCorrection WHERE corrid = 152; | 
+| DELETE FROM VONameCorrection WHERE corrid = 153; | 
+| DELETE FROM VONameCorrection WHERE corrid = 154; | 
+| DELETE FROM VONameCorrection WHERE corrid = 155; | 
+| DELETE FROM VONameCorrection WHERE corrid = 156; | 
+| DELETE FROM VONameCorrection WHERE corrid = 157; | 
+| DELETE FROM VONameCorrection WHERE corrid = 158; | 
+| DELETE FROM VONameCorrection WHERE corrid = 159; | 
+| DELETE FROM VONameCorrection WHERE corrid = 15;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 160; | 
+| DELETE FROM VONameCorrection WHERE corrid = 161; | 
+| DELETE FROM VONameCorrection WHERE corrid = 162; | 
+| DELETE FROM VONameCorrection WHERE corrid = 163; | 
+| DELETE FROM VONameCorrection WHERE corrid = 164; | 
+| DELETE FROM VONameCorrection WHERE corrid = 165; | 
+| DELETE FROM VONameCorrection WHERE corrid = 166; | 
+| DELETE FROM VONameCorrection WHERE corrid = 167; | 
+| DELETE FROM VONameCorrection WHERE corrid = 168; | 
+| DELETE FROM VONameCorrection WHERE corrid = 169; | 
+| DELETE FROM VONameCorrection WHERE corrid = 16;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 170; | 
+| DELETE FROM VONameCorrection WHERE corrid = 171; | 
+| DELETE FROM VONameCorrection WHERE corrid = 172; | 
+| DELETE FROM VONameCorrection WHERE corrid = 173; | 
+| DELETE FROM VONameCorrection WHERE corrid = 174; | 
+| DELETE FROM VONameCorrection WHERE corrid = 175; | 
+| DELETE FROM VONameCorrection WHERE corrid = 176; | 
+| DELETE FROM VONameCorrection WHERE corrid = 177; | 
+| DELETE FROM VONameCorrection WHERE corrid = 178; | 
+| DELETE FROM VONameCorrection WHERE corrid = 179; | 
+| DELETE FROM VONameCorrection WHERE corrid = 17;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 180; | 
+| DELETE FROM VONameCorrection WHERE corrid = 181; | 
+| DELETE FROM VONameCorrection WHERE corrid = 182; | 
+| DELETE FROM VONameCorrection WHERE corrid = 183; | 
+| DELETE FROM VONameCorrection WHERE corrid = 184; | 
+| DELETE FROM VONameCorrection WHERE corrid = 185; | 
+| DELETE FROM VONameCorrection WHERE corrid = 186; | 
+| DELETE FROM VONameCorrection WHERE corrid = 187; | 
+| DELETE FROM VONameCorrection WHERE corrid = 188; | 
+| DELETE FROM VONameCorrection WHERE corrid = 189; | 
+| DELETE FROM VONameCorrection WHERE corrid = 18;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 190; | 
+| DELETE FROM VONameCorrection WHERE corrid = 191; | 
+| DELETE FROM VONameCorrection WHERE corrid = 192; | 
+| DELETE FROM VONameCorrection WHERE corrid = 193; | 
+| DELETE FROM VONameCorrection WHERE corrid = 194; | 
+| DELETE FROM VONameCorrection WHERE corrid = 195; | 
+| DELETE FROM VONameCorrection WHERE corrid = 196; | 
+| DELETE FROM VONameCorrection WHERE corrid = 197; | 
+| DELETE FROM VONameCorrection WHERE corrid = 198; | 
+| DELETE FROM VONameCorrection WHERE corrid = 199; | 
+| DELETE FROM VONameCorrection WHERE corrid = 19;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 1;   | 
+| DELETE FROM VONameCorrection WHERE corrid = 200; | 
+| DELETE FROM VONameCorrection WHERE corrid = 201; | 
+| DELETE FROM VONameCorrection WHERE corrid = 202; | 
+| DELETE FROM VONameCorrection WHERE corrid = 203; | 
+| DELETE FROM VONameCorrection WHERE corrid = 204; | 
+| DELETE FROM VONameCorrection WHERE corrid = 205; | 
+| DELETE FROM VONameCorrection WHERE corrid = 206; | 
+| DELETE FROM VONameCorrection WHERE corrid = 207; | 
+| DELETE FROM VONameCorrection WHERE corrid = 208; | 
+| DELETE FROM VONameCorrection WHERE corrid = 209; | 
+| DELETE FROM VONameCorrection WHERE corrid = 20;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 210; | 
+| DELETE FROM VONameCorrection WHERE corrid = 211; | 
+| DELETE FROM VONameCorrection WHERE corrid = 212; | 
+| DELETE FROM VONameCorrection WHERE corrid = 213; | 
+| DELETE FROM VONameCorrection WHERE corrid = 214; | 
+| DELETE FROM VONameCorrection WHERE corrid = 215; | 
+| DELETE FROM VONameCorrection WHERE corrid = 216; | 
+| DELETE FROM VONameCorrection WHERE corrid = 217; | 
+| DELETE FROM VONameCorrection WHERE corrid = 218; | 
+| DELETE FROM VONameCorrection WHERE corrid = 219; | 
+| DELETE FROM VONameCorrection WHERE corrid = 21;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 220; | 
+| DELETE FROM VONameCorrection WHERE corrid = 221; | 
+| DELETE FROM VONameCorrection WHERE corrid = 222; | 
+| DELETE FROM VONameCorrection WHERE corrid = 223; | 
+| DELETE FROM VONameCorrection WHERE corrid = 224; | 
+| DELETE FROM VONameCorrection WHERE corrid = 225; | 
+| DELETE FROM VONameCorrection WHERE corrid = 226; | 
+| DELETE FROM VONameCorrection WHERE corrid = 227; | 
+| DELETE FROM VONameCorrection WHERE corrid = 228; | 
+| DELETE FROM VONameCorrection WHERE corrid = 229; | 
+| DELETE FROM VONameCorrection WHERE corrid = 22;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 230; | 
+| DELETE FROM VONameCorrection WHERE corrid = 232; | 
+| DELETE FROM VONameCorrection WHERE corrid = 233; | 
+| DELETE FROM VONameCorrection WHERE corrid = 234; | 
+| DELETE FROM VONameCorrection WHERE corrid = 235; | 
+| DELETE FROM VONameCorrection WHERE corrid = 236; | 
+| DELETE FROM VONameCorrection WHERE corrid = 237; | 
+| DELETE FROM VONameCorrection WHERE corrid = 238; | 
+| DELETE FROM VONameCorrection WHERE corrid = 239; | 
+| DELETE FROM VONameCorrection WHERE corrid = 23;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 245; | 
+| DELETE FROM VONameCorrection WHERE corrid = 246; | 
+| DELETE FROM VONameCorrection WHERE corrid = 247; | 
+| DELETE FROM VONameCorrection WHERE corrid = 248; | 
+| DELETE FROM VONameCorrection WHERE corrid = 24;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 251; | 
+| DELETE FROM VONameCorrection WHERE corrid = 254; | 
+| DELETE FROM VONameCorrection WHERE corrid = 256; | 
+| DELETE FROM VONameCorrection WHERE corrid = 259; | 
+| DELETE FROM VONameCorrection WHERE corrid = 25;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 260; | 
+| DELETE FROM VONameCorrection WHERE corrid = 262; | 
+| DELETE FROM VONameCorrection WHERE corrid = 267; | 
+| DELETE FROM VONameCorrection WHERE corrid = 269; | 
+| DELETE FROM VONameCorrection WHERE corrid = 26;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 27;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 283; | 
+| DELETE FROM VONameCorrection WHERE corrid = 284; | 
+| DELETE FROM VONameCorrection WHERE corrid = 286; | 
+| DELETE FROM VONameCorrection WHERE corrid = 287; | 
+| DELETE FROM VONameCorrection WHERE corrid = 289; | 
+| DELETE FROM VONameCorrection WHERE corrid = 28;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 292; | 
+| DELETE FROM VONameCorrection WHERE corrid = 293; | 
+| DELETE FROM VONameCorrection WHERE corrid = 295; | 
+| DELETE FROM VONameCorrection WHERE corrid = 297; | 
+| DELETE FROM VONameCorrection WHERE corrid = 29;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 2;   | 
+| DELETE FROM VONameCorrection WHERE corrid = 306; | 
+| DELETE FROM VONameCorrection WHERE corrid = 308; | 
+| DELETE FROM VONameCorrection WHERE corrid = 30;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 311; | 
+| DELETE FROM VONameCorrection WHERE corrid = 312; | 
+| DELETE FROM VONameCorrection WHERE corrid = 318; | 
+| DELETE FROM VONameCorrection WHERE corrid = 31;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 324; | 
+| DELETE FROM VONameCorrection WHERE corrid = 329; | 
+| DELETE FROM VONameCorrection WHERE corrid = 32;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 333; | 
+| DELETE FROM VONameCorrection WHERE corrid = 334; | 
+| DELETE FROM VONameCorrection WHERE corrid = 335; | 
+| DELETE FROM VONameCorrection WHERE corrid = 339; | 
+| DELETE FROM VONameCorrection WHERE corrid = 33;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 343; | 
+| DELETE FROM VONameCorrection WHERE corrid = 349; | 
+| DELETE FROM VONameCorrection WHERE corrid = 34;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 352; | 
+| DELETE FROM VONameCorrection WHERE corrid = 353; | 
+| DELETE FROM VONameCorrection WHERE corrid = 355; | 
+| DELETE FROM VONameCorrection WHERE corrid = 35;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 361; | 
+| DELETE FROM VONameCorrection WHERE corrid = 362; | 
+| DELETE FROM VONameCorrection WHERE corrid = 368; | 
+| DELETE FROM VONameCorrection WHERE corrid = 36;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 372; | 
+| DELETE FROM VONameCorrection WHERE corrid = 374; | 
+| DELETE FROM VONameCorrection WHERE corrid = 375; | 
+| DELETE FROM VONameCorrection WHERE corrid = 379; | 
+| DELETE FROM VONameCorrection WHERE corrid = 37;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 380; | 
+| DELETE FROM VONameCorrection WHERE corrid = 382; | 
+| DELETE FROM VONameCorrection WHERE corrid = 383; | 
+| DELETE FROM VONameCorrection WHERE corrid = 384; | 
+| DELETE FROM VONameCorrection WHERE corrid = 385; | 
+| DELETE FROM VONameCorrection WHERE corrid = 387; | 
+| DELETE FROM VONameCorrection WHERE corrid = 38;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 393; | 
+| DELETE FROM VONameCorrection WHERE corrid = 394; | 
+| DELETE FROM VONameCorrection WHERE corrid = 398; | 
+| DELETE FROM VONameCorrection WHERE corrid = 39;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 3;   | 
+| DELETE FROM VONameCorrection WHERE corrid = 400; | 
+| DELETE FROM VONameCorrection WHERE corrid = 401; | 
+| DELETE FROM VONameCorrection WHERE corrid = 402; | 
+| DELETE FROM VONameCorrection WHERE corrid = 403; | 
+| DELETE FROM VONameCorrection WHERE corrid = 405; | 
+| DELETE FROM VONameCorrection WHERE corrid = 408; | 
+| DELETE FROM VONameCorrection WHERE corrid = 40;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 410; | 
+| DELETE FROM VONameCorrection WHERE corrid = 411; | 
+| DELETE FROM VONameCorrection WHERE corrid = 412; | 
+| DELETE FROM VONameCorrection WHERE corrid = 414; | 
+| DELETE FROM VONameCorrection WHERE corrid = 415; | 
+| DELETE FROM VONameCorrection WHERE corrid = 416; | 
+| DELETE FROM VONameCorrection WHERE corrid = 417; | 
+| DELETE FROM VONameCorrection WHERE corrid = 418; | 
+| DELETE FROM VONameCorrection WHERE corrid = 419; | 
+| DELETE FROM VONameCorrection WHERE corrid = 41;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 420; | 
+| DELETE FROM VONameCorrection WHERE corrid = 421; | 
+| DELETE FROM VONameCorrection WHERE corrid = 422; | 
+| DELETE FROM VONameCorrection WHERE corrid = 423; | 
+| DELETE FROM VONameCorrection WHERE corrid = 426; | 
+| DELETE FROM VONameCorrection WHERE corrid = 427; | 
+| DELETE FROM VONameCorrection WHERE corrid = 428; | 
+| DELETE FROM VONameCorrection WHERE corrid = 429; | 
+| DELETE FROM VONameCorrection WHERE corrid = 42;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 431; | 
+| DELETE FROM VONameCorrection WHERE corrid = 432; | 
+| DELETE FROM VONameCorrection WHERE corrid = 434; | 
+| DELETE FROM VONameCorrection WHERE corrid = 439; | 
+| DELETE FROM VONameCorrection WHERE corrid = 43;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 440; | 
+| DELETE FROM VONameCorrection WHERE corrid = 444; | 
+| DELETE FROM VONameCorrection WHERE corrid = 44;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 452; | 
+| DELETE FROM VONameCorrection WHERE corrid = 454; | 
+| DELETE FROM VONameCorrection WHERE corrid = 456; | 
+| DELETE FROM VONameCorrection WHERE corrid = 457; | 
+| DELETE FROM VONameCorrection WHERE corrid = 45;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 460; | 
+| DELETE FROM VONameCorrection WHERE corrid = 461; | 
+| DELETE FROM VONameCorrection WHERE corrid = 462; | 
+| DELETE FROM VONameCorrection WHERE corrid = 464; | 
+| DELETE FROM VONameCorrection WHERE corrid = 465; | 
+| DELETE FROM VONameCorrection WHERE corrid = 466; | 
+| DELETE FROM VONameCorrection WHERE corrid = 468; | 
+| DELETE FROM VONameCorrection WHERE corrid = 46;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 470; | 
+| DELETE FROM VONameCorrection WHERE corrid = 476; | 
+| DELETE FROM VONameCorrection WHERE corrid = 477; | 
+| DELETE FROM VONameCorrection WHERE corrid = 478; | 
+| DELETE FROM VONameCorrection WHERE corrid = 479; | 
+| DELETE FROM VONameCorrection WHERE corrid = 47;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 480; | 
+| DELETE FROM VONameCorrection WHERE corrid = 481; | 
+| DELETE FROM VONameCorrection WHERE corrid = 485; | 
+| DELETE FROM VONameCorrection WHERE corrid = 486; | 
+| DELETE FROM VONameCorrection WHERE corrid = 487; | 
+| DELETE FROM VONameCorrection WHERE corrid = 488; | 
+| DELETE FROM VONameCorrection WHERE corrid = 489; | 
+| DELETE FROM VONameCorrection WHERE corrid = 48;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 492; | 
+| DELETE FROM VONameCorrection WHERE corrid = 495; | 
+| DELETE FROM VONameCorrection WHERE corrid = 496; | 
+| DELETE FROM VONameCorrection WHERE corrid = 497; | 
+| DELETE FROM VONameCorrection WHERE corrid = 498; | 
+| DELETE FROM VONameCorrection WHERE corrid = 49;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 4;   | 
+| DELETE FROM VONameCorrection WHERE corrid = 504; | 
+| DELETE FROM VONameCorrection WHERE corrid = 506; | 
+| DELETE FROM VONameCorrection WHERE corrid = 508; | 
+| DELETE FROM VONameCorrection WHERE corrid = 50;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 510; | 
+| DELETE FROM VONameCorrection WHERE corrid = 511; | 
+| DELETE FROM VONameCorrection WHERE corrid = 513; | 
+| DELETE FROM VONameCorrection WHERE corrid = 518; | 
+| DELETE FROM VONameCorrection WHERE corrid = 51;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 520; | 
+| DELETE FROM VONameCorrection WHERE corrid = 522; | 
+| DELETE FROM VONameCorrection WHERE corrid = 529; | 
+| DELETE FROM VONameCorrection WHERE corrid = 52;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 531; | 
+| DELETE FROM VONameCorrection WHERE corrid = 532; | 
+| DELETE FROM VONameCorrection WHERE corrid = 53;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 542; | 
+| DELETE FROM VONameCorrection WHERE corrid = 544; | 
+| DELETE FROM VONameCorrection WHERE corrid = 545; | 
+| DELETE FROM VONameCorrection WHERE corrid = 546; | 
+| DELETE FROM VONameCorrection WHERE corrid = 547; | 
+| DELETE FROM VONameCorrection WHERE corrid = 548; | 
+| DELETE FROM VONameCorrection WHERE corrid = 54;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 558; | 
+| DELETE FROM VONameCorrection WHERE corrid = 55;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 560; | 
+| DELETE FROM VONameCorrection WHERE corrid = 565; | 
+| DELETE FROM VONameCorrection WHERE corrid = 56;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 570; | 
+| DELETE FROM VONameCorrection WHERE corrid = 571; | 
+| DELETE FROM VONameCorrection WHERE corrid = 572; | 
+| DELETE FROM VONameCorrection WHERE corrid = 57;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 580; | 
+| DELETE FROM VONameCorrection WHERE corrid = 581; | 
+| DELETE FROM VONameCorrection WHERE corrid = 582; | 
+| DELETE FROM VONameCorrection WHERE corrid = 583; | 
+| DELETE FROM VONameCorrection WHERE corrid = 584; | 
+| DELETE FROM VONameCorrection WHERE corrid = 586; | 
+| DELETE FROM VONameCorrection WHERE corrid = 58;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 590; | 
+| DELETE FROM VONameCorrection WHERE corrid = 591; | 
+| DELETE FROM VONameCorrection WHERE corrid = 592; | 
+| DELETE FROM VONameCorrection WHERE corrid = 593; | 
+| DELETE FROM VONameCorrection WHERE corrid = 594; | 
+| DELETE FROM VONameCorrection WHERE corrid = 595; | 
+| DELETE FROM VONameCorrection WHERE corrid = 596; | 
+| DELETE FROM VONameCorrection WHERE corrid = 597; | 
+| DELETE FROM VONameCorrection WHERE corrid = 598; | 
+| DELETE FROM VONameCorrection WHERE corrid = 599; | 
+| DELETE FROM VONameCorrection WHERE corrid = 59;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 5;   | 
+| DELETE FROM VONameCorrection WHERE corrid = 604; | 
+| DELETE FROM VONameCorrection WHERE corrid = 606; | 
+| DELETE FROM VONameCorrection WHERE corrid = 609; | 
+| DELETE FROM VONameCorrection WHERE corrid = 60;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 610; | 
+| DELETE FROM VONameCorrection WHERE corrid = 611; | 
+| DELETE FROM VONameCorrection WHERE corrid = 612; | 
+| DELETE FROM VONameCorrection WHERE corrid = 616; | 
+| DELETE FROM VONameCorrection WHERE corrid = 61;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 620; | 
+| DELETE FROM VONameCorrection WHERE corrid = 622; | 
+| DELETE FROM VONameCorrection WHERE corrid = 623; | 
+| DELETE FROM VONameCorrection WHERE corrid = 625; | 
+| DELETE FROM VONameCorrection WHERE corrid = 626; | 
+| DELETE FROM VONameCorrection WHERE corrid = 628; | 
+| DELETE FROM VONameCorrection WHERE corrid = 62;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 630; | 
+| DELETE FROM VONameCorrection WHERE corrid = 631; | 
+| DELETE FROM VONameCorrection WHERE corrid = 632; | 
+| DELETE FROM VONameCorrection WHERE corrid = 633; | 
+| DELETE FROM VONameCorrection WHERE corrid = 63;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 642; | 
+| DELETE FROM VONameCorrection WHERE corrid = 644; | 
+| DELETE FROM VONameCorrection WHERE corrid = 646; | 
+| DELETE FROM VONameCorrection WHERE corrid = 647; | 
+| DELETE FROM VONameCorrection WHERE corrid = 649; | 
+| DELETE FROM VONameCorrection WHERE corrid = 64;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 650; | 
+| DELETE FROM VONameCorrection WHERE corrid = 652; | 
+| DELETE FROM VONameCorrection WHERE corrid = 653; | 
+| DELETE FROM VONameCorrection WHERE corrid = 654; | 
+| DELETE FROM VONameCorrection WHERE corrid = 657; | 
+| DELETE FROM VONameCorrection WHERE corrid = 658; | 
+| DELETE FROM VONameCorrection WHERE corrid = 659; | 
+| DELETE FROM VONameCorrection WHERE corrid = 65;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 661; | 
+| DELETE FROM VONameCorrection WHERE corrid = 662; | 
+| DELETE FROM VONameCorrection WHERE corrid = 663; | 
+| DELETE FROM VONameCorrection WHERE corrid = 664; | 
+| DELETE FROM VONameCorrection WHERE corrid = 665; | 
+| DELETE FROM VONameCorrection WHERE corrid = 669; | 
+| DELETE FROM VONameCorrection WHERE corrid = 66;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 671; | 
+| DELETE FROM VONameCorrection WHERE corrid = 673; | 
+| DELETE FROM VONameCorrection WHERE corrid = 674; | 
+| DELETE FROM VONameCorrection WHERE corrid = 675; | 
+| DELETE FROM VONameCorrection WHERE corrid = 676; | 
+| DELETE FROM VONameCorrection WHERE corrid = 677; | 
+| DELETE FROM VONameCorrection WHERE corrid = 678; | 
+| DELETE FROM VONameCorrection WHERE corrid = 67;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 682; | 
+| DELETE FROM VONameCorrection WHERE corrid = 683; | 
+| DELETE FROM VONameCorrection WHERE corrid = 685; | 
+| DELETE FROM VONameCorrection WHERE corrid = 686; | 
+| DELETE FROM VONameCorrection WHERE corrid = 687; | 
+| DELETE FROM VONameCorrection WHERE corrid = 689; | 
+| DELETE FROM VONameCorrection WHERE corrid = 68;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 693; | 
+| DELETE FROM VONameCorrection WHERE corrid = 695; | 
+| DELETE FROM VONameCorrection WHERE corrid = 69;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 6;   | 
+| DELETE FROM VONameCorrection WHERE corrid = 701; | 
+| DELETE FROM VONameCorrection WHERE corrid = 702; | 
+| DELETE FROM VONameCorrection WHERE corrid = 703; | 
+| DELETE FROM VONameCorrection WHERE corrid = 706; | 
+| DELETE FROM VONameCorrection WHERE corrid = 709; | 
+| DELETE FROM VONameCorrection WHERE corrid = 70;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 715; | 
+| DELETE FROM VONameCorrection WHERE corrid = 718; | 
+| DELETE FROM VONameCorrection WHERE corrid = 719; | 
+| DELETE FROM VONameCorrection WHERE corrid = 71;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 720; | 
+| DELETE FROM VONameCorrection WHERE corrid = 722; | 
+| DELETE FROM VONameCorrection WHERE corrid = 727; | 
+| DELETE FROM VONameCorrection WHERE corrid = 72;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 730; | 
+| DELETE FROM VONameCorrection WHERE corrid = 732; | 
+| DELETE FROM VONameCorrection WHERE corrid = 736; | 
+| DELETE FROM VONameCorrection WHERE corrid = 738; | 
+| DELETE FROM VONameCorrection WHERE corrid = 73;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 741; | 
+| DELETE FROM VONameCorrection WHERE corrid = 744; | 
+| DELETE FROM VONameCorrection WHERE corrid = 746; | 
+| DELETE FROM VONameCorrection WHERE corrid = 748; | 
+| DELETE FROM VONameCorrection WHERE corrid = 749; | 
+| DELETE FROM VONameCorrection WHERE corrid = 74;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 757; | 
+| DELETE FROM VONameCorrection WHERE corrid = 758; | 
+| DELETE FROM VONameCorrection WHERE corrid = 759; | 
+| DELETE FROM VONameCorrection WHERE corrid = 75;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 761; | 
+| DELETE FROM VONameCorrection WHERE corrid = 764; | 
+| DELETE FROM VONameCorrection WHERE corrid = 765; | 
+| DELETE FROM VONameCorrection WHERE corrid = 766; | 
+| DELETE FROM VONameCorrection WHERE corrid = 767; | 
+| DELETE FROM VONameCorrection WHERE corrid = 769; | 
+| DELETE FROM VONameCorrection WHERE corrid = 76;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 770; | 
+| DELETE FROM VONameCorrection WHERE corrid = 772; | 
+| DELETE FROM VONameCorrection WHERE corrid = 773; | 
+| DELETE FROM VONameCorrection WHERE corrid = 774; | 
+| DELETE FROM VONameCorrection WHERE corrid = 775; | 
+| DELETE FROM VONameCorrection WHERE corrid = 776; | 
+| DELETE FROM VONameCorrection WHERE corrid = 777; | 
+| DELETE FROM VONameCorrection WHERE corrid = 778; | 
+| DELETE FROM VONameCorrection WHERE corrid = 77;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 780; | 
+| DELETE FROM VONameCorrection WHERE corrid = 781; | 
+| DELETE FROM VONameCorrection WHERE corrid = 782; | 
+| DELETE FROM VONameCorrection WHERE corrid = 783; | 
+| DELETE FROM VONameCorrection WHERE corrid = 784; | 
+| DELETE FROM VONameCorrection WHERE corrid = 787; | 
+| DELETE FROM VONameCorrection WHERE corrid = 788; | 
+| DELETE FROM VONameCorrection WHERE corrid = 789; | 
+| DELETE FROM VONameCorrection WHERE corrid = 78;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 794; | 
+| DELETE FROM VONameCorrection WHERE corrid = 795; | 
+| DELETE FROM VONameCorrection WHERE corrid = 796; | 
+| DELETE FROM VONameCorrection WHERE corrid = 79;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 7;   | 
+| DELETE FROM VONameCorrection WHERE corrid = 800; | 
+| DELETE FROM VONameCorrection WHERE corrid = 806; | 
+| DELETE FROM VONameCorrection WHERE corrid = 808; | 
+| DELETE FROM VONameCorrection WHERE corrid = 809; | 
+| DELETE FROM VONameCorrection WHERE corrid = 80;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 814; | 
+| DELETE FROM VONameCorrection WHERE corrid = 817; | 
+| DELETE FROM VONameCorrection WHERE corrid = 81;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 821; | 
+| DELETE FROM VONameCorrection WHERE corrid = 826; | 
+| DELETE FROM VONameCorrection WHERE corrid = 82;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 833; | 
+| DELETE FROM VONameCorrection WHERE corrid = 83;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 847; | 
+| DELETE FROM VONameCorrection WHERE corrid = 84;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 850; | 
+| DELETE FROM VONameCorrection WHERE corrid = 851; | 
+| DELETE FROM VONameCorrection WHERE corrid = 853; | 
+| DELETE FROM VONameCorrection WHERE corrid = 854; | 
+| DELETE FROM VONameCorrection WHERE corrid = 855; | 
+| DELETE FROM VONameCorrection WHERE corrid = 856; | 
+| DELETE FROM VONameCorrection WHERE corrid = 857; | 
+| DELETE FROM VONameCorrection WHERE corrid = 859; | 
+| DELETE FROM VONameCorrection WHERE corrid = 85;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 860; | 
+| DELETE FROM VONameCorrection WHERE corrid = 861; | 
+| DELETE FROM VONameCorrection WHERE corrid = 86;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 87;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 88;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 89;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 8;   | 
+| DELETE FROM VONameCorrection WHERE corrid = 90;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 91;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 92;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 93;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 94;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 95;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 96;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 97;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 98;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 99;  | 
+| DELETE FROM VONameCorrection WHERE corrid = 9;   | 
++--------------------------------------------------+
+--------------
+SELECT *
+FROM VONameCorrection
+WHERE corrid in
+ ( SELECT distinct(corrid)
+   FROM
+      VONameCorrection VC
+   where 
+       VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterSummaryData)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummaryHourly)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
+   and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
+ )
+--------------
+
++--------+-------------------------------------------------+------------------+------+
+| corrid | VOName                                          | ReportableVOName | VOid |
++--------+-------------------------------------------------+------------------+------+
+|      1 | /cdf/Role=NULL/Capability=NULL                  | NULL             |  206 | 
+|      2 | /cdf/glidecaf/Role=namcaf/Capability=NULL       | NULL             |  207 | 
+|      3 | 1178843                                         | NULL             |   79 | 
+|      4 | 1180053                                         | NULL             |   80 | 
+|      5 | 1183335                                         | NULL             |   81 | 
+|      6 | 1189588                                         | NULL             |  175 | 
+|      7 | 1198495                                         | NULL             |  193 | 
+|      8 | 1202574                                         | NULL             |  198 | 
+|      9 | 1203635                                         | NULL             |  204 | 
+|     10 | 1204018                                         | NULL             |  205 | 
+|     11 | 492                                             | NULL             |   82 | 
+|     12 | 568                                             | NULL             |  169 | 
+|     13 | ATLAS                                           | NULL             |   83 | 
+|     14 | CMS                                             | NULL             |   84 | 
+|     15 | CompBioGrid                                     | NULL             |   85 | 
+|     16 | DOSAR                                           | NULL             |   86 | 
+|     17 | DZero                                           | NULL             |   87 | 
+|     18 | Engage                                          | NULL             |   88 | 
+|     19 | Engage                                          | Engage           |   88 | 
+|     20 | GLOW                                            | NULL             |   89 | 
+|     21 | GridEx                                          | NULL             |   90 | 
+|     22 | LIGO                                            | NULL             |   91 | 
+|     23 | MIS                                             | NULL             |   92 | 
+|     24 | Other                                           | NULL             |  194 | 
+|     25 | Unknown                                         | NULL             |   93 | 
+|     26 | Unknown                                         | Unknown          |   93 | 
+|     27 | ap                                              | NULL             |  178 | 
+|     28 | aru0                                            | NULL             |  171 | 
+|     29 | as                                              | NULL             |  195 | 
+|     30 | atlas                                           | NULL             |  185 | 
+|     31 | atlasprd                                        | NULL             |  189 | 
+|     32 | atlassgm                                        | NULL             |  186 | 
+|     33 | auger                                           | NULL             |   94 | 
+|     34 | auger                                           | auger            |   94 | 
+|     35 | austriangrid                                    | NULL             |   95 | 
+|     36 | begrid                                          | NULL             |   96 | 
+|     37 | blane                                           | NULL             |  170 | 
+|     38 | bsc-cns                                         | NULL             |  200 | 
+|     39 | cdf                                             | NULL             |   97 | 
+|     40 | cdf                                             | cdf              |   97 | 
+|     41 | cdms                                            | NULL             |   98 | 
+|     42 | cdms                                            | cdms             |   98 | 
+|     43 | cern                                            | NULL             |   99 | 
+|     44 | cern                                            | cern             |   99 | 
+|     45 | chem9                                           | NULL             |  184 | 
+|     46 | ciemat                                          | NULL             |  100 | 
+|     47 | cigi                                            | NULL             |  191 | 
+|     48 | cms                                             | NULL             |  101 | 
+|     49 | cms                                             | cms              |  101 | 
+|     50 | compbiogrid                                     | NULL             |  102 | 
+|     51 | compbiogrid                                     | compbiogrid      |  102 | 
+|     52 | datagrid-es                                     | NULL             |  103 | 
+|     53 | des                                             | NULL             |  104 | 
+|     54 | des                                             | des              |  104 | 
+|     55 | dhkim1                                          | NULL             |  199 | 
+|     56 | dosar                                           | NULL             |  105 | 
+|     57 | dosar                                           | dosar            |  105 | 
+|     58 | dteam                                           | NULL             |  106 | 
+|     59 | dteam                                           | dteam            |  106 | 
+|     60 | dteamprd                                        | NULL             |  188 | 
+|     61 | dzero                                           | NULL             |  107 | 
+|     62 | dzero                                           | dzero            |  107 | 
+|     63 | engage                                          | NULL             |  108 | 
+|     64 | engage                                          | engage           |  108 | 
+|     65 | engagement                                      | NULL             |  109 | 
+|     66 | escience                                        | NULL             |  110 | 
+|     67 | fermilab                                        | NULL             |  111 | 
+|     68 | fermilab                                        | fermilab         |  111 | 
+|     69 | fermilab-test                                   | NULL             |  112 | 
+|     70 | fmri                                            | NULL             |  167 | 
+|     71 | fmri                                            | fmri             |  167 | 
+|     72 | gadu                                            | NULL             |  113 | 
+|     73 | gadu                                            | gadu             |  113 | 
+|     74 | geant4                                          | NULL             |  114 | 
+|     75 | geant4                                          | geant4           |  114 | 
+|     76 | germangrid                                      | NULL             |  115 | 
+|     77 | gin.ggf.org                                     | NULL             |  116 | 
+|     78 | gin.ggf.org                                     | gin.ggf.org      |  116 | 
+|     79 | glow                                            | NULL             |  117 | 
+|     80 | glow                                            | glow             |  117 | 
+|     81 | gpn                                             | NULL             |  118 | 
+|     82 | gpn                                             | gpn              |  118 | 
+|     83 | grase                                           | NULL             |  119 | 
+|     84 | grase                                           | grase            |  119 | 
+|     85 | grid                                            | NULL             |  120 | 
+|     86 | grid-fr                                         | NULL             |  121 | 
+|     87 | gridex                                          | NULL             |  122 | 
+|     88 | gridex                                          | gridex           |  122 | 
+|     89 | grow                                            | NULL             |  123 | 
+|     90 | grow                                            | grow             |  123 | 
+|     91 | hep                                             | NULL             |  124 | 
+|     92 | hep                                             | hep              |  124 | 
+|     93 | hypercp                                         | NULL             |  125 | 
+|     94 | hypercp                                         | hypercp          |  125 | 
+|     95 | iVDgL                                           | NULL             |  126 | 
+|     96 | ifh1                                            | NULL             |  181 | 
+|     97 | ilc                                             | NULL             |  127 | 
+|     98 | ilc                                             | ilc              |  127 | 
+|     99 | infn                                            | NULL             |  128 | 
+|    100 | infn                                            | infn             |  128 | 
+|    101 | ivdgl                                           | NULL             |  129 | 
+|    102 | ivdgl                                           | ivdgl            |  129 | 
+|    103 | james                                           | NULL             |  179 | 
+|    104 | jcd2                                            | NULL             |  196 | 
+|    105 | jen7                                            | NULL             |  183 | 
+|    106 | kfki rmki ca                                    | NULL             |  130 | 
+|    107 | kim                                             | NULL             |  173 | 
+|    108 | km                                              | NULL             |  131 | 
+|    109 | ktev                                            | NULL             |  132 | 
+|    110 | ktev                                            | ktev             |  132 | 
+|    111 | lee                                             | NULL             |  133 | 
+|    112 | lee                                             | lee              |  133 | 
+|    113 | lhcb                                            | NULL             |  134 | 
+|    114 | lhcb                                            | lhcb             |  134 | 
+|    115 | ligo                                            | NULL             |  135 | 
+|    116 | ligo                                            | ligo             |  135 | 
+|    117 | lipca                                           | NULL             |  136 | 
+|    118 | mb                                              | NULL             |  203 | 
+|    119 | miniboone                                       | NULL             |  137 | 
+|    120 | miniboone                                       | miniboone        |  137 | 
+|    121 | minos                                           | NULL             |  138 | 
+|    122 | mipp                                            | NULL             |  139 | 
+|    123 | mis                                             | NULL             |  140 | 
+|    124 | mis                                             | mis              |  140 | 
+|    125 | mit                                             | NULL             |  172 | 
+|    126 | mm                                              | NULL             |  141 | 
+|    127 | mm                                              | mm               |  141 | 
+|    128 | mpi                                             | NULL             |  180 | 
+|    129 | mt5                                             | NULL             |  177 | 
+|    130 | nanohub                                         | NULL             |  142 | 
+|    131 | nanohub                                         | nanohub          |  142 | 
+|    132 | national center for supercomputing applications | NULL             |  143 | 
+|    133 | ntu                                             | NULL             |  144 | 
+|    134 | nwicg                                           | NULL             |  145 | 
+|    135 | nwicg                                           | nwicg            |  145 | 
+|    136 | nysgrid                                         | NULL             |  190 | 
+|    137 | ops                                             | NULL             |  146 | 
+|    138 | ops                                             | ops              |  146 | 
+|    139 | opssgm                                          | NULL             |  187 | 
+|    140 | osg                                             | NULL             |  147 | 
+|    141 | osg                                             | osg              |  147 | 
+|    142 | osgbabar00                                      | NULL             |  176 | 
+|    143 | osgedu                                          | NULL             |  148 | 
+|    144 | osgedu                                          | osgedu           |  148 | 
+|    145 | osgusatlas00                                    | NULL             |  174 | 
+|    146 | other                                           | NULL             |  202 | 
+|    147 | park                                            | NULL             |  149 | 
+|    148 | park                                            | park             |  149 | 
+|    149 | patriot                                         | NULL             |  150 | 
+|    150 | ph                                              | NULL             |  151 | 
+|    151 | pragma                                          | NULL             |  152 | 
+|    152 | purdue university                               | NULL             |  153 | 
+|    153 | rdig                                            | NULL             |  154 | 
+|    154 | sdss                                            | NULL             |  155 | 
+|    155 | sdss                                            | sdss             |  155 | 
+|    156 | ss                                              | NULL             |  156 | 
+|    157 | ss                                              | ss               |  156 | 
+|    158 | star                                            | NULL             |  157 | 
+|    159 | star                                            | star             |  157 | 
+|    160 | sun                                             | NULL             |  158 | 
+|    161 | tigre                                           | NULL             |  182 | 
+|    162 | tigrepool0                                      | NULL             |  168 | 
+|    163 | trgrid                                          | NULL             |  197 | 
+|    164 | unknown                                         | NULL             |  201 | 
+|    165 | usatlas                                         | NULL             |  159 | 
+|    166 | usatlas                                         | usatlas          |  159 | 
+|    167 | uscms                                           | NULL             |  160 | 
+|    168 | uscms                                           | uscms            |  160 | 
+|    169 | uscmsPool                                       | NULL             |  161 | 
+|    170 | uscmsPool                                       | uscmsPool        |  161 | 
+|    171 | uscmsPool1                                      | NULL             |  162 | 
+|    172 | uscmsPool1                                      | uscmsPool1       |  162 | 
+|    173 | uscmspool0                                      | NULL             |  163 | 
+|    174 | uscmspool0                                      | uscmspool0       |  163 | 
+|    175 | ux001                                           | NULL             |  164 | 
+|    176 | vam                                             | NULL             |  192 | 
+|    177 | wang                                            | NULL             |  165 | 
+|    178 | wang                                            | wang             |  165 | 
+|    179 | zeus                                            | NULL             |  166 | 
+|    180 | zeus                                            | zeus             |  166 | 
+|    181 | accelerator                                     | NULL             |  208 | 
+|    182 | sbgrid                                          | NULL             |  209 | 
+|    183 | RSV                                             | NULL             |  210 | 
+|    184 | aceace                                          | NULL             |  211 | 
+|    185 | icbr                                            | NULL             |  212 | 
+|    186 | suragrid                                        | NULL             |  213 | 
+|    187 | chen                                            | NULL             |  214 | 
+|    188 | theory                                          | NULL             |  215 | 
+|    189 | oiv_test1                                       | NULL             |  216 | 
+|    190 | numi                                            | NULL             |  217 | 
+|    191 | nano011/16/2                                    | NULL             |  218 | 
+|    192 | suragrid (nr)                                   | NULL             |  219 | 
+|    193 | zeus (nr)                                       | NULL             |  220 | 
+|    194 | lhcb (nr)                                       | NULL             |  221 | 
+|    195 | chen (nr)                                       | NULL             |  222 | 
+|    196 | RSV (nr)                                        | NULL             |  223 | 
+|    197 | icbr (nr)                                       | NULL             |  224 | 
+|    198 | aceace (nr)                                     | NULL             |  225 | 
+|    199 | atlas (nr)                                      | NULL             |  226 | 
+|    200 | mipp (nr)                                       | NULL             |  227 | 
+|    201 | mb (nr)                                         | NULL             |  228 | 
+|    202 | tigre (nr)                                      | NULL             |  229 | 
+|    203 | dteam (nr)                                      | NULL             |  230 | 
+|    204 | ivdgl (nr)                                      | NULL             |  231 | 
+|    205 | ocucs (nr)                                      | NULL             |  232 | 
+|    206 | camcs (nr)                                      | NULL             |  233 | 
+|    207 | minerva                                         | NULL             |  234 | 
+|    208 | uscms1 (nr)                                     | NULL             |  235 | 
+|    209 | NWICG (nr)                                      | NULL             |  236 | 
+|    210 | icecube                                         | NULL             |  237 | 
+|    211 | yang (nr)                                       | NULL             |  238 | 
+|    212 | TIGRE (nr)                                      | NULL             |  239 | 
+|    213 | gridex (nr)                                     | NULL             |  240 | 
+|    214 | jdem                                            | NULL             |  241 | 
+|    215 | fgstore (nr)                                    | NULL             |  242 | 
+|    216 | SBGrid (nr)                                     | NULL             |  243 | 
+|    217 | alice                                           | NULL             |  244 | 
+|    218 | jjs (nr)                                        | NULL             |  245 | 
+|    219 | fermilab-test (nr)                              | NULL             |  246 | 
+|    220 | johns (nr)                                      | NULL             |  247 | 
+|    221 | li (nr)                                         | NULL             |  248 | 
+|    222 | pegrid0 (nr)                                    | NULL             |  249 | 
+|    223 | mariachi                                        | NULL             |  250 | 
+|    224 | wu (nr)                                         | NULL             |  251 | 
+|    225 | cyt701 (nr)                                     | NULL             |  252 | 
+|    226 | NEBioGrid (nr)                                  | NULL             |  253 | 
+|    227 | Engage (nr)                                     | NULL             |  254 | 
+|    228 | CompBioGrid (nr)                                | NULL             |  255 | 
+|    229 | js (nr)                                         | NULL             |  256 | 
+|    230 | ilc4c (nr)                                      | NULL             |  257 | 
+|    232 | choueiry (nr)                                   | NULL             |  259 | 
+|    233 | idb (nr)                                        | NULL             |  260 | 
+|    234 | plukashev (nr)                                  | NULL             |  261 | 
+|    235 | xzeng (nr)                                      | NULL             |  262 | 
+|    236 | goddard (nr)                                    | NULL             |  263 | 
+|    237 | physmei (nr)                                    | NULL             |  264 | 
+|    238 | rowe (nr)                                       | NULL             |  265 | 
+|    239 | uscmsPool (nr)                                  | NULL             |  266 | 
+|    245 | biomed (nr)                                     | NULL             |  272 | 
+|    246 | mech950 (nr)                                    | NULL             |  273 | 
+|    247 | belashchenko (nr)                               | NULL             |  274 | 
+|    248 | zeng (nr)                                       | NULL             |  275 | 
+|    251 | siddet (nr)                                     | NULL             |  278 | 
+|    254 | batelaan (nr)                                   | NULL             |  281 | 
+|    256 | chandra (nr)                                    | NULL             |  283 | 
+|    259 | jiang (nr)                                      | NULL             |  286 | 
+|    260 | reid (nr)                                       | NULL             |  287 | 
+|    262 | furtney (nr)                                    | NULL             |  289 | 
+|    267 | harbison (nr)                                   | NULL             |  294 | 
+|    269 | uscmspool2 (nr)                                 | NULL             |  296 | 
+|    283 | ducharme (nr)                                   | NULL             |  310 | 
+|    284 | uno (nr)                                        | NULL             |  311 | 
+|    286 | mei (nr)                                        | NULL             |  313 | 
+|    287 | ahouston (nr)                                   | NULL             |  314 | 
+|    289 | mille (nr)                                      | NULL             |  316 | 
+|    292 | rsv (nr)                                        | NULL             |  319 | 
+|    293 | csci4440 (nr)                                   | NULL             |  320 | 
+|    295 | fgtest (nr)                                     | NULL             |  322 | 
+|    297 | biocore (nr)                                    | NULL             |  324 | 
+|    306 | nebiogrid                                       | NULL             |  333 | 
+|    308 | dzenis (nr)                                     | NULL             |  335 | 
+|    311 | ddowney (nr)                                    | NULL             |  338 | 
+|    312 | oglesby (nr)                                    | NULL             |  339 | 
+|    318 | gay (nr)                                        | NULL             |  345 | 
+|    324 | aa (nr)                                         | NULL             |  351 | 
+|    329 | siddet                                          | NULL             |  356 | 
+|    333 | ilc4c                                           | NULL             |  360 | 
+|    334 | fgstore                                         | NULL             |  361 | 
+|    335 | gluex (nr)                                      | NULL             |  362 | 
+|    339 | gluex                                           | NULL             |  366 | 
+|    343 | cse496 (nr)                                     | NULL             |  370 | 
+|    349 | mu2e                                            | NULL             |  376 | 
+|    352 | wood (nr)                                       | NULL             |  379 | 
+|    353 | fabrikant (nr)                                  | NULL             |  380 | 
+|    355 | sabirianov (nr)                                 | NULL             |  382 | 
+|    361 | ilddet                                          | NULL             |  388 | 
+|    362 | bjs (nr)                                        | NULL             |  389 | 
+|    368 | tubio (nr)                                      | NULL             |  395 | 
+|    372 | gilda (nr)                                      | NULL             |  399 | 
+|    374 | sm (nr)                                         | NULL             |  401 | 
+|    375 | TGYRO (nr)                                      | NULL             |  402 | 
+|    379 | lin (nr)                                        | NULL             |  406 | 
+|    380 | LSST (nr)                                       | NULL             |  407 | 
+|    382 | pegrid (nr)                                     | NULL             |  409 | 
+|    383 | Gluex (nr)                                      | NULL             |  410 | 
+|    384 | nova                                            | NULL             |  411 | 
+|    385 | ecucs (nr)                                      | NULL             |  412 | 
+|    387 | GLOW (nr)                                       | NULL             |  414 | 
+|    393 | GridUNESP (nr)                                  | NULL             |  420 | 
+|    394 | choi (nr)                                       | NULL             |  421 | 
+|    398 | lsst                                            | NULL             |  425 | 
+|    400 | superbvo.org (nr)                               | NULL             |  427 | 
+|    401 | fgtest                                          | NULL             |  428 | 
+|    402 | other EGEE                                      | NULL             |  429 | 
+|    403 | osgbabar00 (nr)                                 | NULL             |  430 | 
+|    405 | hcc                                             | NULL             |  432 | 
+|    408 | local (nr)                                      | NULL             |  435 | 
+|    410 | uscmsPool2 (nr)                                 | NULL             |  437 | 
+|    411 | thomp (nr)                                      | NULL             |  438 | 
+|    412 | jl (nr)                                         | NULL             |  439 | 
+|    414 | gridunesp                                       | NULL             |  441 | 
+|    415 | ligy (nr)                                       | NULL             |  442 | 
+|    416 | ouame (nr)                                      | NULL             |  443 | 
+|    417 | auger (nr)                                      | NULL             |  444 | 
+|    418 | ou2 (nr)                                        | NULL             |  445 | 
+|    419 | loni_rhall09_1 (nr)                             | NULL             |  446 | 
+|    420 | loni_cavitands (nr)                             | NULL             |  447 | 
+|    421 | loni_i3sim04 (nr)                               | NULL             |  448 | 
+|    422 | loni_cactus05 (nr)                              | NULL             |  449 | 
+|    423 | loni_binding04 (nr)                             | NULL             |  450 | 
+|    426 | loni_hep_09 (nr)                                | NULL             |  453 | 
+|    427 | loni_metrics_09 (nr)                            | NULL             |  454 | 
+|    428 | loni_density003 (nr)                            | NULL             |  455 | 
+|    429 | loni_qcp_dms09 (nr)                             | NULL             |  456 | 
+|    431 | loni_jhabig09 (nr)                              | NULL             |  458 | 
+|    432 | loni_coptah (nr)                                | NULL             |  459 | 
+|    434 | loni_resonator3 (nr)                            | NULL             |  461 | 
+|    439 | lbne                                            | NULL             |  466 | 
+|    440 | Unknown (nr)                                    | NULL             |  467 | 
+|    444 | zhou (nr)                                       | NULL             |  471 | 
+|    452 | along (nr)                                      | NULL             |  479 | 
+|    454 | sgmatlas (nr)                                   | NULL             |  481 | 
+|    456 | jcyin (nr)                                      | NULL             |  483 | 
+|    457 | sagrid (nr)                                     | NULL             |  484 | 
+|    460 | saint (nr)                                      | NULL             |  487 | 
+|    461 | matt (nr)                                       | NULL             |  488 | 
+|    462 | lsl1 (nr)                                       | NULL             |  489 | 
+|    464 | sahara (nr)                                     | NULL             |  491 | 
+|    465 | dech (nr)                                       | NULL             |  492 | 
+|    466 | danielpark2 (nr)                                | NULL             |  493 | 
+|    468 | cms1 (nr)                                       | NULL             |  495 | 
+|    470 | cms0 (nr)                                       | NULL             |  497 | 
+|    476 | wilso (nr)                                      | NULL             |  503 | 
+|    477 | c670 (nr)                                       | NULL             |  504 | 
+|    478 | ck (nr)                                         | NULL             |  505 | 
+|    479 | sc (nr)                                         | NULL             |  506 | 
+|    480 | belle                                           | NULL             |  507 | 
+|    481 | mpccc (nr)                                      | NULL             |  508 | 
+|    485 | as2 (nr)                                        | NULL             |  512 | 
+|    486 | jms21 (nr)                                      | NULL             |  513 | 
+|    487 | sipe0 (nr)                                      | NULL             |  514 | 
+|    488 | ATLAS (nr)                                      | NULL             |  515 | 
+|    489 | rsvuser (nr)                                    | NULL             |  516 | 
+|    492 | cms2 (nr)                                       | NULL             |  519 | 
+|    495 | map (nr)                                        | NULL             |  522 | 
+|    496 | enmr (nr)                                       | NULL             |  523 | 
+|    497 | shah (nr)                                       | NULL             |  524 | 
+|    498 | evayi (nr)                                      | NULL             |  525 | 
+|    504 | example (nr)                                    | NULL             |  531 | 
+|    506 | scidac (nr)                                     | NULL             |  533 | 
+|    508 | huang (nr)                                      | NULL             |  535 | 
+|    510 | yuguo1 (nr)                                     | NULL             |  537 | 
+|    511 | k47k4 (nr)                                      | NULL             |  538 | 
+|    513 | default (nr)                                    | NULL             |  540 | 
+|    518 | liu (nr)                                        | NULL             |  545 | 
+|    520 | lee (nr)                                        | NULL             |  547 | 
+|    522 | sgmenmr (nr)                                    | NULL             |  549 | 
+|    529 | turne (nr)                                      | NULL             |  556 | 
+|    531 | sgmenmrcirmmp (nr)                              | NULL             |  558 | 
+|    532 | cmmap (nr)                                      | NULL             |  559 | 
+|    542 | sura (nr)                                       | NULL             |  569 | 
+|    544 | mrp9 (nr)                                       | NULL             |  571 | 
+|    545 | pilatlas (nr)                                   | NULL             |  572 | 
+|    546 | prdatlas (nr)                                   | NULL             |  573 | 
+|    547 | argoneut                                        | NULL             |  574 | 
+|    548 | gabi (nr)                                       | NULL             |  575 | 
+|    558 | m670 (nr)                                       | NULL             |  585 | 
+|    560 | nees                                            | NULL             |  587 | 
+|    565 | king (nr)                                       | NULL             |  592 | 
+|    570 | external (nr)                                   | NULL             |  597 | 
+|    571 | renci (nr)                                      | NULL             |  598 | 
+|    572 | pari (nr)                                       | NULL             |  599 | 
+|    580 | bt (nr)                                         | NULL             |  607 | 
+|    581 | qpei (nr)                                       | NULL             |  608 | 
+|    582 | seneslab (nr)                                   | NULL             |  609 | 
+|    583 | wenger (nr)                                     | NULL             |  610 | 
+|    584 | jmb (nr)                                        | NULL             |  611 | 
+|    586 | webportal (nr)                                  | NULL             |  613 | 
+|    590 | jmcdaniel (nr)                                  | NULL             |  617 | 
+|    591 | jmondal (nr)                                    | NULL             |  618 | 
+|    592 | lwang (nr)                                      | NULL             |  619 | 
+|    593 | manoj (nr)                                      | NULL             |  620 | 
+|    594 | pgoyal (nr)                                     | NULL             |  621 | 
+|    595 | rsakidja (nr)                                   | NULL             |  622 | 
+|    596 | xzhu (nr)                                       | NULL             |  623 | 
+|    597 | yethiraj (nr)                                   | NULL             |  624 | 
+|    598 | zhijun (nr)                                     | NULL             |  625 | 
+|    599 | zorba (nr)                                      | NULL             |  626 | 
+|    604 | dhinckley (nr)                                  | NULL             |  631 | 
+|    606 | soarbuild (nr)                                  | NULL             |  633 | 
+|    609 | adesmet (nr)                                    | NULL             |  636 | 
+|    610 | epacg (nr)                                      | NULL             |  637 | 
+|    611 | sgmsagrid (nr)                                  | NULL             |  638 | 
+|    612 | ankur (nr)                                      | NULL             |  639 | 
+|    616 | kuang (nr)                                      | NULL             |  643 | 
+|    620 | llzhang (nr)                                    | NULL             |  647 | 
+|    622 | yijieli (nr)                                    | NULL             |  649 | 
+|    623 | bgs0 (nr)                                       | NULL             |  650 | 
+|    625 | parii (nr)                                      | NULL             |  652 | 
+|    626 | tmayeshi (nr)                                   | NULL             |  653 | 
+|    628 | osgu000 (nr)                                    | NULL             |  655 | 
+|    630 | gthain (nr)                                     | NULL             |  657 | 
+|    631 | jchristianson (nr)                              | NULL             |  658 | 
+|    632 | danb (nr)                                       | NULL             |  659 | 
+|    633 | fox (nr)                                        | NULL             |  660 | 
+|    642 | genec (nr)                                      | NULL             |  669 | 
+|    644 | TG-ASC050039N (nr)                              | NULL             |  671 | 
+|    646 | TG-CHE100095 (nr)                               | NULL             |  673 | 
+|    647 | TG-CHE110064 (nr)                               | NULL             |  674 | 
+|    649 | TG-EAR110015 (nr)                               | NULL             |  676 | 
+|    650 | TG-MCB110072 (nr)                               | NULL             |  677 | 
+|    652 | TG-PHY110010 (nr)                               | NULL             |  679 | 
+|    653 | TG-PHY110034 (nr)                               | NULL             |  680 | 
+|    654 | TG-STA060008N (nr)                              | NULL             |  681 | 
+|    657 | TG-CDA100007 (nr)                               | NULL             |  684 | 
+|    658 | TG-CDA110012 (nr)                               | NULL             |  685 | 
+|    659 | TG-CHE080066N (nr)                              | NULL             |  686 | 
+|    661 | TG-CTS070034N (nr)                              | NULL             |  688 | 
+|    662 | TG-DMR110013 (nr)                               | NULL             |  689 | 
+|    663 | TG-DMR110072 (nr)                               | NULL             |  690 | 
+|    664 | TG-EAR080018T (nr)                              | NULL             |  691 | 
+|    665 | TG-MCB090163 (nr)                               | NULL             |  692 | 
+|    669 | zwu7 (nr)                                       | NULL             |  696 | 
+|    671 | TG-ATM110019 (nr)                               | NULL             |  698 | 
+|    673 | TG-CHE100058 (nr)                               | NULL             |  700 | 
+|    674 | TG-CTS100012 (nr)                               | NULL             |  701 | 
+|    675 | TG-DMR080070 (nr)                               | NULL             |  702 | 
+|    676 | TG-DMR110052 (nr)                               | NULL             |  703 | 
+|    677 | TG-IBN050000N (nr)                              | NULL             |  704 | 
+|    678 | TG-IBN100006 (nr)                               | NULL             |  705 | 
+|    682 | sabs (nr)                                       | NULL             |  709 | 
+|    683 | TG-MCB070015N (nr)                              | NULL             |  710 | 
+|    685 | TG-PHY110021 (nr)                               | NULL             |  712 | 
+|    686 | hguanhua (nr)                                   | NULL             |  713 | 
+|    687 | yru1 (nr)                                       | NULL             |  714 | 
+|    689 | TG-PHY100030 (nr)                               | NULL             |  716 | 
+|    693 | TG-CHE070074N (nr)                              | NULL             |  720 | 
+|    695 | TG-DMR110095 (nr)                               | NULL             |  722 | 
+|    701 | TG-CHE090006 (nr)                               | NULL             |  728 | 
+|    702 | TG-CTS100026 (nr)                               | NULL             |  729 | 
+|    703 | TG-IBN090004 (nr)                               | NULL             |  730 | 
+|    706 | bmueller (nr)                                   | NULL             |  733 | 
+|    709 | m1248 (nr)                                      | NULL             |  736 | 
+|    715 | TG-CHE100113 (nr)                               | NULL             |  742 | 
+|    718 | cweiss (nr)                                     | NULL             |  745 | 
+|    719 | TG-CTS090062 (nr)                               | NULL             |  746 | 
+|    720 | TG-DMS100018 (nr)                               | NULL             |  747 | 
+|    722 | TG-MCB040051N (nr)                              | NULL             |  749 | 
+|    727 | TG-AST100043 (nr)                               | NULL             |  754 | 
+|    730 | TG-DMS110002 (nr)                               | NULL             |  757 | 
+|    732 | TG-MCB110112 (nr)                               | NULL             |  759 | 
+|    736 | TG-AST090100 (nr)                               | NULL             |  763 | 
+|    738 | TG-ATM090002 (nr)                               | NULL             |  765 | 
+|    741 | TG-DMR100080 (nr)                               | NULL             |  768 | 
+|    744 | TG-PHY110005 (nr)                               | NULL             |  771 | 
+|    746 | lhaupert (nr)                                   | NULL             |  773 | 
+|    748 | nickwu (nr)                                     | NULL             |  775 | 
+|    749 | sqzhu (nr)                                      | NULL             |  776 | 
+|    757 | ht (nr)                                         | NULL             |  784 | 
+|    758 | huihui (nr)                                     | NULL             |  785 | 
+|    759 | leiliz (nr)                                     | NULL             |  786 | 
+|    761 | TG-ATM010005N (nr)                              | NULL             |  788 | 
+|    764 | TG-MCA03S007 (nr)                               | NULL             |  791 | 
+|    765 | TG-MCA07S029 (nr)                               | NULL             |  792 | 
+|    766 | TG-MCB110037 (nr)                               | NULL             |  793 | 
+|    767 | lslipche (nr)                                   | NULL             |  794 | 
+|    769 | TG-AST070052N (nr)                              | NULL             |  796 | 
+|    770 | TG-ATM090060 (nr)                               | NULL             |  797 | 
+|    772 | pxq (nr)                                        | NULL             |  799 | 
+|    773 | TG-CTS100027 (nr)                               | NULL             |  800 | 
+|    774 | sura0 (nr)                                      | NULL             |  801 | 
+|    775 | TG-DMR110027 (nr)                               | NULL             |  802 | 
+|    776 | ab (nr)                                         | NULL             |  803 | 
+|    777 | ac (nr)                                         | NULL             |  804 | 
+|    778 | aw (nr)                                         | NULL             |  805 | 
+|    780 | el (nr)                                         | NULL             |  807 | 
+|    781 | jd (nr)                                         | NULL             |  808 | 
+|    782 | mh (nr)                                         | NULL             |  809 | 
+|    783 | sl (nr)                                         | NULL             |  810 | 
+|    784 | sp (nr)                                         | NULL             |  811 | 
+|    787 | TG-MCA07S022 (nr)                               | NULL             |  814 | 
+|    788 | grid14 (nr)                                     | NULL             |  815 | 
+|    789 | grid17 (nr)                                     | NULL             |  816 | 
+|    794 | grid (nr)                                       | NULL             |  821 | 
+|    795 | grid16 (nr)                                     | NULL             |  822 | 
+|    796 | SGVO (nr)                                       | NULL             |  823 | 
+|    800 | yj7 (nr)                                        | NULL             |  827 | 
+|    806 | superbvo.org                                    | NULL             |  833 | 
+|    808 | bockelman (nr)                                  | NULL             |  835 | 
+|    809 | glideinwms (nr)                                 | NULL             |  836 | 
+|    814 | cse435 (nr)                                     | NULL             |  841 | 
+|    817 | users (nr)                                      | NULL             |  844 | 
+|    821 | cstaff (nr)                                     | NULL             |  848 | 
+|    826 | symp (nr)                                       | NULL             |  853 | 
+|    833 | TG-MCA05S010 (nr)                               | NULL             |  860 | 
+|    847 | gcvo                                            | NULL             |  874 | 
+|    850 | map                                             | NULL             |  877 | 
+|    851 | gcedu                                           | NULL             |  878 | 
+|    853 | armino (nr)                                     | NULL             |  880 | 
+|    854 | sc11 (nr)                                       | NULL             |  881 | 
+|    855 | jkong (nr)                                      | NULL             |  882 | 
+|    856 | UT-NTNL0033 (nr)                                | NULL             |  883 | 
+|    857 | cx32 (nr)                                       | NULL             |  884 | 
+|    859 | baru-tro (nr)                                   | NULL             |  886 | 
+|    860 | grid15 (nr)                                     | NULL             |  887 | 
+|    861 | dyna (nr)                                       | NULL             |  888 | 
++--------+-------------------------------------------------+------------------+------+
