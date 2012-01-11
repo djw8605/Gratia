@@ -25,9 +25,12 @@ function set_mysql_cmd {
 }
 #----------------
 function run_mysql {
+  logdebug "... in function run_mysql"
   local sqlfile=$1
   local outfile=$2
   local tmpfile=$outputdir/tmpfile.$table
+  logdebug "sqlfile: $sqlfile"
+  logdebug "tmpfile: $tmpfile"
   logdebug "sql cmd: $cmd"
   $cmd <$sqlfile >$tmpfile;rtn=$?
   if [ "$rtn" != "0" ];then
@@ -60,7 +63,7 @@ EOF
 #----------------
 function create_delete_file {
   logdebug "... in function create_delete_file"
-  local sqlfile=$outputdir/sqlfile_$table
+  local sqlfile=$outputdir/sqlfile.$table
   local outfile=$outputdir/delete_${table}.out
   local table_delete=$sqlDir/${table}_delete.sql
   if [ ! -e "$table_delete" ];then
@@ -262,18 +265,20 @@ function perform_voname_analysis {
 #-----------------
 function check_for_unused_corrids {
   logdebug "==========================================================="
-  logdebug "-- check the VONameCorrection table for unused entries ---"
-  for db in $dbs
+  for table in VONameCorrection VO
   do
-    outputdir="$outputDir/$db"
-    logdebug "------------------"
-    logdebug "Database: $db" 
-    table=VONameCorrection
-    outputdir="$outputDir/$db"
-    make_dir $outputdir
-    set_db_parameters $db
-    analyze_table
-    create_delete_file
+    logdebug "-- check the $table table for unused entries ---"
+    for db in $dbs
+    do
+      outputdir="$outputDir/$db"
+      logdebug "------------------"
+      logdebug "Database: $db" 
+      outputdir="$outputDir/$db"
+      make_dir $outputdir
+      set_db_parameters $db
+      analyze_table
+      create_delete_file
+    done
   done
 }
 

@@ -41,9 +41,10 @@ where VOName like @voname
 \! echo ========================================================
 SELECT 
    VO.VOName as GratiaVO
+  ,VO.void
+  ,VC.corrid
   ,VC.VOName as ProbeVO
   ,VC.ReportableVOName
-  ,VC.corrid
 FROM
    VONameCorrection VC
   ,VO VO
@@ -55,6 +56,8 @@ and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
 and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
 order by 
   GratiaVO
+ ,VO.void
+ ,VC.corrid
  ,ProbeVO       
  ,ReportableVOName
 ;
@@ -103,9 +106,10 @@ and (
 
 SELECT 
    VO.VOName as GratiaVO
+  ,VO.void
+  ,VC.corrid
   ,VC.VOName as ProbeVO
   ,VC.ReportableVOName
-  ,VC.corrid
 --  ,count(*) as nbr_of_refs
 FROM
    VONameCorrection VC
@@ -120,16 +124,17 @@ and (
   )
 order by 
   GratiaVO
+ ,VO.void
+ ,VC.corrid
  ,ProbeVO       
  ,ReportableVOName
  ,VC.corrid
 ;
 
 
---
--- ============================================================
---   VONameCorrection DELETE statements (unused ones)
--- ============================================================
+\! echo  ============================================================
+\! echo    VONameCorrection DELETE statements - unused ones
+\! echo  ============================================================
 
 SELECT
    CONCAT("DELETE FROM VONameCorrection WHERE corrid = ", a.corrid ,";")
@@ -148,10 +153,9 @@ order by delete_sql
 ;
 
 
---
--- ============================================================
---   VONameCorrection dump of records to be deleted
--- ============================================================
+\! echo  ============================================================
+\! echo    VONameCorrection dump of records to be deleted
+\! echo  ============================================================
 
 SELECT *
 FROM VONameCorrection
