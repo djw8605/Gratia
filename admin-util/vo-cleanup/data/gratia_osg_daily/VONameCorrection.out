@@ -62,9 +62,10 @@ Query - Unused VONameCorrection table entries.
 --------------
 SELECT 
    VO.VOName as GratiaVO
+  ,VO.void
+  ,VC.corrid
   ,VC.VOName as ProbeVO
   ,VC.ReportableVOName
-  ,VC.corrid
 FROM
    VONameCorrection VC
   ,VO VO
@@ -76,520 +77,523 @@ and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
 and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
 order by 
   GratiaVO
+ ,VO.void
+ ,VC.corrid
  ,ProbeVO       
  ,ReportableVOName
 --------------
 
-+-------------------------------------------------+-------------------------------------------------+------------------+--------+
-| GratiaVO                                        | ProbeVO                                         | ReportableVOName | corrid |
-+-------------------------------------------------+-------------------------------------------------+------------------+--------+
-| /cdf/Role=NULL/Capability=NULL                  | /cdf/Role=NULL/Capability=NULL                  | NULL             |      1 | 
-| /cdf/glidecaf/Role=namcaf/Capability=NULL       | /cdf/glidecaf/Role=namcaf/Capability=NULL       | NULL             |      2 | 
-| 1178843                                         | 1178843                                         | NULL             |      3 | 
-| 1180053                                         | 1180053                                         | NULL             |      4 | 
-| 1183335                                         | 1183335                                         | NULL             |      5 | 
-| 1189588                                         | 1189588                                         | NULL             |      6 | 
-| 1198495                                         | 1198495                                         | NULL             |      7 | 
-| 1202574                                         | 1202574                                         | NULL             |      8 | 
-| 1203635                                         | 1203635                                         | NULL             |      9 | 
-| 1204018                                         | 1204018                                         | NULL             |     10 | 
-| 492                                             | 492                                             | NULL             |     11 | 
-| 568                                             | 568                                             | NULL             |     12 | 
-| ATLAS                                           | ATLAS                                           | NULL             |     13 | 
-| ATLAS (nr)                                      | ATLAS (nr)                                      | NULL             |    488 | 
-| CMS                                             | CMS                                             | NULL             |     14 | 
-| CompBioGrid                                     | CompBioGrid                                     | NULL             |     15 | 
-| CompBioGrid (nr)                                | CompBioGrid (nr)                                | NULL             |    228 | 
-| DOSAR                                           | DOSAR                                           | NULL             |     16 | 
-| DZero                                           | DZero                                           | NULL             |     17 | 
-| Engage                                          | Engage                                          | NULL             |     18 | 
-| Engage                                          | Engage                                          | Engage           |     19 | 
-| Engage (nr)                                     | Engage (nr)                                     | NULL             |    227 | 
-| GLOW                                            | GLOW                                            | NULL             |     20 | 
-| GLOW (nr)                                       | GLOW (nr)                                       | NULL             |    387 | 
-| Gluex (nr)                                      | Gluex (nr)                                      | NULL             |    383 | 
-| GridEx                                          | GridEx                                          | NULL             |     21 | 
-| GridUNESP (nr)                                  | GridUNESP (nr)                                  | NULL             |    393 | 
-| LIGO                                            | LIGO                                            | NULL             |     22 | 
-| LSST (nr)                                       | LSST (nr)                                       | NULL             |    380 | 
-| MIS                                             | MIS                                             | NULL             |     23 | 
-| NEBioGrid (nr)                                  | NEBioGrid (nr)                                  | NULL             |    226 | 
-| NWICG (nr)                                      | NWICG (nr)                                      | NULL             |    209 | 
-| Other                                           | Other                                           | NULL             |     24 | 
-| RSV                                             | RSV                                             | NULL             |    183 | 
-| RSV (nr)                                        | RSV (nr)                                        | NULL             |    196 | 
-| SBGrid (nr)                                     | SBGrid (nr)                                     | NULL             |    216 | 
-| SGVO (nr)                                       | SGVO (nr)                                       | NULL             |    796 | 
-| TG-ASC050039N (nr)                              | TG-ASC050039N (nr)                              | NULL             |    644 | 
-| TG-AST070052N (nr)                              | TG-AST070052N (nr)                              | NULL             |    769 | 
-| TG-AST090100 (nr)                               | TG-AST090100 (nr)                               | NULL             |    736 | 
-| TG-AST100043 (nr)                               | TG-AST100043 (nr)                               | NULL             |    727 | 
-| TG-ATM010005N (nr)                              | TG-ATM010005N (nr)                              | NULL             |    761 | 
-| TG-ATM090002 (nr)                               | TG-ATM090002 (nr)                               | NULL             |    738 | 
-| TG-ATM090060 (nr)                               | TG-ATM090060 (nr)                               | NULL             |    770 | 
-| TG-ATM110019 (nr)                               | TG-ATM110019 (nr)                               | NULL             |    671 | 
-| TG-CDA100007 (nr)                               | TG-CDA100007 (nr)                               | NULL             |    657 | 
-| TG-CDA110012 (nr)                               | TG-CDA110012 (nr)                               | NULL             |    658 | 
-| TG-CHE070074N (nr)                              | TG-CHE070074N (nr)                              | NULL             |    693 | 
-| TG-CHE080066N (nr)                              | TG-CHE080066N (nr)                              | NULL             |    659 | 
-| TG-CHE090006 (nr)                               | TG-CHE090006 (nr)                               | NULL             |    701 | 
-| TG-CHE100058 (nr)                               | TG-CHE100058 (nr)                               | NULL             |    673 | 
-| TG-CHE100095 (nr)                               | TG-CHE100095 (nr)                               | NULL             |    646 | 
-| TG-CHE100113 (nr)                               | TG-CHE100113 (nr)                               | NULL             |    715 | 
-| TG-CHE110064 (nr)                               | TG-CHE110064 (nr)                               | NULL             |    647 | 
-| TG-CTS070034N (nr)                              | TG-CTS070034N (nr)                              | NULL             |    661 | 
-| TG-CTS090062 (nr)                               | TG-CTS090062 (nr)                               | NULL             |    719 | 
-| TG-CTS100012 (nr)                               | TG-CTS100012 (nr)                               | NULL             |    674 | 
-| TG-CTS100026 (nr)                               | TG-CTS100026 (nr)                               | NULL             |    702 | 
-| TG-CTS100027 (nr)                               | TG-CTS100027 (nr)                               | NULL             |    773 | 
-| TG-DMR080070 (nr)                               | TG-DMR080070 (nr)                               | NULL             |    675 | 
-| TG-DMR100080 (nr)                               | TG-DMR100080 (nr)                               | NULL             |    741 | 
-| TG-DMR110013 (nr)                               | TG-DMR110013 (nr)                               | NULL             |    662 | 
-| TG-DMR110027 (nr)                               | TG-DMR110027 (nr)                               | NULL             |    775 | 
-| TG-DMR110052 (nr)                               | TG-DMR110052 (nr)                               | NULL             |    676 | 
-| TG-DMR110072 (nr)                               | TG-DMR110072 (nr)                               | NULL             |    663 | 
-| TG-DMR110095 (nr)                               | TG-DMR110095 (nr)                               | NULL             |    695 | 
-| TG-DMS100018 (nr)                               | TG-DMS100018 (nr)                               | NULL             |    720 | 
-| TG-DMS110002 (nr)                               | TG-DMS110002 (nr)                               | NULL             |    730 | 
-| TG-EAR080018T (nr)                              | TG-EAR080018T (nr)                              | NULL             |    664 | 
-| TG-EAR110015 (nr)                               | TG-EAR110015 (nr)                               | NULL             |    649 | 
-| TG-IBN050000N (nr)                              | TG-IBN050000N (nr)                              | NULL             |    677 | 
-| TG-IBN090004 (nr)                               | TG-IBN090004 (nr)                               | NULL             |    703 | 
-| TG-IBN100006 (nr)                               | TG-IBN100006 (nr)                               | NULL             |    678 | 
-| TG-MCA03S007 (nr)                               | TG-MCA03S007 (nr)                               | NULL             |    764 | 
-| TG-MCA05S010 (nr)                               | TG-MCA05S010 (nr)                               | NULL             |    833 | 
-| TG-MCA07S022 (nr)                               | TG-MCA07S022 (nr)                               | NULL             |    787 | 
-| TG-MCA07S029 (nr)                               | TG-MCA07S029 (nr)                               | NULL             |    765 | 
-| TG-MCB040051N (nr)                              | TG-MCB040051N (nr)                              | NULL             |    722 | 
-| TG-MCB070015N (nr)                              | TG-MCB070015N (nr)                              | NULL             |    683 | 
-| TG-MCB090163 (nr)                               | TG-MCB090163 (nr)                               | NULL             |    665 | 
-| TG-MCB110037 (nr)                               | TG-MCB110037 (nr)                               | NULL             |    766 | 
-| TG-MCB110072 (nr)                               | TG-MCB110072 (nr)                               | NULL             |    650 | 
-| TG-MCB110112 (nr)                               | TG-MCB110112 (nr)                               | NULL             |    732 | 
-| TG-PHY100030 (nr)                               | TG-PHY100030 (nr)                               | NULL             |    689 | 
-| TG-PHY110005 (nr)                               | TG-PHY110005 (nr)                               | NULL             |    744 | 
-| TG-PHY110010 (nr)                               | TG-PHY110010 (nr)                               | NULL             |    652 | 
-| TG-PHY110021 (nr)                               | TG-PHY110021 (nr)                               | NULL             |    685 | 
-| TG-PHY110034 (nr)                               | TG-PHY110034 (nr)                               | NULL             |    653 | 
-| TG-STA060008N (nr)                              | TG-STA060008N (nr)                              | NULL             |    654 | 
-| TGYRO (nr)                                      | TGYRO (nr)                                      | NULL             |    375 | 
-| TIGRE (nr)                                      | TIGRE (nr)                                      | NULL             |    212 | 
-| UT-NTNL0033 (nr)                                | UT-NTNL0033 (nr)                                | NULL             |    856 | 
-| Unknown                                         | Unknown                                         | NULL             |     25 | 
-| Unknown                                         | Unknown                                         | Unknown          |     26 | 
-| Unknown (nr)                                    | Unknown (nr)                                    | NULL             |    440 | 
-| aa (nr)                                         | aa (nr)                                         | NULL             |    324 | 
-| ab (nr)                                         | ab (nr)                                         | NULL             |    776 | 
-| ac (nr)                                         | ac (nr)                                         | NULL             |    777 | 
-| accelerator                                     | accelerator                                     | NULL             |    181 | 
-| aceace                                          | aceace                                          | NULL             |    184 | 
-| aceace (nr)                                     | aceace (nr)                                     | NULL             |    198 | 
-| adesmet (nr)                                    | adesmet (nr)                                    | NULL             |    609 | 
-| ahouston (nr)                                   | ahouston (nr)                                   | NULL             |    287 | 
-| alice                                           | alice                                           | NULL             |    217 | 
-| along (nr)                                      | along (nr)                                      | NULL             |    452 | 
-| ankur (nr)                                      | ankur (nr)                                      | NULL             |    612 | 
-| ap                                              | ap                                              | NULL             |     27 | 
-| argoneut                                        | argoneut                                        | NULL             |    547 | 
-| armino (nr)                                     | armino (nr)                                     | NULL             |    853 | 
-| aru0                                            | aru0                                            | NULL             |     28 | 
-| as                                              | as                                              | NULL             |     29 | 
-| as2 (nr)                                        | as2 (nr)                                        | NULL             |    485 | 
-| atlas                                           | atlas                                           | NULL             |     30 | 
-| atlas (nr)                                      | atlas (nr)                                      | NULL             |    199 | 
-| atlasprd                                        | atlasprd                                        | NULL             |     31 | 
-| atlassgm                                        | atlassgm                                        | NULL             |     32 | 
-| auger                                           | auger                                           | NULL             |     33 | 
-| auger                                           | auger                                           | auger            |     34 | 
-| auger (nr)                                      | auger (nr)                                      | NULL             |    417 | 
-| austriangrid                                    | austriangrid                                    | NULL             |     35 | 
-| aw (nr)                                         | aw (nr)                                         | NULL             |    778 | 
-| baru-tro (nr)                                   | baru-tro (nr)                                   | NULL             |    859 | 
-| batelaan (nr)                                   | batelaan (nr)                                   | NULL             |    254 | 
-| begrid                                          | begrid                                          | NULL             |     36 | 
-| belashchenko (nr)                               | belashchenko (nr)                               | NULL             |    247 | 
-| belle                                           | belle                                           | NULL             |    480 | 
-| bgs0 (nr)                                       | bgs0 (nr)                                       | NULL             |    623 | 
-| biocore (nr)                                    | biocore (nr)                                    | NULL             |    297 | 
-| biomed (nr)                                     | biomed (nr)                                     | NULL             |    245 | 
-| bjs (nr)                                        | bjs (nr)                                        | NULL             |    362 | 
-| blane                                           | blane                                           | NULL             |     37 | 
-| bmueller (nr)                                   | bmueller (nr)                                   | NULL             |    706 | 
-| bockelman (nr)                                  | bockelman (nr)                                  | NULL             |    808 | 
-| bsc-cns                                         | bsc-cns                                         | NULL             |     38 | 
-| bt (nr)                                         | bt (nr)                                         | NULL             |    580 | 
-| c670 (nr)                                       | c670 (nr)                                       | NULL             |    477 | 
-| camcs (nr)                                      | camcs (nr)                                      | NULL             |    206 | 
-| cdf                                             | cdf                                             | NULL             |     39 | 
-| cdf                                             | cdf                                             | cdf              |     40 | 
-| cdms                                            | cdms                                            | NULL             |     41 | 
-| cdms                                            | cdms                                            | cdms             |     42 | 
-| cern                                            | cern                                            | NULL             |     43 | 
-| cern                                            | cern                                            | cern             |     44 | 
-| chandra (nr)                                    | chandra (nr)                                    | NULL             |    256 | 
-| chem9                                           | chem9                                           | NULL             |     45 | 
-| chen                                            | chen                                            | NULL             |    187 | 
-| chen (nr)                                       | chen (nr)                                       | NULL             |    195 | 
-| choi (nr)                                       | choi (nr)                                       | NULL             |    394 | 
-| choueiry (nr)                                   | choueiry (nr)                                   | NULL             |    232 | 
-| ciemat                                          | ciemat                                          | NULL             |     46 | 
-| cigi                                            | cigi                                            | NULL             |     47 | 
-| ck (nr)                                         | ck (nr)                                         | NULL             |    478 | 
-| cmmap (nr)                                      | cmmap (nr)                                      | NULL             |    532 | 
-| cms                                             | cms                                             | NULL             |     48 | 
-| cms                                             | cms                                             | cms              |     49 | 
-| cms0 (nr)                                       | cms0 (nr)                                       | NULL             |    470 | 
-| cms1 (nr)                                       | cms1 (nr)                                       | NULL             |    468 | 
-| cms2 (nr)                                       | cms2 (nr)                                       | NULL             |    492 | 
-| compbiogrid                                     | compbiogrid                                     | NULL             |     50 | 
-| compbiogrid                                     | compbiogrid                                     | compbiogrid      |     51 | 
-| csci4440 (nr)                                   | csci4440 (nr)                                   | NULL             |    293 | 
-| cse435 (nr)                                     | cse435 (nr)                                     | NULL             |    814 | 
-| cse496 (nr)                                     | cse496 (nr)                                     | NULL             |    343 | 
-| cstaff (nr)                                     | cstaff (nr)                                     | NULL             |    821 | 
-| cweiss (nr)                                     | cweiss (nr)                                     | NULL             |    718 | 
-| cx32 (nr)                                       | cx32 (nr)                                       | NULL             |    857 | 
-| cyt701 (nr)                                     | cyt701 (nr)                                     | NULL             |    225 | 
-| danb (nr)                                       | danb (nr)                                       | NULL             |    632 | 
-| danielpark2 (nr)                                | danielpark2 (nr)                                | NULL             |    466 | 
-| datagrid-es                                     | datagrid-es                                     | NULL             |     52 | 
-| ddowney (nr)                                    | ddowney (nr)                                    | NULL             |    311 | 
-| dech (nr)                                       | dech (nr)                                       | NULL             |    465 | 
-| default (nr)                                    | default (nr)                                    | NULL             |    513 | 
-| des                                             | des                                             | NULL             |     53 | 
-| des                                             | des                                             | des              |     54 | 
-| dhinckley (nr)                                  | dhinckley (nr)                                  | NULL             |    604 | 
-| dhkim1                                          | dhkim1                                          | NULL             |     55 | 
-| dosar                                           | dosar                                           | NULL             |     56 | 
-| dosar                                           | dosar                                           | dosar            |     57 | 
-| dteam                                           | dteam                                           | NULL             |     58 | 
-| dteam                                           | dteam                                           | dteam            |     59 | 
-| dteam (nr)                                      | dteam (nr)                                      | NULL             |    203 | 
-| dteamprd                                        | dteamprd                                        | NULL             |     60 | 
-| ducharme (nr)                                   | ducharme (nr)                                   | NULL             |    283 | 
-| dyna (nr)                                       | dyna (nr)                                       | NULL             |    861 | 
-| dzenis (nr)                                     | dzenis (nr)                                     | NULL             |    308 | 
-| dzero                                           | dzero                                           | NULL             |     61 | 
-| dzero                                           | dzero                                           | dzero            |     62 | 
-| ecucs (nr)                                      | ecucs (nr)                                      | NULL             |    385 | 
-| el (nr)                                         | el (nr)                                         | NULL             |    780 | 
-| engage                                          | engage                                          | NULL             |     63 | 
-| engage                                          | engage                                          | engage           |     64 | 
-| engagement                                      | engagement                                      | NULL             |     65 | 
-| enmr (nr)                                       | enmr (nr)                                       | NULL             |    496 | 
-| epacg (nr)                                      | epacg (nr)                                      | NULL             |    610 | 
-| escience                                        | escience                                        | NULL             |     66 | 
-| evayi (nr)                                      | evayi (nr)                                      | NULL             |    498 | 
-| example (nr)                                    | example (nr)                                    | NULL             |    504 | 
-| external (nr)                                   | external (nr)                                   | NULL             |    570 | 
-| fabrikant (nr)                                  | fabrikant (nr)                                  | NULL             |    353 | 
-| fermilab                                        | fermilab                                        | NULL             |     67 | 
-| fermilab                                        | fermilab                                        | fermilab         |     68 | 
-| fermilab-test                                   | fermilab-test                                   | NULL             |     69 | 
-| fermilab-test (nr)                              | fermilab-test (nr)                              | NULL             |    219 | 
-| fgstore                                         | fgstore                                         | NULL             |    334 | 
-| fgstore (nr)                                    | fgstore (nr)                                    | NULL             |    215 | 
-| fgtest                                          | fgtest                                          | NULL             |    401 | 
-| fgtest (nr)                                     | fgtest (nr)                                     | NULL             |    295 | 
-| fmri                                            | fmri                                            | NULL             |     70 | 
-| fmri                                            | fmri                                            | fmri             |     71 | 
-| fox (nr)                                        | fox (nr)                                        | NULL             |    633 | 
-| furtney (nr)                                    | furtney (nr)                                    | NULL             |    262 | 
-| gabi (nr)                                       | gabi (nr)                                       | NULL             |    548 | 
-| gadu                                            | gadu                                            | NULL             |     72 | 
-| gadu                                            | gadu                                            | gadu             |     73 | 
-| gay (nr)                                        | gay (nr)                                        | NULL             |    318 | 
-| gcedu                                           | gcedu                                           | NULL             |    851 | 
-| gcvo                                            | gcvo                                            | NULL             |    847 | 
-| geant4                                          | geant4                                          | NULL             |     74 | 
-| geant4                                          | geant4                                          | geant4           |     75 | 
-| genec (nr)                                      | genec (nr)                                      | NULL             |    642 | 
-| germangrid                                      | germangrid                                      | NULL             |     76 | 
-| gilda (nr)                                      | gilda (nr)                                      | NULL             |    372 | 
-| gin.ggf.org                                     | gin.ggf.org                                     | NULL             |     77 | 
-| gin.ggf.org                                     | gin.ggf.org                                     | gin.ggf.org      |     78 | 
-| glideinwms (nr)                                 | glideinwms (nr)                                 | NULL             |    809 | 
-| glow                                            | glow                                            | NULL             |     79 | 
-| glow                                            | glow                                            | glow             |     80 | 
-| gluex                                           | gluex                                           | NULL             |    339 | 
-| gluex (nr)                                      | gluex (nr)                                      | NULL             |    335 | 
-| goddard (nr)                                    | goddard (nr)                                    | NULL             |    236 | 
-| gpn                                             | gpn                                             | NULL             |     81 | 
-| gpn                                             | gpn                                             | gpn              |     82 | 
-| grase                                           | grase                                           | NULL             |     83 | 
-| grase                                           | grase                                           | grase            |     84 | 
-| grid                                            | grid                                            | NULL             |     85 | 
-| grid (nr)                                       | grid (nr)                                       | NULL             |    794 | 
-| grid-fr                                         | grid-fr                                         | NULL             |     86 | 
-| grid14 (nr)                                     | grid14 (nr)                                     | NULL             |    788 | 
-| grid15 (nr)                                     | grid15 (nr)                                     | NULL             |    860 | 
-| grid16 (nr)                                     | grid16 (nr)                                     | NULL             |    795 | 
-| grid17 (nr)                                     | grid17 (nr)                                     | NULL             |    789 | 
-| gridex                                          | gridex                                          | NULL             |     87 | 
-| gridex                                          | gridex                                          | gridex           |     88 | 
-| gridex (nr)                                     | gridex (nr)                                     | NULL             |    213 | 
-| gridunesp                                       | gridunesp                                       | NULL             |    414 | 
-| grow                                            | grow                                            | NULL             |     89 | 
-| grow                                            | grow                                            | grow             |     90 | 
-| gthain (nr)                                     | gthain (nr)                                     | NULL             |    630 | 
-| harbison (nr)                                   | harbison (nr)                                   | NULL             |    267 | 
-| hcc                                             | hcc                                             | NULL             |    405 | 
-| hep                                             | hep                                             | NULL             |     91 | 
-| hep                                             | hep                                             | hep              |     92 | 
-| hguanhua (nr)                                   | hguanhua (nr)                                   | NULL             |    686 | 
-| ht (nr)                                         | ht (nr)                                         | NULL             |    757 | 
-| huang (nr)                                      | huang (nr)                                      | NULL             |    508 | 
-| huihui (nr)                                     | huihui (nr)                                     | NULL             |    758 | 
-| hypercp                                         | hypercp                                         | NULL             |     93 | 
-| hypercp                                         | hypercp                                         | hypercp          |     94 | 
-| iVDgL                                           | iVDgL                                           | NULL             |     95 | 
-| icbr                                            | icbr                                            | NULL             |    185 | 
-| icbr (nr)                                       | icbr (nr)                                       | NULL             |    197 | 
-| icecube                                         | icecube                                         | NULL             |    210 | 
-| idb (nr)                                        | idb (nr)                                        | NULL             |    233 | 
-| ifh1                                            | ifh1                                            | NULL             |     96 | 
-| ilc                                             | ilc                                             | NULL             |     97 | 
-| ilc                                             | ilc                                             | ilc              |     98 | 
-| ilc4c                                           | ilc4c                                           | NULL             |    333 | 
-| ilc4c (nr)                                      | ilc4c (nr)                                      | NULL             |    230 | 
-| ilddet                                          | ilddet                                          | NULL             |    361 | 
-| infn                                            | infn                                            | NULL             |     99 | 
-| infn                                            | infn                                            | infn             |    100 | 
-| ivdgl                                           | ivdgl                                           | NULL             |    101 | 
-| ivdgl                                           | ivdgl                                           | ivdgl            |    102 | 
-| ivdgl (nr)                                      | ivdgl (nr)                                      | NULL             |    204 | 
-| james                                           | james                                           | NULL             |    103 | 
-| jcd2                                            | jcd2                                            | NULL             |    104 | 
-| jchristianson (nr)                              | jchristianson (nr)                              | NULL             |    631 | 
-| jcyin (nr)                                      | jcyin (nr)                                      | NULL             |    456 | 
-| jd (nr)                                         | jd (nr)                                         | NULL             |    781 | 
-| jdem                                            | jdem                                            | NULL             |    214 | 
-| jen7                                            | jen7                                            | NULL             |    105 | 
-| jiang (nr)                                      | jiang (nr)                                      | NULL             |    259 | 
-| jjs (nr)                                        | jjs (nr)                                        | NULL             |    218 | 
-| jkong (nr)                                      | jkong (nr)                                      | NULL             |    855 | 
-| jl (nr)                                         | jl (nr)                                         | NULL             |    412 | 
-| jmb (nr)                                        | jmb (nr)                                        | NULL             |    584 | 
-| jmcdaniel (nr)                                  | jmcdaniel (nr)                                  | NULL             |    590 | 
-| jmondal (nr)                                    | jmondal (nr)                                    | NULL             |    591 | 
-| jms21 (nr)                                      | jms21 (nr)                                      | NULL             |    486 | 
-| johns (nr)                                      | johns (nr)                                      | NULL             |    220 | 
-| js (nr)                                         | js (nr)                                         | NULL             |    229 | 
-| k47k4 (nr)                                      | k47k4 (nr)                                      | NULL             |    511 | 
-| kfki rmki ca                                    | kfki rmki ca                                    | NULL             |    106 | 
-| kim                                             | kim                                             | NULL             |    107 | 
-| king (nr)                                       | king (nr)                                       | NULL             |    565 | 
-| km                                              | km                                              | NULL             |    108 | 
-| ktev                                            | ktev                                            | NULL             |    109 | 
-| ktev                                            | ktev                                            | ktev             |    110 | 
-| kuang (nr)                                      | kuang (nr)                                      | NULL             |    616 | 
-| lbne                                            | lbne                                            | NULL             |    439 | 
-| lee                                             | lee                                             | NULL             |    111 | 
-| lee                                             | lee                                             | lee              |    112 | 
-| lee (nr)                                        | lee (nr)                                        | NULL             |    520 | 
-| leiliz (nr)                                     | leiliz (nr)                                     | NULL             |    759 | 
-| lhaupert (nr)                                   | lhaupert (nr)                                   | NULL             |    746 | 
-| lhcb                                            | lhcb                                            | NULL             |    113 | 
-| lhcb                                            | lhcb                                            | lhcb             |    114 | 
-| lhcb (nr)                                       | lhcb (nr)                                       | NULL             |    194 | 
-| li (nr)                                         | li (nr)                                         | NULL             |    221 | 
-| ligo                                            | ligo                                            | NULL             |    115 | 
-| ligo                                            | ligo                                            | ligo             |    116 | 
-| ligy (nr)                                       | ligy (nr)                                       | NULL             |    415 | 
-| lin (nr)                                        | lin (nr)                                        | NULL             |    379 | 
-| lipca                                           | lipca                                           | NULL             |    117 | 
-| liu (nr)                                        | liu (nr)                                        | NULL             |    518 | 
-| llzhang (nr)                                    | llzhang (nr)                                    | NULL             |    620 | 
-| local (nr)                                      | local (nr)                                      | NULL             |    408 | 
-| loni_binding04 (nr)                             | loni_binding04 (nr)                             | NULL             |    423 | 
-| loni_cactus05 (nr)                              | loni_cactus05 (nr)                              | NULL             |    422 | 
-| loni_cavitands (nr)                             | loni_cavitands (nr)                             | NULL             |    420 | 
-| loni_coptah (nr)                                | loni_coptah (nr)                                | NULL             |    432 | 
-| loni_density003 (nr)                            | loni_density003 (nr)                            | NULL             |    428 | 
-| loni_hep_09 (nr)                                | loni_hep_09 (nr)                                | NULL             |    426 | 
-| loni_i3sim04 (nr)                               | loni_i3sim04 (nr)                               | NULL             |    421 | 
-| loni_jhabig09 (nr)                              | loni_jhabig09 (nr)                              | NULL             |    431 | 
-| loni_metrics_09 (nr)                            | loni_metrics_09 (nr)                            | NULL             |    427 | 
-| loni_qcp_dms09 (nr)                             | loni_qcp_dms09 (nr)                             | NULL             |    429 | 
-| loni_resonator3 (nr)                            | loni_resonator3 (nr)                            | NULL             |    434 | 
-| loni_rhall09_1 (nr)                             | loni_rhall09_1 (nr)                             | NULL             |    419 | 
-| lsl1 (nr)                                       | lsl1 (nr)                                       | NULL             |    462 | 
-| lslipche (nr)                                   | lslipche (nr)                                   | NULL             |    767 | 
-| lsst                                            | lsst                                            | NULL             |    398 | 
-| lwang (nr)                                      | lwang (nr)                                      | NULL             |    592 | 
-| m1248 (nr)                                      | m1248 (nr)                                      | NULL             |    709 | 
-| m670 (nr)                                       | m670 (nr)                                       | NULL             |    558 | 
-| manoj (nr)                                      | manoj (nr)                                      | NULL             |    593 | 
-| map                                             | map                                             | NULL             |    850 | 
-| map (nr)                                        | map (nr)                                        | NULL             |    495 | 
-| mariachi                                        | mariachi                                        | NULL             |    223 | 
-| matt (nr)                                       | matt (nr)                                       | NULL             |    461 | 
-| mb                                              | mb                                              | NULL             |    118 | 
-| mb (nr)                                         | mb (nr)                                         | NULL             |    201 | 
-| mech950 (nr)                                    | mech950 (nr)                                    | NULL             |    246 | 
-| mei (nr)                                        | mei (nr)                                        | NULL             |    286 | 
-| mh (nr)                                         | mh (nr)                                         | NULL             |    782 | 
-| mille (nr)                                      | mille (nr)                                      | NULL             |    289 | 
-| minerva                                         | minerva                                         | NULL             |    207 | 
-| miniboone                                       | miniboone                                       | NULL             |    119 | 
-| miniboone                                       | miniboone                                       | miniboone        |    120 | 
-| minos                                           | minos                                           | NULL             |    121 | 
-| mipp                                            | mipp                                            | NULL             |    122 | 
-| mipp (nr)                                       | mipp (nr)                                       | NULL             |    200 | 
-| mis                                             | mis                                             | NULL             |    123 | 
-| mis                                             | mis                                             | mis              |    124 | 
-| mit                                             | mit                                             | NULL             |    125 | 
-| mm                                              | mm                                              | NULL             |    126 | 
-| mm                                              | mm                                              | mm               |    127 | 
-| mpccc (nr)                                      | mpccc (nr)                                      | NULL             |    481 | 
-| mpi                                             | mpi                                             | NULL             |    128 | 
-| mrp9 (nr)                                       | mrp9 (nr)                                       | NULL             |    544 | 
-| mt5                                             | mt5                                             | NULL             |    129 | 
-| mu2e                                            | mu2e                                            | NULL             |    349 | 
-| nano011/16/2                                    | nano011/16/2                                    | NULL             |    191 | 
-| nanohub                                         | nanohub                                         | NULL             |    130 | 
-| nanohub                                         | nanohub                                         | nanohub          |    131 | 
-| national center for supercomputing applications | national center for supercomputing applications | NULL             |    132 | 
-| nebiogrid                                       | nebiogrid                                       | NULL             |    306 | 
-| nees                                            | nees                                            | NULL             |    560 | 
-| nickwu (nr)                                     | nickwu (nr)                                     | NULL             |    748 | 
-| nova                                            | nova                                            | NULL             |    384 | 
-| ntu                                             | ntu                                             | NULL             |    133 | 
-| numi                                            | numi                                            | NULL             |    190 | 
-| nwicg                                           | nwicg                                           | NULL             |    134 | 
-| nwicg                                           | nwicg                                           | nwicg            |    135 | 
-| nysgrid                                         | nysgrid                                         | NULL             |    136 | 
-| ocucs (nr)                                      | ocucs (nr)                                      | NULL             |    205 | 
-| oglesby (nr)                                    | oglesby (nr)                                    | NULL             |    312 | 
-| oiv_test1                                       | oiv_test1                                       | NULL             |    189 | 
-| ops                                             | ops                                             | NULL             |    137 | 
-| ops                                             | ops                                             | ops              |    138 | 
-| opssgm                                          | opssgm                                          | NULL             |    139 | 
-| osg                                             | osg                                             | NULL             |    140 | 
-| osg                                             | osg                                             | osg              |    141 | 
-| osgbabar00                                      | osgbabar00                                      | NULL             |    142 | 
-| osgbabar00 (nr)                                 | osgbabar00 (nr)                                 | NULL             |    403 | 
-| osgedu                                          | osgedu                                          | NULL             |    143 | 
-| osgedu                                          | osgedu                                          | osgedu           |    144 | 
-| osgu000 (nr)                                    | osgu000 (nr)                                    | NULL             |    628 | 
-| osgusatlas00                                    | osgusatlas00                                    | NULL             |    145 | 
-| other                                           | other                                           | NULL             |    146 | 
-| other EGEE                                      | other EGEE                                      | NULL             |    402 | 
-| ou2 (nr)                                        | ou2 (nr)                                        | NULL             |    418 | 
-| ouame (nr)                                      | ouame (nr)                                      | NULL             |    416 | 
-| pari (nr)                                       | pari (nr)                                       | NULL             |    572 | 
-| parii (nr)                                      | parii (nr)                                      | NULL             |    625 | 
-| park                                            | park                                            | NULL             |    147 | 
-| park                                            | park                                            | park             |    148 | 
-| patriot                                         | patriot                                         | NULL             |    149 | 
-| pegrid (nr)                                     | pegrid (nr)                                     | NULL             |    382 | 
-| pegrid0 (nr)                                    | pegrid0 (nr)                                    | NULL             |    222 | 
-| pgoyal (nr)                                     | pgoyal (nr)                                     | NULL             |    594 | 
-| ph                                              | ph                                              | NULL             |    150 | 
-| physmei (nr)                                    | physmei (nr)                                    | NULL             |    237 | 
-| pilatlas (nr)                                   | pilatlas (nr)                                   | NULL             |    545 | 
-| plukashev (nr)                                  | plukashev (nr)                                  | NULL             |    234 | 
-| pragma                                          | pragma                                          | NULL             |    151 | 
-| prdatlas (nr)                                   | prdatlas (nr)                                   | NULL             |    546 | 
-| purdue university                               | purdue university                               | NULL             |    152 | 
-| pxq (nr)                                        | pxq (nr)                                        | NULL             |    772 | 
-| qpei (nr)                                       | qpei (nr)                                       | NULL             |    581 | 
-| rdig                                            | rdig                                            | NULL             |    153 | 
-| reid (nr)                                       | reid (nr)                                       | NULL             |    260 | 
-| renci (nr)                                      | renci (nr)                                      | NULL             |    571 | 
-| rowe (nr)                                       | rowe (nr)                                       | NULL             |    238 | 
-| rsakidja (nr)                                   | rsakidja (nr)                                   | NULL             |    595 | 
-| rsv (nr)                                        | rsv (nr)                                        | NULL             |    292 | 
-| rsvuser (nr)                                    | rsvuser (nr)                                    | NULL             |    489 | 
-| sabirianov (nr)                                 | sabirianov (nr)                                 | NULL             |    355 | 
-| sabs (nr)                                       | sabs (nr)                                       | NULL             |    682 | 
-| sagrid (nr)                                     | sagrid (nr)                                     | NULL             |    457 | 
-| sahara (nr)                                     | sahara (nr)                                     | NULL             |    464 | 
-| saint (nr)                                      | saint (nr)                                      | NULL             |    460 | 
-| sbgrid                                          | sbgrid                                          | NULL             |    182 | 
-| sc (nr)                                         | sc (nr)                                         | NULL             |    479 | 
-| sc11 (nr)                                       | sc11 (nr)                                       | NULL             |    854 | 
-| scidac (nr)                                     | scidac (nr)                                     | NULL             |    506 | 
-| sdss                                            | sdss                                            | NULL             |    154 | 
-| sdss                                            | sdss                                            | sdss             |    155 | 
-| seneslab (nr)                                   | seneslab (nr)                                   | NULL             |    582 | 
-| sgmatlas (nr)                                   | sgmatlas (nr)                                   | NULL             |    454 | 
-| sgmenmr (nr)                                    | sgmenmr (nr)                                    | NULL             |    522 | 
-| sgmenmrcirmmp (nr)                              | sgmenmrcirmmp (nr)                              | NULL             |    531 | 
-| sgmsagrid (nr)                                  | sgmsagrid (nr)                                  | NULL             |    611 | 
-| shah (nr)                                       | shah (nr)                                       | NULL             |    497 | 
-| siddet                                          | siddet                                          | NULL             |    329 | 
-| siddet (nr)                                     | siddet (nr)                                     | NULL             |    251 | 
-| sipe0 (nr)                                      | sipe0 (nr)                                      | NULL             |    487 | 
-| sl (nr)                                         | sl (nr)                                         | NULL             |    783 | 
-| sm (nr)                                         | sm (nr)                                         | NULL             |    374 | 
-| soarbuild (nr)                                  | soarbuild (nr)                                  | NULL             |    606 | 
-| sp (nr)                                         | sp (nr)                                         | NULL             |    784 | 
-| sqzhu (nr)                                      | sqzhu (nr)                                      | NULL             |    749 | 
-| ss                                              | ss                                              | NULL             |    156 | 
-| ss                                              | ss                                              | ss               |    157 | 
-| star                                            | star                                            | NULL             |    158 | 
-| star                                            | star                                            | star             |    159 | 
-| sun                                             | sun                                             | NULL             |    160 | 
-| superbvo.org                                    | superbvo.org                                    | NULL             |    806 | 
-| superbvo.org (nr)                               | superbvo.org (nr)                               | NULL             |    400 | 
-| sura (nr)                                       | sura (nr)                                       | NULL             |    542 | 
-| sura0 (nr)                                      | sura0 (nr)                                      | NULL             |    774 | 
-| suragrid                                        | suragrid                                        | NULL             |    186 | 
-| suragrid (nr)                                   | suragrid (nr)                                   | NULL             |    192 | 
-| symp (nr)                                       | symp (nr)                                       | NULL             |    826 | 
-| theory                                          | theory                                          | NULL             |    188 | 
-| thomp (nr)                                      | thomp (nr)                                      | NULL             |    411 | 
-| tigre                                           | tigre                                           | NULL             |    161 | 
-| tigre (nr)                                      | tigre (nr)                                      | NULL             |    202 | 
-| tigrepool0                                      | tigrepool0                                      | NULL             |    162 | 
-| tmayeshi (nr)                                   | tmayeshi (nr)                                   | NULL             |    626 | 
-| trgrid                                          | trgrid                                          | NULL             |    163 | 
-| tubio (nr)                                      | tubio (nr)                                      | NULL             |    368 | 
-| turne (nr)                                      | turne (nr)                                      | NULL             |    529 | 
-| unknown                                         | unknown                                         | NULL             |    164 | 
-| uno (nr)                                        | uno (nr)                                        | NULL             |    284 | 
-| usatlas                                         | usatlas                                         | NULL             |    165 | 
-| usatlas                                         | usatlas                                         | usatlas          |    166 | 
-| uscms                                           | uscms                                           | NULL             |    167 | 
-| uscms                                           | uscms                                           | uscms            |    168 | 
-| uscms1 (nr)                                     | uscms1 (nr)                                     | NULL             |    208 | 
-| uscmsPool                                       | uscmsPool                                       | NULL             |    169 | 
-| uscmsPool                                       | uscmsPool                                       | uscmsPool        |    170 | 
-| uscmsPool (nr)                                  | uscmsPool (nr)                                  | NULL             |    239 | 
-| uscmsPool1                                      | uscmsPool1                                      | NULL             |    171 | 
-| uscmsPool1                                      | uscmsPool1                                      | uscmsPool1       |    172 | 
-| uscmsPool2 (nr)                                 | uscmsPool2 (nr)                                 | NULL             |    410 | 
-| uscmspool0                                      | uscmspool0                                      | NULL             |    173 | 
-| uscmspool0                                      | uscmspool0                                      | uscmspool0       |    174 | 
-| uscmspool2 (nr)                                 | uscmspool2 (nr)                                 | NULL             |    269 | 
-| users (nr)                                      | users (nr)                                      | NULL             |    817 | 
-| ux001                                           | ux001                                           | NULL             |    175 | 
-| vam                                             | vam                                             | NULL             |    176 | 
-| wang                                            | wang                                            | NULL             |    177 | 
-| wang                                            | wang                                            | wang             |    178 | 
-| webportal (nr)                                  | webportal (nr)                                  | NULL             |    586 | 
-| wenger (nr)                                     | wenger (nr)                                     | NULL             |    583 | 
-| wilso (nr)                                      | wilso (nr)                                      | NULL             |    476 | 
-| wood (nr)                                       | wood (nr)                                       | NULL             |    352 | 
-| wu (nr)                                         | wu (nr)                                         | NULL             |    224 | 
-| xzeng (nr)                                      | xzeng (nr)                                      | NULL             |    235 | 
-| xzhu (nr)                                       | xzhu (nr)                                       | NULL             |    596 | 
-| yang (nr)                                       | yang (nr)                                       | NULL             |    211 | 
-| yethiraj (nr)                                   | yethiraj (nr)                                   | NULL             |    597 | 
-| yijieli (nr)                                    | yijieli (nr)                                    | NULL             |    622 | 
-| yj7 (nr)                                        | yj7 (nr)                                        | NULL             |    800 | 
-| yru1 (nr)                                       | yru1 (nr)                                       | NULL             |    687 | 
-| yuguo1 (nr)                                     | yuguo1 (nr)                                     | NULL             |    510 | 
-| zeng (nr)                                       | zeng (nr)                                       | NULL             |    248 | 
-| zeus                                            | zeus                                            | NULL             |    179 | 
-| zeus                                            | zeus                                            | zeus             |    180 | 
-| zeus (nr)                                       | zeus (nr)                                       | NULL             |    193 | 
-| zhijun (nr)                                     | zhijun (nr)                                     | NULL             |    598 | 
-| zhou (nr)                                       | zhou (nr)                                       | NULL             |    444 | 
-| zorba (nr)                                      | zorba (nr)                                      | NULL             |    599 | 
-| zwu7 (nr)                                       | zwu7 (nr)                                       | NULL             |    669 | 
-+-------------------------------------------------+-------------------------------------------------+------------------+--------+
++-------------------------------------------------+------+--------+-------------------------------------------------+------------------+
+| GratiaVO                                        | void | corrid | ProbeVO                                         | ReportableVOName |
++-------------------------------------------------+------+--------+-------------------------------------------------+------------------+
+| /cdf/Role=NULL/Capability=NULL                  |  206 |      1 | /cdf/Role=NULL/Capability=NULL                  | NULL             | 
+| /cdf/glidecaf/Role=namcaf/Capability=NULL       |  207 |      2 | /cdf/glidecaf/Role=namcaf/Capability=NULL       | NULL             | 
+| 1178843                                         |   79 |      3 | 1178843                                         | NULL             | 
+| 1180053                                         |   80 |      4 | 1180053                                         | NULL             | 
+| 1183335                                         |   81 |      5 | 1183335                                         | NULL             | 
+| 1189588                                         |  175 |      6 | 1189588                                         | NULL             | 
+| 1198495                                         |  193 |      7 | 1198495                                         | NULL             | 
+| 1202574                                         |  198 |      8 | 1202574                                         | NULL             | 
+| 1203635                                         |  204 |      9 | 1203635                                         | NULL             | 
+| 1204018                                         |  205 |     10 | 1204018                                         | NULL             | 
+| 492                                             |   82 |     11 | 492                                             | NULL             | 
+| 568                                             |  169 |     12 | 568                                             | NULL             | 
+| ATLAS                                           |   83 |     13 | ATLAS                                           | NULL             | 
+| ATLAS (nr)                                      |  515 |    488 | ATLAS (nr)                                      | NULL             | 
+| CMS                                             |   84 |     14 | CMS                                             | NULL             | 
+| CompBioGrid                                     |   85 |     15 | CompBioGrid                                     | NULL             | 
+| CompBioGrid (nr)                                |  255 |    228 | CompBioGrid (nr)                                | NULL             | 
+| DOSAR                                           |   86 |     16 | DOSAR                                           | NULL             | 
+| DZero                                           |   87 |     17 | DZero                                           | NULL             | 
+| Engage                                          |   88 |     18 | Engage                                          | NULL             | 
+| Engage                                          |   88 |     19 | Engage                                          | Engage           | 
+| Engage (nr)                                     |  254 |    227 | Engage (nr)                                     | NULL             | 
+| GLOW                                            |   89 |     20 | GLOW                                            | NULL             | 
+| GLOW (nr)                                       |  414 |    387 | GLOW (nr)                                       | NULL             | 
+| Gluex (nr)                                      |  410 |    383 | Gluex (nr)                                      | NULL             | 
+| GridEx                                          |   90 |     21 | GridEx                                          | NULL             | 
+| GridUNESP (nr)                                  |  420 |    393 | GridUNESP (nr)                                  | NULL             | 
+| LIGO                                            |   91 |     22 | LIGO                                            | NULL             | 
+| LSST (nr)                                       |  407 |    380 | LSST (nr)                                       | NULL             | 
+| MIS                                             |   92 |     23 | MIS                                             | NULL             | 
+| NEBioGrid (nr)                                  |  253 |    226 | NEBioGrid (nr)                                  | NULL             | 
+| NWICG (nr)                                      |  236 |    209 | NWICG (nr)                                      | NULL             | 
+| Other                                           |  194 |     24 | Other                                           | NULL             | 
+| RSV                                             |  210 |    183 | RSV                                             | NULL             | 
+| RSV (nr)                                        |  223 |    196 | RSV (nr)                                        | NULL             | 
+| SBGrid (nr)                                     |  243 |    216 | SBGrid (nr)                                     | NULL             | 
+| SGVO (nr)                                       |  823 |    796 | SGVO (nr)                                       | NULL             | 
+| TG-ASC050039N (nr)                              |  671 |    644 | TG-ASC050039N (nr)                              | NULL             | 
+| TG-AST070052N (nr)                              |  796 |    769 | TG-AST070052N (nr)                              | NULL             | 
+| TG-AST090100 (nr)                               |  763 |    736 | TG-AST090100 (nr)                               | NULL             | 
+| TG-AST100043 (nr)                               |  754 |    727 | TG-AST100043 (nr)                               | NULL             | 
+| TG-ATM010005N (nr)                              |  788 |    761 | TG-ATM010005N (nr)                              | NULL             | 
+| TG-ATM090002 (nr)                               |  765 |    738 | TG-ATM090002 (nr)                               | NULL             | 
+| TG-ATM090060 (nr)                               |  797 |    770 | TG-ATM090060 (nr)                               | NULL             | 
+| TG-ATM110019 (nr)                               |  698 |    671 | TG-ATM110019 (nr)                               | NULL             | 
+| TG-CDA100007 (nr)                               |  684 |    657 | TG-CDA100007 (nr)                               | NULL             | 
+| TG-CDA110012 (nr)                               |  685 |    658 | TG-CDA110012 (nr)                               | NULL             | 
+| TG-CHE070074N (nr)                              |  720 |    693 | TG-CHE070074N (nr)                              | NULL             | 
+| TG-CHE080066N (nr)                              |  686 |    659 | TG-CHE080066N (nr)                              | NULL             | 
+| TG-CHE090006 (nr)                               |  728 |    701 | TG-CHE090006 (nr)                               | NULL             | 
+| TG-CHE100058 (nr)                               |  700 |    673 | TG-CHE100058 (nr)                               | NULL             | 
+| TG-CHE100095 (nr)                               |  673 |    646 | TG-CHE100095 (nr)                               | NULL             | 
+| TG-CHE100113 (nr)                               |  742 |    715 | TG-CHE100113 (nr)                               | NULL             | 
+| TG-CHE110064 (nr)                               |  674 |    647 | TG-CHE110064 (nr)                               | NULL             | 
+| TG-CTS070034N (nr)                              |  688 |    661 | TG-CTS070034N (nr)                              | NULL             | 
+| TG-CTS090062 (nr)                               |  746 |    719 | TG-CTS090062 (nr)                               | NULL             | 
+| TG-CTS100012 (nr)                               |  701 |    674 | TG-CTS100012 (nr)                               | NULL             | 
+| TG-CTS100026 (nr)                               |  729 |    702 | TG-CTS100026 (nr)                               | NULL             | 
+| TG-CTS100027 (nr)                               |  800 |    773 | TG-CTS100027 (nr)                               | NULL             | 
+| TG-DMR080070 (nr)                               |  702 |    675 | TG-DMR080070 (nr)                               | NULL             | 
+| TG-DMR100080 (nr)                               |  768 |    741 | TG-DMR100080 (nr)                               | NULL             | 
+| TG-DMR110013 (nr)                               |  689 |    662 | TG-DMR110013 (nr)                               | NULL             | 
+| TG-DMR110027 (nr)                               |  802 |    775 | TG-DMR110027 (nr)                               | NULL             | 
+| TG-DMR110052 (nr)                               |  703 |    676 | TG-DMR110052 (nr)                               | NULL             | 
+| TG-DMR110072 (nr)                               |  690 |    663 | TG-DMR110072 (nr)                               | NULL             | 
+| TG-DMR110095 (nr)                               |  722 |    695 | TG-DMR110095 (nr)                               | NULL             | 
+| TG-DMS100018 (nr)                               |  747 |    720 | TG-DMS100018 (nr)                               | NULL             | 
+| TG-DMS110002 (nr)                               |  757 |    730 | TG-DMS110002 (nr)                               | NULL             | 
+| TG-EAR080018T (nr)                              |  691 |    664 | TG-EAR080018T (nr)                              | NULL             | 
+| TG-EAR110015 (nr)                               |  676 |    649 | TG-EAR110015 (nr)                               | NULL             | 
+| TG-IBN050000N (nr)                              |  704 |    677 | TG-IBN050000N (nr)                              | NULL             | 
+| TG-IBN090004 (nr)                               |  730 |    703 | TG-IBN090004 (nr)                               | NULL             | 
+| TG-IBN100006 (nr)                               |  705 |    678 | TG-IBN100006 (nr)                               | NULL             | 
+| TG-MCA03S007 (nr)                               |  791 |    764 | TG-MCA03S007 (nr)                               | NULL             | 
+| TG-MCA05S010 (nr)                               |  860 |    833 | TG-MCA05S010 (nr)                               | NULL             | 
+| TG-MCA07S022 (nr)                               |  814 |    787 | TG-MCA07S022 (nr)                               | NULL             | 
+| TG-MCA07S029 (nr)                               |  792 |    765 | TG-MCA07S029 (nr)                               | NULL             | 
+| TG-MCB040051N (nr)                              |  749 |    722 | TG-MCB040051N (nr)                              | NULL             | 
+| TG-MCB070015N (nr)                              |  710 |    683 | TG-MCB070015N (nr)                              | NULL             | 
+| TG-MCB090163 (nr)                               |  692 |    665 | TG-MCB090163 (nr)                               | NULL             | 
+| TG-MCB110037 (nr)                               |  793 |    766 | TG-MCB110037 (nr)                               | NULL             | 
+| TG-MCB110072 (nr)                               |  677 |    650 | TG-MCB110072 (nr)                               | NULL             | 
+| TG-MCB110112 (nr)                               |  759 |    732 | TG-MCB110112 (nr)                               | NULL             | 
+| TG-PHY100030 (nr)                               |  716 |    689 | TG-PHY100030 (nr)                               | NULL             | 
+| TG-PHY110005 (nr)                               |  771 |    744 | TG-PHY110005 (nr)                               | NULL             | 
+| TG-PHY110010 (nr)                               |  679 |    652 | TG-PHY110010 (nr)                               | NULL             | 
+| TG-PHY110021 (nr)                               |  712 |    685 | TG-PHY110021 (nr)                               | NULL             | 
+| TG-PHY110034 (nr)                               |  680 |    653 | TG-PHY110034 (nr)                               | NULL             | 
+| TG-STA060008N (nr)                              |  681 |    654 | TG-STA060008N (nr)                              | NULL             | 
+| TGYRO (nr)                                      |  402 |    375 | TGYRO (nr)                                      | NULL             | 
+| TIGRE (nr)                                      |  239 |    212 | TIGRE (nr)                                      | NULL             | 
+| UT-NTNL0033 (nr)                                |  883 |    856 | UT-NTNL0033 (nr)                                | NULL             | 
+| Unknown                                         |   93 |     25 | Unknown                                         | NULL             | 
+| Unknown                                         |   93 |     26 | Unknown                                         | Unknown          | 
+| Unknown (nr)                                    |  467 |    440 | Unknown (nr)                                    | NULL             | 
+| aa (nr)                                         |  351 |    324 | aa (nr)                                         | NULL             | 
+| ab (nr)                                         |  803 |    776 | ab (nr)                                         | NULL             | 
+| ac (nr)                                         |  804 |    777 | ac (nr)                                         | NULL             | 
+| accelerator                                     |  208 |    181 | accelerator                                     | NULL             | 
+| aceace                                          |  211 |    184 | aceace                                          | NULL             | 
+| aceace (nr)                                     |  225 |    198 | aceace (nr)                                     | NULL             | 
+| adesmet (nr)                                    |  636 |    609 | adesmet (nr)                                    | NULL             | 
+| ahouston (nr)                                   |  314 |    287 | ahouston (nr)                                   | NULL             | 
+| alice                                           |  244 |    217 | alice                                           | NULL             | 
+| along (nr)                                      |  479 |    452 | along (nr)                                      | NULL             | 
+| ankur (nr)                                      |  639 |    612 | ankur (nr)                                      | NULL             | 
+| ap                                              |  178 |     27 | ap                                              | NULL             | 
+| argoneut                                        |  574 |    547 | argoneut                                        | NULL             | 
+| armino (nr)                                     |  880 |    853 | armino (nr)                                     | NULL             | 
+| aru0                                            |  171 |     28 | aru0                                            | NULL             | 
+| as                                              |  195 |     29 | as                                              | NULL             | 
+| as2 (nr)                                        |  512 |    485 | as2 (nr)                                        | NULL             | 
+| atlas                                           |  185 |     30 | atlas                                           | NULL             | 
+| atlas (nr)                                      |  226 |    199 | atlas (nr)                                      | NULL             | 
+| atlasprd                                        |  189 |     31 | atlasprd                                        | NULL             | 
+| atlassgm                                        |  186 |     32 | atlassgm                                        | NULL             | 
+| auger                                           |   94 |     33 | auger                                           | NULL             | 
+| auger                                           |   94 |     34 | auger                                           | auger            | 
+| auger (nr)                                      |  444 |    417 | auger (nr)                                      | NULL             | 
+| austriangrid                                    |   95 |     35 | austriangrid                                    | NULL             | 
+| avery (nr)                                      |  889 |    862 | avery (nr)                                      | NULL             | 
+| aw (nr)                                         |  805 |    778 | aw (nr)                                         | NULL             | 
+| baru-tro (nr)                                   |  886 |    859 | baru-tro (nr)                                   | NULL             | 
+| batelaan (nr)                                   |  281 |    254 | batelaan (nr)                                   | NULL             | 
+| begrid                                          |   96 |     36 | begrid                                          | NULL             | 
+| belashchenko (nr)                               |  274 |    247 | belashchenko (nr)                               | NULL             | 
+| belle                                           |  507 |    480 | belle                                           | NULL             | 
+| bgs0 (nr)                                       |  650 |    623 | bgs0 (nr)                                       | NULL             | 
+| biocore (nr)                                    |  324 |    297 | biocore (nr)                                    | NULL             | 
+| biomed (nr)                                     |  272 |    245 | biomed (nr)                                     | NULL             | 
+| bjs (nr)                                        |  389 |    362 | bjs (nr)                                        | NULL             | 
+| blane                                           |  170 |     37 | blane                                           | NULL             | 
+| bmueller (nr)                                   |  733 |    706 | bmueller (nr)                                   | NULL             | 
+| bockelman (nr)                                  |  835 |    808 | bockelman (nr)                                  | NULL             | 
+| bsc-cns                                         |  200 |     38 | bsc-cns                                         | NULL             | 
+| bt (nr)                                         |  607 |    580 | bt (nr)                                         | NULL             | 
+| c670 (nr)                                       |  504 |    477 | c670 (nr)                                       | NULL             | 
+| camcs (nr)                                      |  233 |    206 | camcs (nr)                                      | NULL             | 
+| cdf                                             |   97 |     39 | cdf                                             | NULL             | 
+| cdf                                             |   97 |     40 | cdf                                             | cdf              | 
+| cdms                                            |   98 |     41 | cdms                                            | NULL             | 
+| cdms                                            |   98 |     42 | cdms                                            | cdms             | 
+| cern                                            |   99 |     43 | cern                                            | NULL             | 
+| cern                                            |   99 |     44 | cern                                            | cern             | 
+| chandra (nr)                                    |  283 |    256 | chandra (nr)                                    | NULL             | 
+| chem9                                           |  184 |     45 | chem9                                           | NULL             | 
+| chen                                            |  214 |    187 | chen                                            | NULL             | 
+| chen (nr)                                       |  222 |    195 | chen (nr)                                       | NULL             | 
+| choi (nr)                                       |  421 |    394 | choi (nr)                                       | NULL             | 
+| choueiry (nr)                                   |  259 |    232 | choueiry (nr)                                   | NULL             | 
+| ciemat                                          |  100 |     46 | ciemat                                          | NULL             | 
+| cigi                                            |  191 |     47 | cigi                                            | NULL             | 
+| ck (nr)                                         |  505 |    478 | ck (nr)                                         | NULL             | 
+| cmmap (nr)                                      |  559 |    532 | cmmap (nr)                                      | NULL             | 
+| cms                                             |  101 |     48 | cms                                             | NULL             | 
+| cms                                             |  101 |     49 | cms                                             | cms              | 
+| cms0 (nr)                                       |  497 |    470 | cms0 (nr)                                       | NULL             | 
+| cms1 (nr)                                       |  495 |    468 | cms1 (nr)                                       | NULL             | 
+| cms2 (nr)                                       |  519 |    492 | cms2 (nr)                                       | NULL             | 
+| compbiogrid                                     |  102 |     50 | compbiogrid                                     | NULL             | 
+| compbiogrid                                     |  102 |     51 | compbiogrid                                     | compbiogrid      | 
+| csci4440 (nr)                                   |  320 |    293 | csci4440 (nr)                                   | NULL             | 
+| cse435 (nr)                                     |  841 |    814 | cse435 (nr)                                     | NULL             | 
+| cse496 (nr)                                     |  370 |    343 | cse496 (nr)                                     | NULL             | 
+| cstaff (nr)                                     |  848 |    821 | cstaff (nr)                                     | NULL             | 
+| cweiss (nr)                                     |  745 |    718 | cweiss (nr)                                     | NULL             | 
+| cx32 (nr)                                       |  884 |    857 | cx32 (nr)                                       | NULL             | 
+| cyt701 (nr)                                     |  252 |    225 | cyt701 (nr)                                     | NULL             | 
+| danb (nr)                                       |  659 |    632 | danb (nr)                                       | NULL             | 
+| danielpark2 (nr)                                |  493 |    466 | danielpark2 (nr)                                | NULL             | 
+| datagrid-es                                     |  103 |     52 | datagrid-es                                     | NULL             | 
+| ddowney (nr)                                    |  338 |    311 | ddowney (nr)                                    | NULL             | 
+| dech (nr)                                       |  492 |    465 | dech (nr)                                       | NULL             | 
+| default (nr)                                    |  540 |    513 | default (nr)                                    | NULL             | 
+| des                                             |  104 |     53 | des                                             | NULL             | 
+| des                                             |  104 |     54 | des                                             | des              | 
+| dhinckley (nr)                                  |  631 |    604 | dhinckley (nr)                                  | NULL             | 
+| dhkim1                                          |  199 |     55 | dhkim1                                          | NULL             | 
+| dosar                                           |  105 |     56 | dosar                                           | NULL             | 
+| dosar                                           |  105 |     57 | dosar                                           | dosar            | 
+| dteam                                           |  106 |     58 | dteam                                           | NULL             | 
+| dteam                                           |  106 |     59 | dteam                                           | dteam            | 
+| dteam (nr)                                      |  230 |    203 | dteam (nr)                                      | NULL             | 
+| dteamprd                                        |  188 |     60 | dteamprd                                        | NULL             | 
+| ducharme (nr)                                   |  310 |    283 | ducharme (nr)                                   | NULL             | 
+| dyna (nr)                                       |  888 |    861 | dyna (nr)                                       | NULL             | 
+| dzenis (nr)                                     |  335 |    308 | dzenis (nr)                                     | NULL             | 
+| dzero                                           |  107 |     61 | dzero                                           | NULL             | 
+| dzero                                           |  107 |     62 | dzero                                           | dzero            | 
+| ecucs (nr)                                      |  412 |    385 | ecucs (nr)                                      | NULL             | 
+| el (nr)                                         |  807 |    780 | el (nr)                                         | NULL             | 
+| engage                                          |  108 |     63 | engage                                          | NULL             | 
+| engage                                          |  108 |     64 | engage                                          | engage           | 
+| engagement                                      |  109 |     65 | engagement                                      | NULL             | 
+| enmr (nr)                                       |  523 |    496 | enmr (nr)                                       | NULL             | 
+| epacg (nr)                                      |  637 |    610 | epacg (nr)                                      | NULL             | 
+| escience                                        |  110 |     66 | escience                                        | NULL             | 
+| evayi (nr)                                      |  525 |    498 | evayi (nr)                                      | NULL             | 
+| example (nr)                                    |  531 |    504 | example (nr)                                    | NULL             | 
+| external (nr)                                   |  597 |    570 | external (nr)                                   | NULL             | 
+| fabrikant (nr)                                  |  380 |    353 | fabrikant (nr)                                  | NULL             | 
+| fermilab                                        |  111 |     67 | fermilab                                        | NULL             | 
+| fermilab                                        |  111 |     68 | fermilab                                        | fermilab         | 
+| fermilab-test                                   |  112 |     69 | fermilab-test                                   | NULL             | 
+| fermilab-test (nr)                              |  246 |    219 | fermilab-test (nr)                              | NULL             | 
+| fgstore                                         |  361 |    334 | fgstore                                         | NULL             | 
+| fgstore (nr)                                    |  242 |    215 | fgstore (nr)                                    | NULL             | 
+| fgtest                                          |  428 |    401 | fgtest                                          | NULL             | 
+| fgtest (nr)                                     |  322 |    295 | fgtest (nr)                                     | NULL             | 
+| fmri                                            |  167 |     70 | fmri                                            | NULL             | 
+| fmri                                            |  167 |     71 | fmri                                            | fmri             | 
+| fox (nr)                                        |  660 |    633 | fox (nr)                                        | NULL             | 
+| furtney (nr)                                    |  289 |    262 | furtney (nr)                                    | NULL             | 
+| gabi (nr)                                       |  575 |    548 | gabi (nr)                                       | NULL             | 
+| gadu                                            |  113 |     72 | gadu                                            | NULL             | 
+| gadu                                            |  113 |     73 | gadu                                            | gadu             | 
+| gay (nr)                                        |  345 |    318 | gay (nr)                                        | NULL             | 
+| gcedu                                           |  878 |    851 | gcedu                                           | NULL             | 
+| gcvo                                            |  874 |    847 | gcvo                                            | NULL             | 
+| geant4                                          |  114 |     74 | geant4                                          | NULL             | 
+| geant4                                          |  114 |     75 | geant4                                          | geant4           | 
+| genec (nr)                                      |  669 |    642 | genec (nr)                                      | NULL             | 
+| germangrid                                      |  115 |     76 | germangrid                                      | NULL             | 
+| gilda (nr)                                      |  399 |    372 | gilda (nr)                                      | NULL             | 
+| gin.ggf.org                                     |  116 |     77 | gin.ggf.org                                     | NULL             | 
+| gin.ggf.org                                     |  116 |     78 | gin.ggf.org                                     | gin.ggf.org      | 
+| glideinwms (nr)                                 |  836 |    809 | glideinwms (nr)                                 | NULL             | 
+| glow                                            |  117 |     79 | glow                                            | NULL             | 
+| glow                                            |  117 |     80 | glow                                            | glow             | 
+| gluex                                           |  366 |    339 | gluex                                           | NULL             | 
+| gluex (nr)                                      |  362 |    335 | gluex (nr)                                      | NULL             | 
+| goddard (nr)                                    |  263 |    236 | goddard (nr)                                    | NULL             | 
+| gpn                                             |  118 |     81 | gpn                                             | NULL             | 
+| gpn                                             |  118 |     82 | gpn                                             | gpn              | 
+| grase                                           |  119 |     83 | grase                                           | NULL             | 
+| grase                                           |  119 |     84 | grase                                           | grase            | 
+| grid                                            |  120 |     85 | grid                                            | NULL             | 
+| grid (nr)                                       |  821 |    794 | grid (nr)                                       | NULL             | 
+| grid-fr                                         |  121 |     86 | grid-fr                                         | NULL             | 
+| grid14 (nr)                                     |  815 |    788 | grid14 (nr)                                     | NULL             | 
+| grid15 (nr)                                     |  887 |    860 | grid15 (nr)                                     | NULL             | 
+| grid16 (nr)                                     |  822 |    795 | grid16 (nr)                                     | NULL             | 
+| grid17 (nr)                                     |  816 |    789 | grid17 (nr)                                     | NULL             | 
+| gridex                                          |  122 |     87 | gridex                                          | NULL             | 
+| gridex                                          |  122 |     88 | gridex                                          | gridex           | 
+| gridex (nr)                                     |  240 |    213 | gridex (nr)                                     | NULL             | 
+| gridunesp                                       |  441 |    414 | gridunesp                                       | NULL             | 
+| grow                                            |  123 |     89 | grow                                            | NULL             | 
+| grow                                            |  123 |     90 | grow                                            | grow             | 
+| gthain (nr)                                     |  657 |    630 | gthain (nr)                                     | NULL             | 
+| harbison (nr)                                   |  294 |    267 | harbison (nr)                                   | NULL             | 
+| hcc                                             |  432 |    405 | hcc                                             | NULL             | 
+| hep                                             |  124 |     91 | hep                                             | NULL             | 
+| hep                                             |  124 |     92 | hep                                             | hep              | 
+| hguanhua (nr)                                   |  713 |    686 | hguanhua (nr)                                   | NULL             | 
+| ht (nr)                                         |  784 |    757 | ht (nr)                                         | NULL             | 
+| huang (nr)                                      |  535 |    508 | huang (nr)                                      | NULL             | 
+| huihui (nr)                                     |  785 |    758 | huihui (nr)                                     | NULL             | 
+| hypercp                                         |  125 |     93 | hypercp                                         | NULL             | 
+| hypercp                                         |  125 |     94 | hypercp                                         | hypercp          | 
+| iVDgL                                           |  126 |     95 | iVDgL                                           | NULL             | 
+| icbr                                            |  212 |    185 | icbr                                            | NULL             | 
+| icbr (nr)                                       |  224 |    197 | icbr (nr)                                       | NULL             | 
+| icecube                                         |  237 |    210 | icecube                                         | NULL             | 
+| idb (nr)                                        |  260 |    233 | idb (nr)                                        | NULL             | 
+| ifh1                                            |  181 |     96 | ifh1                                            | NULL             | 
+| ilc                                             |  127 |     97 | ilc                                             | NULL             | 
+| ilc                                             |  127 |     98 | ilc                                             | ilc              | 
+| ilc4c                                           |  360 |    333 | ilc4c                                           | NULL             | 
+| ilc4c (nr)                                      |  257 |    230 | ilc4c (nr)                                      | NULL             | 
+| ilddet                                          |  388 |    361 | ilddet                                          | NULL             | 
+| infn                                            |  128 |     99 | infn                                            | NULL             | 
+| infn                                            |  128 |    100 | infn                                            | infn             | 
+| ivdgl                                           |  129 |    101 | ivdgl                                           | NULL             | 
+| ivdgl                                           |  129 |    102 | ivdgl                                           | ivdgl            | 
+| ivdgl (nr)                                      |  231 |    204 | ivdgl (nr)                                      | NULL             | 
+| james                                           |  179 |    103 | james                                           | NULL             | 
+| jcd2                                            |  196 |    104 | jcd2                                            | NULL             | 
+| jchristianson (nr)                              |  658 |    631 | jchristianson (nr)                              | NULL             | 
+| jcyin (nr)                                      |  483 |    456 | jcyin (nr)                                      | NULL             | 
+| jd (nr)                                         |  808 |    781 | jd (nr)                                         | NULL             | 
+| jdem                                            |  241 |    214 | jdem                                            | NULL             | 
+| jen7                                            |  183 |    105 | jen7                                            | NULL             | 
+| jiang (nr)                                      |  286 |    259 | jiang (nr)                                      | NULL             | 
+| jjs (nr)                                        |  245 |    218 | jjs (nr)                                        | NULL             | 
+| jkong (nr)                                      |  882 |    855 | jkong (nr)                                      | NULL             | 
+| jl (nr)                                         |  439 |    412 | jl (nr)                                         | NULL             | 
+| jmb (nr)                                        |  611 |    584 | jmb (nr)                                        | NULL             | 
+| jmcdaniel (nr)                                  |  617 |    590 | jmcdaniel (nr)                                  | NULL             | 
+| jmondal (nr)                                    |  618 |    591 | jmondal (nr)                                    | NULL             | 
+| jms21 (nr)                                      |  513 |    486 | jms21 (nr)                                      | NULL             | 
+| johns (nr)                                      |  247 |    220 | johns (nr)                                      | NULL             | 
+| js (nr)                                         |  256 |    229 | js (nr)                                         | NULL             | 
+| k47k4 (nr)                                      |  538 |    511 | k47k4 (nr)                                      | NULL             | 
+| kfki rmki ca                                    |  130 |    106 | kfki rmki ca                                    | NULL             | 
+| kim                                             |  173 |    107 | kim                                             | NULL             | 
+| king (nr)                                       |  592 |    565 | king (nr)                                       | NULL             | 
+| km                                              |  131 |    108 | km                                              | NULL             | 
+| ktev                                            |  132 |    109 | ktev                                            | NULL             | 
+| ktev                                            |  132 |    110 | ktev                                            | ktev             | 
+| kuang (nr)                                      |  643 |    616 | kuang (nr)                                      | NULL             | 
+| lbne                                            |  466 |    439 | lbne                                            | NULL             | 
+| lee                                             |  133 |    111 | lee                                             | NULL             | 
+| lee                                             |  133 |    112 | lee                                             | lee              | 
+| lee (nr)                                        |  547 |    520 | lee (nr)                                        | NULL             | 
+| leiliz (nr)                                     |  786 |    759 | leiliz (nr)                                     | NULL             | 
+| lhaupert (nr)                                   |  773 |    746 | lhaupert (nr)                                   | NULL             | 
+| lhcb                                            |  134 |    113 | lhcb                                            | NULL             | 
+| lhcb                                            |  134 |    114 | lhcb                                            | lhcb             | 
+| lhcb (nr)                                       |  221 |    194 | lhcb (nr)                                       | NULL             | 
+| li (nr)                                         |  248 |    221 | li (nr)                                         | NULL             | 
+| ligo                                            |  135 |    115 | ligo                                            | NULL             | 
+| ligo                                            |  135 |    116 | ligo                                            | ligo             | 
+| ligy (nr)                                       |  442 |    415 | ligy (nr)                                       | NULL             | 
+| lin (nr)                                        |  406 |    379 | lin (nr)                                        | NULL             | 
+| lipca                                           |  136 |    117 | lipca                                           | NULL             | 
+| liu (nr)                                        |  545 |    518 | liu (nr)                                        | NULL             | 
+| llzhang (nr)                                    |  647 |    620 | llzhang (nr)                                    | NULL             | 
+| local (nr)                                      |  435 |    408 | local (nr)                                      | NULL             | 
+| loni_binding04 (nr)                             |  450 |    423 | loni_binding04 (nr)                             | NULL             | 
+| loni_cactus05 (nr)                              |  449 |    422 | loni_cactus05 (nr)                              | NULL             | 
+| loni_cavitands (nr)                             |  447 |    420 | loni_cavitands (nr)                             | NULL             | 
+| loni_coptah (nr)                                |  459 |    432 | loni_coptah (nr)                                | NULL             | 
+| loni_density003 (nr)                            |  455 |    428 | loni_density003 (nr)                            | NULL             | 
+| loni_hep_09 (nr)                                |  453 |    426 | loni_hep_09 (nr)                                | NULL             | 
+| loni_i3sim04 (nr)                               |  448 |    421 | loni_i3sim04 (nr)                               | NULL             | 
+| loni_jhabig09 (nr)                              |  458 |    431 | loni_jhabig09 (nr)                              | NULL             | 
+| loni_metrics_09 (nr)                            |  454 |    427 | loni_metrics_09 (nr)                            | NULL             | 
+| loni_qcp_dms09 (nr)                             |  456 |    429 | loni_qcp_dms09 (nr)                             | NULL             | 
+| loni_resonator3 (nr)                            |  461 |    434 | loni_resonator3 (nr)                            | NULL             | 
+| loni_rhall09_1 (nr)                             |  446 |    419 | loni_rhall09_1 (nr)                             | NULL             | 
+| lsl1 (nr)                                       |  489 |    462 | lsl1 (nr)                                       | NULL             | 
+| lslipche (nr)                                   |  794 |    767 | lslipche (nr)                                   | NULL             | 
+| lsst                                            |  425 |    398 | lsst                                            | NULL             | 
+| lwang (nr)                                      |  619 |    592 | lwang (nr)                                      | NULL             | 
+| m1248 (nr)                                      |  736 |    709 | m1248 (nr)                                      | NULL             | 
+| m670 (nr)                                       |  585 |    558 | m670 (nr)                                       | NULL             | 
+| manoj (nr)                                      |  620 |    593 | manoj (nr)                                      | NULL             | 
+| map                                             |  877 |    850 | map                                             | NULL             | 
+| map (nr)                                        |  522 |    495 | map (nr)                                        | NULL             | 
+| mariachi                                        |  250 |    223 | mariachi                                        | NULL             | 
+| matt (nr)                                       |  488 |    461 | matt (nr)                                       | NULL             | 
+| mb                                              |  203 |    118 | mb                                              | NULL             | 
+| mb (nr)                                         |  228 |    201 | mb (nr)                                         | NULL             | 
+| mech950 (nr)                                    |  273 |    246 | mech950 (nr)                                    | NULL             | 
+| mei (nr)                                        |  313 |    286 | mei (nr)                                        | NULL             | 
+| mh (nr)                                         |  809 |    782 | mh (nr)                                         | NULL             | 
+| mille (nr)                                      |  316 |    289 | mille (nr)                                      | NULL             | 
+| minerva                                         |  234 |    207 | minerva                                         | NULL             | 
+| miniboone                                       |  137 |    119 | miniboone                                       | NULL             | 
+| miniboone                                       |  137 |    120 | miniboone                                       | miniboone        | 
+| minos                                           |  138 |    121 | minos                                           | NULL             | 
+| mipp                                            |  139 |    122 | mipp                                            | NULL             | 
+| mipp (nr)                                       |  227 |    200 | mipp (nr)                                       | NULL             | 
+| mis                                             |  140 |    123 | mis                                             | NULL             | 
+| mis                                             |  140 |    124 | mis                                             | mis              | 
+| mit                                             |  172 |    125 | mit                                             | NULL             | 
+| mm                                              |  141 |    126 | mm                                              | NULL             | 
+| mm                                              |  141 |    127 | mm                                              | mm               | 
+| mpccc (nr)                                      |  508 |    481 | mpccc (nr)                                      | NULL             | 
+| mpi                                             |  180 |    128 | mpi                                             | NULL             | 
+| mrp9 (nr)                                       |  571 |    544 | mrp9 (nr)                                       | NULL             | 
+| mt5                                             |  177 |    129 | mt5                                             | NULL             | 
+| mu2e                                            |  376 |    349 | mu2e                                            | NULL             | 
+| nano011/16/2                                    |  218 |    191 | nano011/16/2                                    | NULL             | 
+| nanohub                                         |  142 |    130 | nanohub                                         | NULL             | 
+| nanohub                                         |  142 |    131 | nanohub                                         | nanohub          | 
+| national center for supercomputing applications |  143 |    132 | national center for supercomputing applications | NULL             | 
+| nebiogrid                                       |  333 |    306 | nebiogrid                                       | NULL             | 
+| nees                                            |  587 |    560 | nees                                            | NULL             | 
+| nickwu (nr)                                     |  775 |    748 | nickwu (nr)                                     | NULL             | 
+| nova                                            |  411 |    384 | nova                                            | NULL             | 
+| ntu                                             |  144 |    133 | ntu                                             | NULL             | 
+| numi                                            |  217 |    190 | numi                                            | NULL             | 
+| nwicg                                           |  145 |    134 | nwicg                                           | NULL             | 
+| nwicg                                           |  145 |    135 | nwicg                                           | nwicg            | 
+| nysgrid                                         |  190 |    136 | nysgrid                                         | NULL             | 
+| ocucs (nr)                                      |  232 |    205 | ocucs (nr)                                      | NULL             | 
+| oglesby (nr)                                    |  339 |    312 | oglesby (nr)                                    | NULL             | 
+| oiv_test1                                       |  216 |    189 | oiv_test1                                       | NULL             | 
+| ops                                             |  146 |    137 | ops                                             | NULL             | 
+| ops                                             |  146 |    138 | ops                                             | ops              | 
+| opssgm                                          |  187 |    139 | opssgm                                          | NULL             | 
+| osg                                             |  147 |    140 | osg                                             | NULL             | 
+| osg                                             |  147 |    141 | osg                                             | osg              | 
+| osgbabar00                                      |  176 |    142 | osgbabar00                                      | NULL             | 
+| osgbabar00 (nr)                                 |  430 |    403 | osgbabar00 (nr)                                 | NULL             | 
+| osgedu                                          |  148 |    143 | osgedu                                          | NULL             | 
+| osgedu                                          |  148 |    144 | osgedu                                          | osgedu           | 
+| osgu000 (nr)                                    |  655 |    628 | osgu000 (nr)                                    | NULL             | 
+| osgusatlas00                                    |  174 |    145 | osgusatlas00                                    | NULL             | 
+| other                                           |  202 |    146 | other                                           | NULL             | 
+| other EGEE                                      |  429 |    402 | other EGEE                                      | NULL             | 
+| ou2 (nr)                                        |  445 |    418 | ou2 (nr)                                        | NULL             | 
+| ouame (nr)                                      |  443 |    416 | ouame (nr)                                      | NULL             | 
+| pari (nr)                                       |  599 |    572 | pari (nr)                                       | NULL             | 
+| parii (nr)                                      |  652 |    625 | parii (nr)                                      | NULL             | 
+| park                                            |  149 |    147 | park                                            | NULL             | 
+| park                                            |  149 |    148 | park                                            | park             | 
+| patriot                                         |  150 |    149 | patriot                                         | NULL             | 
+| pegrid (nr)                                     |  409 |    382 | pegrid (nr)                                     | NULL             | 
+| pegrid0 (nr)                                    |  249 |    222 | pegrid0 (nr)                                    | NULL             | 
+| pgoyal (nr)                                     |  621 |    594 | pgoyal (nr)                                     | NULL             | 
+| ph                                              |  151 |    150 | ph                                              | NULL             | 
+| physmei (nr)                                    |  264 |    237 | physmei (nr)                                    | NULL             | 
+| pilatlas (nr)                                   |  572 |    545 | pilatlas (nr)                                   | NULL             | 
+| plukashev (nr)                                  |  261 |    234 | plukashev (nr)                                  | NULL             | 
+| pragma                                          |  152 |    151 | pragma                                          | NULL             | 
+| prdatlas (nr)                                   |  573 |    546 | prdatlas (nr)                                   | NULL             | 
+| purdue university                               |  153 |    152 | purdue university                               | NULL             | 
+| pxq (nr)                                        |  799 |    772 | pxq (nr)                                        | NULL             | 
+| qpei (nr)                                       |  608 |    581 | qpei (nr)                                       | NULL             | 
+| rdig                                            |  154 |    153 | rdig                                            | NULL             | 
+| reid (nr)                                       |  287 |    260 | reid (nr)                                       | NULL             | 
+| renci (nr)                                      |  598 |    571 | renci (nr)                                      | NULL             | 
+| rowe (nr)                                       |  265 |    238 | rowe (nr)                                       | NULL             | 
+| rsakidja (nr)                                   |  622 |    595 | rsakidja (nr)                                   | NULL             | 
+| rsv (nr)                                        |  319 |    292 | rsv (nr)                                        | NULL             | 
+| rsvuser (nr)                                    |  516 |    489 | rsvuser (nr)                                    | NULL             | 
+| sabirianov (nr)                                 |  382 |    355 | sabirianov (nr)                                 | NULL             | 
+| sabs (nr)                                       |  709 |    682 | sabs (nr)                                       | NULL             | 
+| sagrid (nr)                                     |  484 |    457 | sagrid (nr)                                     | NULL             | 
+| sahara (nr)                                     |  491 |    464 | sahara (nr)                                     | NULL             | 
+| saint (nr)                                      |  487 |    460 | saint (nr)                                      | NULL             | 
+| sbgrid                                          |  209 |    182 | sbgrid                                          | NULL             | 
+| sc (nr)                                         |  506 |    479 | sc (nr)                                         | NULL             | 
+| sc11 (nr)                                       |  881 |    854 | sc11 (nr)                                       | NULL             | 
+| scidac (nr)                                     |  533 |    506 | scidac (nr)                                     | NULL             | 
+| sdss                                            |  155 |    154 | sdss                                            | NULL             | 
+| sdss                                            |  155 |    155 | sdss                                            | sdss             | 
+| seneslab (nr)                                   |  609 |    582 | seneslab (nr)                                   | NULL             | 
+| sgmatlas (nr)                                   |  481 |    454 | sgmatlas (nr)                                   | NULL             | 
+| sgmenmr (nr)                                    |  549 |    522 | sgmenmr (nr)                                    | NULL             | 
+| sgmenmrcirmmp (nr)                              |  558 |    531 | sgmenmrcirmmp (nr)                              | NULL             | 
+| sgmsagrid (nr)                                  |  638 |    611 | sgmsagrid (nr)                                  | NULL             | 
+| shah (nr)                                       |  524 |    497 | shah (nr)                                       | NULL             | 
+| siddet                                          |  356 |    329 | siddet                                          | NULL             | 
+| siddet (nr)                                     |  278 |    251 | siddet (nr)                                     | NULL             | 
+| sipe0 (nr)                                      |  514 |    487 | sipe0 (nr)                                      | NULL             | 
+| sl (nr)                                         |  810 |    783 | sl (nr)                                         | NULL             | 
+| sm (nr)                                         |  401 |    374 | sm (nr)                                         | NULL             | 
+| soarbuild (nr)                                  |  633 |    606 | soarbuild (nr)                                  | NULL             | 
+| sp (nr)                                         |  811 |    784 | sp (nr)                                         | NULL             | 
+| sqzhu (nr)                                      |  776 |    749 | sqzhu (nr)                                      | NULL             | 
+| ss                                              |  156 |    156 | ss                                              | NULL             | 
+| ss                                              |  156 |    157 | ss                                              | ss               | 
+| star                                            |  157 |    158 | star                                            | NULL             | 
+| star                                            |  157 |    159 | star                                            | star             | 
+| sun                                             |  158 |    160 | sun                                             | NULL             | 
+| superbvo.org                                    |  833 |    806 | superbvo.org                                    | NULL             | 
+| superbvo.org (nr)                               |  427 |    400 | superbvo.org (nr)                               | NULL             | 
+| sura (nr)                                       |  569 |    542 | sura (nr)                                       | NULL             | 
+| sura0 (nr)                                      |  801 |    774 | sura0 (nr)                                      | NULL             | 
+| suragrid                                        |  213 |    186 | suragrid                                        | NULL             | 
+| suragrid (nr)                                   |  219 |    192 | suragrid (nr)                                   | NULL             | 
+| symp (nr)                                       |  853 |    826 | symp (nr)                                       | NULL             | 
+| theory                                          |  215 |    188 | theory                                          | NULL             | 
+| thomp (nr)                                      |  438 |    411 | thomp (nr)                                      | NULL             | 
+| tigre                                           |  182 |    161 | tigre                                           | NULL             | 
+| tigre (nr)                                      |  229 |    202 | tigre (nr)                                      | NULL             | 
+| tigrepool0                                      |  168 |    162 | tigrepool0                                      | NULL             | 
+| tmayeshi (nr)                                   |  653 |    626 | tmayeshi (nr)                                   | NULL             | 
+| trgrid                                          |  197 |    163 | trgrid                                          | NULL             | 
+| tubio (nr)                                      |  395 |    368 | tubio (nr)                                      | NULL             | 
+| turne (nr)                                      |  556 |    529 | turne (nr)                                      | NULL             | 
+| unknown                                         |  201 |    164 | unknown                                         | NULL             | 
+| uno (nr)                                        |  311 |    284 | uno (nr)                                        | NULL             | 
+| usatlas                                         |  159 |    165 | usatlas                                         | NULL             | 
+| usatlas                                         |  159 |    166 | usatlas                                         | usatlas          | 
+| uscms                                           |  160 |    167 | uscms                                           | NULL             | 
+| uscms                                           |  160 |    168 | uscms                                           | uscms            | 
+| uscms1 (nr)                                     |  235 |    208 | uscms1 (nr)                                     | NULL             | 
+| uscmsPool                                       |  161 |    169 | uscmsPool                                       | NULL             | 
+| uscmsPool                                       |  161 |    170 | uscmsPool                                       | uscmsPool        | 
+| uscmsPool (nr)                                  |  266 |    239 | uscmsPool (nr)                                  | NULL             | 
+| uscmsPool1                                      |  162 |    171 | uscmsPool1                                      | NULL             | 
+| uscmsPool1                                      |  162 |    172 | uscmsPool1                                      | uscmsPool1       | 
+| uscmsPool2 (nr)                                 |  437 |    410 | uscmsPool2 (nr)                                 | NULL             | 
+| uscmspool0                                      |  163 |    173 | uscmspool0                                      | NULL             | 
+| uscmspool0                                      |  163 |    174 | uscmspool0                                      | uscmspool0       | 
+| uscmspool2 (nr)                                 |  296 |    269 | uscmspool2 (nr)                                 | NULL             | 
+| users (nr)                                      |  844 |    817 | users (nr)                                      | NULL             | 
+| ux001                                           |  164 |    175 | ux001                                           | NULL             | 
+| vam                                             |  192 |    176 | vam                                             | NULL             | 
+| wang                                            |  165 |    177 | wang                                            | NULL             | 
+| wang                                            |  165 |    178 | wang                                            | wang             | 
+| webportal (nr)                                  |  613 |    586 | webportal (nr)                                  | NULL             | 
+| wenger (nr)                                     |  610 |    583 | wenger (nr)                                     | NULL             | 
+| wilso (nr)                                      |  503 |    476 | wilso (nr)                                      | NULL             | 
+| wood (nr)                                       |  379 |    352 | wood (nr)                                       | NULL             | 
+| wu (nr)                                         |  251 |    224 | wu (nr)                                         | NULL             | 
+| xzeng (nr)                                      |  262 |    235 | xzeng (nr)                                      | NULL             | 
+| xzhu (nr)                                       |  623 |    596 | xzhu (nr)                                       | NULL             | 
+| yang (nr)                                       |  238 |    211 | yang (nr)                                       | NULL             | 
+| yethiraj (nr)                                   |  624 |    597 | yethiraj (nr)                                   | NULL             | 
+| yijieli (nr)                                    |  649 |    622 | yijieli (nr)                                    | NULL             | 
+| yj7 (nr)                                        |  827 |    800 | yj7 (nr)                                        | NULL             | 
+| yru1 (nr)                                       |  714 |    687 | yru1 (nr)                                       | NULL             | 
+| yuguo1 (nr)                                     |  537 |    510 | yuguo1 (nr)                                     | NULL             | 
+| zeng (nr)                                       |  275 |    248 | zeng (nr)                                       | NULL             | 
+| zeus                                            |  166 |    179 | zeus                                            | NULL             | 
+| zeus                                            |  166 |    180 | zeus                                            | zeus             | 
+| zeus (nr)                                       |  220 |    193 | zeus (nr)                                       | NULL             | 
+| zhijun (nr)                                     |  625 |    598 | zhijun (nr)                                     | NULL             | 
+| zhou (nr)                                       |  471 |    444 | zhou (nr)                                       | NULL             | 
+| zorba (nr)                                      |  626 |    599 | zorba (nr)                                      | NULL             | 
+| zwu7 (nr)                                       |  696 |    669 | zwu7 (nr)                                       | NULL             | 
++-------------------------------------------------+------+--------+-------------------------------------------------+------------------+
 ========================================================
 Query - VONameCorrection table entries not in VO.
 ========================================================
@@ -639,9 +643,10 @@ and (
 --------------
 SELECT 
    VO.VOName as GratiaVO
+  ,VO.void
+  ,VC.corrid
   ,VC.VOName as ProbeVO
   ,VC.ReportableVOName
-  ,VC.corrid
 
 FROM
    VONameCorrection VC
@@ -656,11 +661,16 @@ and (
   )
 order by 
   GratiaVO
+ ,VO.void
+ ,VC.corrid
  ,ProbeVO       
  ,ReportableVOName
  ,VC.corrid
 --------------
 
+============================================================
+VONameCorrection DELETE statements - unused ones
+============================================================
 --------------
 SELECT
    CONCAT("DELETE FROM VONameCorrection WHERE corrid = ", a.corrid ,";")
@@ -1171,6 +1181,7 @@ order by delete_sql
 | DELETE FROM VONameCorrection WHERE corrid = 85;  | 
 | DELETE FROM VONameCorrection WHERE corrid = 860; | 
 | DELETE FROM VONameCorrection WHERE corrid = 861; | 
+| DELETE FROM VONameCorrection WHERE corrid = 862; | 
 | DELETE FROM VONameCorrection WHERE corrid = 86;  | 
 | DELETE FROM VONameCorrection WHERE corrid = 87;  | 
 | DELETE FROM VONameCorrection WHERE corrid = 88;  | 
@@ -1188,6 +1199,9 @@ order by delete_sql
 | DELETE FROM VONameCorrection WHERE corrid = 99;  | 
 | DELETE FROM VONameCorrection WHERE corrid = 9;   | 
 +--------------------------------------------------+
+============================================================
+VONameCorrection dump of records to be deleted
+============================================================
 --------------
 SELECT *
 FROM VONameCorrection
@@ -1712,4 +1726,5 @@ WHERE corrid in
 |    859 | baru-tro (nr)                                   | NULL             |  886 | 
 |    860 | grid15 (nr)                                     | NULL             |  887 | 
 |    861 | dyna (nr)                                       | NULL             |  888 | 
+|    862 | avery (nr)                                      | NULL             |  889 | 
 +--------+-------------------------------------------------+------------------+------+

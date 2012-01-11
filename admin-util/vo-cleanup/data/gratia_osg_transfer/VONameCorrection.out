@@ -56,9 +56,10 @@ Query - Unused VONameCorrection table entries.
 --------------
 SELECT 
    VO.VOName as GratiaVO
+  ,VO.void
+  ,VC.corrid
   ,VC.VOName as ProbeVO
   ,VC.ReportableVOName
-  ,VC.corrid
 FROM
    VONameCorrection VC
   ,VO VO
@@ -70,19 +71,21 @@ and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterServiceSummary)
 and VC.corrid not in (SELECT distinct(VOCorrid) FROM MasterTransferSummary)
 order by 
   GratiaVO
+ ,VO.void
+ ,VC.corrid
  ,ProbeVO       
  ,ReportableVOName
 --------------
 
-+----------+-----------+------------------+--------+
-| GratiaVO | ProbeVO   | ReportableVOName | corrid |
-+----------+-----------+------------------+--------+
-| atlas    | atlas     | NULL             |     13 | 
-| cms      | cms       | uscms            |     50 | 
-| null     | /atlas    | NULL             |     40 | 
-| null     | /fermilab | NULL             |     49 | 
-| usatlas3 | usatlas3  | NULL             |     41 | 
-+----------+-----------+------------------+--------+
++----------+------+--------+-----------+------------------+
+| GratiaVO | void | corrid | ProbeVO   | ReportableVOName |
++----------+------+--------+-----------+------------------+
+| atlas    |   13 |     13 | atlas     | NULL             | 
+| cms      |   41 |     50 | cms       | uscms            | 
+| null     |   37 |     40 | /atlas    | NULL             | 
+| null     |   37 |     49 | /fermilab | NULL             | 
+| usatlas3 |   38 |     41 | usatlas3  | NULL             | 
++----------+------+--------+-----------+------------------+
 ========================================================
 Query - VONameCorrection table entries not in VO.
 ========================================================
@@ -127,14 +130,15 @@ and (
 +----------------+
 | nbr_of_entries |
 +----------------+
-|             93 | 
+|             94 | 
 +----------------+
 --------------
 SELECT 
    VO.VOName as GratiaVO
+  ,VO.void
+  ,VC.corrid
   ,VC.VOName as ProbeVO
   ,VC.ReportableVOName
-  ,VC.corrid
 
 FROM
    VONameCorrection VC
@@ -149,108 +153,114 @@ and (
   )
 order by 
   GratiaVO
+ ,VO.void
+ ,VC.corrid
  ,ProbeVO       
  ,ReportableVOName
  ,VC.corrid
 --------------
 
-+-----------------------------------------------------------+-----------------------------------------------------------+------------------+--------+
-| GratiaVO                                                  | ProbeVO                                                   | ReportableVOName | corrid |
-+-----------------------------------------------------------+-----------------------------------------------------------+------------------+--------+
-| Engage                                                    | /Engage/LSST/Role=NULL/Capability=NULL                    | Engage           |     79 | 
-| GridUNESP                                                 | GridUNESP                                                 | GridUNESP        |     51 | 
-| LIGO                                                      | LIGO                                                      | NULL             |     77 | 
-| RSV                                                       | RSV                                                       | RSV              |     56 | 
-| SBGrid                                                    | /SBGrid/Role=NULL/Capability=NULL                         | SBGrid           |     86 | 
-| Unknown                                                   | Unknown                                                   | NULL             |      1 | 
-| aegis                                                     | aegis                                                     | NULL             |     38 | 
-| ap                                                        | ap                                                        | NULL             |      9 | 
-| apacgrid                                                  | apacgrid                                                  | NULL             |     26 | 
-| as                                                        | as                                                        | NULL             |     43 | 
-| atlas                                                     | /atlas/Role=NULL/Capability=NULL                          | atlas            |     68 | 
-| atlas                                                     | /atlas/Role=production/Capability=NULL                    | atlas            |     81 | 
-| atlas                                                     | /atlas/usatlas/Role=pilot/Capability=NULL                 | atlas            |     66 | 
-| atlas                                                     | /atlas/usatlas/Role=production/Capability=NULL            | atlas            |     58 | 
-| atlas                                                     | /atlas/usatlas/Role=software/Capability=NULL              | atlas            |     63 | 
-| atlas                                                     | atlas                                                     | ATLAS            |     42 | 
-| cdf                                                       | /cdf/Role=NULL/Capability=NULL                            | cdf              |     75 | 
-| cdf                                                       | /cdf/glidecaf/Role=development/Capability=NULL            | cdf              |     70 | 
-| cdf                                                       | /cdf/glidecaf/Role=fermigrid/Capability=NULL              | cdf              |     61 | 
-| cdf                                                       | cdf                                                       | CDF              |     23 | 
-| ciemat                                                    | ciemat                                                    | NULL             |     10 | 
-| cms                                                       | /cms/Role=NULL/Capability=NULL                            | cms              |     62 | 
-| cms                                                       | /cms/Role=lcgadmin/Capability=NULL                        | cms              |     89 | 
-| cms                                                       | /cms/Role=pilot/Capability=NULL                           | cms              |     93 | 
-| cms                                                       | /cms/Role=production/Capability=NULL                      | cms              |     82 | 
-| cms                                                       | /cms/becms/Role=NULL/Capability=NULL                      | cms              |     90 | 
-| cms                                                       | /cms/dcms/Role=NULL/Capability=NULL                       | cms              |     92 | 
-| cms                                                       | /cms/escms/Role=NULL/Capability=NULL                      | cms              |     94 | 
-| cms                                                       | /cms/twcms/Role=NULL/Capability=NULL                      | cms              |     91 | 
-| cms                                                       | /cms/uscms/Role=cmsuser/Capability=NULL                   | cms              |     54 | 
-| cms                                                       | cms                                                       | CMS              |     45 | 
-| dosar                                                     | /dosar/Role=NULL/Capability=NULL                          | dosar            |     74 | 
-| dosar                                                     | dosar                                                     | DOSAR            |     37 | 
-| dteam                                                     | dteam                                                     | DTEAM            |     19 | 
-| dteam                                                     | dteam                                                     | dteam            |     24 | 
-| dutchgrid                                                 | dutchgrid                                                 | NULL             |     16 | 
-| dzero                                                     | /dzero/users/Role=NULL/Capability=NULL                    | dzero            |     64 | 
-| dzero                                                     | dzero                                                     | DZERO            |     39 | 
-| dzero                                                     | dzero                                                     | dzero            |      2 | 
-| e-ciencia                                                 | e-ciencia                                                 | NULL             |     17 | 
-| engage                                                    | engage                                                    | ENGAGE           |     98 | 
-| engage                                                    | engage                                                    | Engage           |     35 | 
-| escience                                                  | escience                                                  | NULL             |      7 | 
-| fermilab                                                  | /fermilab/Role=NULL/Capability=NULL                       | fermilab         |     52 | 
-| fermilab                                                  | /fermilab/grid/Role=NULL/Capability=NULL                  | fermilab         |     53 | 
-| fermilab                                                  | /fermilab/grid/Role=admin/Capability=NULL                 | fermilab         |     71 | 
-| fermilab                                                  | /fermilab/test/Role=NULL/Capability=NULL                  | fermilab         |     60 | 
-| fermilab                                                  | fermilab                                                  | FERMILAB         |     30 | 
-| fermilab                                                  | fermilab                                                  | Fermilab         |     48 | 
-| fermilab-test                                             | fermilab-test                                             | FERMILAB         |     59 | 
-| geant4                                                    | geant4                                                    | GEANT4           |     83 | 
-| germangrid                                                | germangrid                                                | NULL             |      8 | 
-| gluex                                                     | gluex                                                     | Gluex            |     88 | 
-| gpn                                                       | gpn                                                       | gpn              |     34 | 
-| grid                                                      | grid                                                      | NULL             |     12 | 
-| grid-fr                                                   | grid-fr                                                   | NULL             |     14 | 
-| hcc                                                       | /hcc/Role=NULL/Capability=NULL                            | hcc              |     87 | 
-| hcc                                                       | hcc                                                       | hcc              |     85 | 
-| hellasgrid                                                | hellasgrid                                                | NULL             |     36 | 
-| hep                                                       | hep                                                       | NULL             |     22 | 
-| ifae                                                      | ifae                                                      | NULL             |     25 | 
-| infn                                                      | infn                                                      | NULL             |      6 | 
-| institute of physics of the academy of sciences of the cr | institute of physics of the academy of sciences of the cr | NULL             |     15 | 
-| kek                                                       | kek                                                       | NULL             |     33 | 
-| ligo                                                      | ligo                                                      | LIGO             |     29 | 
-| lipca                                                     | lipca                                                     | NULL             |     21 | 
-| lqcd                                                      | lqcd                                                      | LQCD             |     47 | 
-| mis                                                       | mis                                                       | MIS              |     31 | 
-| nanohub                                                   | nanohub                                                   | NANOHUB          |     27 | 
-| nebiogrid                                                 | nebiogrid                                                 | NEBioGrid        |     46 | 
-| ops                                                       | /ops/Role=NULL/Capability=NULL                            | ops              |     55 | 
-| ops                                                       | ops                                                       | OPS              |     44 | 
-| ops                                                       | ops                                                       | ops              |     69 | 
-| osg                                                       | /osg/Role=NULL/Capability=NULL                            | osg              |     67 | 
-| osg                                                       | /osg/Role=pilot/Capability=NULL                           | osg              |     57 | 
-| osg                                                       | osg                                                       | OSG              |      4 | 
-| osgedu                                                    | /osgedu/Role=NULL/Capability=NULL                         | osgedu           |     73 | 
-| osgedu                                                    | osgedu                                                    | OSGEDU           |     78 | 
-| pegrid                                                    | pegrid                                                    | PEGRID           |     80 | 
-| pic                                                       | pic                                                       | NULL             |     20 | 
-| rdig                                                      | rdig                                                      | NULL             |      5 | 
-| sbgrid                                                    | sbgrid                                                    | SBGrid           |     28 | 
-| sgvo                                                      | sgvo                                                      | SGVO             |     95 | 
-| star                                                      | star                                                      | STAR             |     32 | 
-| superbvo.org                                              | superbvo.org                                              | superbvo.org     |     84 | 
-| suragrid                                                  | suragrid                                                  | SURAGrid         |     97 | 
-| suragrid                                                  | suragrid                                                  | suragrid         |     96 | 
-| tigre                                                     | tigre                                                     | TIGRE            |     72 | 
-| usatlas                                                   | usatlas                                                   | ATLAS            |     18 | 
-| usatlas                                                   | usatlas                                                   | atlas            |     11 | 
-| usatlas                                                   | usatlas                                                   | usatlas          |     65 | 
-| uscms                                                     | uscms                                                     | CMS              |      3 | 
-| uscms                                                     | uscms                                                     | uscms            |     76 | 
-+-----------------------------------------------------------+-----------------------------------------------------------+------------------+--------+
++-----------------------------------------------------------+------+--------+-----------------------------------------------------------+------------------+
+| GratiaVO                                                  | void | corrid | ProbeVO                                                   | ReportableVOName |
++-----------------------------------------------------------+------+--------+-----------------------------------------------------------+------------------+
+| Engage                                                    |   50 |     79 | /Engage/LSST/Role=NULL/Capability=NULL                    | Engage           | 
+| Engage                                                    |   50 |     99 | /Engage/Role=NULL/Capability=NULL                         | Engage           | 
+| GridUNESP                                                 |   44 |     51 | GridUNESP                                                 | GridUNESP        | 
+| LIGO                                                      |   49 |     77 | LIGO                                                      | NULL             | 
+| RSV                                                       |   45 |     56 | RSV                                                       | RSV              | 
+| SBGrid                                                    |   55 |     86 | /SBGrid/Role=NULL/Capability=NULL                         | SBGrid           | 
+| Unknown                                                   |    1 |      1 | Unknown                                                   | NULL             | 
+| aegis                                                     |   36 |     38 | aegis                                                     | NULL             | 
+| ap                                                        |    9 |      9 | ap                                                        | NULL             | 
+| apacgrid                                                  |   24 |     26 | apacgrid                                                  | NULL             | 
+| as                                                        |   39 |     43 | as                                                        | NULL             | 
+| atlas                                                     |   13 |     42 | atlas                                                     | ATLAS            | 
+| atlas                                                     |   13 |     58 | /atlas/usatlas/Role=production/Capability=NULL            | atlas            | 
+| atlas                                                     |   13 |     63 | /atlas/usatlas/Role=software/Capability=NULL              | atlas            | 
+| atlas                                                     |   13 |     66 | /atlas/usatlas/Role=pilot/Capability=NULL                 | atlas            | 
+| atlas                                                     |   13 |     68 | /atlas/Role=NULL/Capability=NULL                          | atlas            | 
+| atlas                                                     |   13 |     81 | /atlas/Role=production/Capability=NULL                    | atlas            | 
+| cdf                                                       |   22 |     23 | cdf                                                       | CDF              | 
+| cdf                                                       |   22 |     61 | /cdf/glidecaf/Role=fermigrid/Capability=NULL              | cdf              | 
+| cdf                                                       |   22 |     70 | /cdf/glidecaf/Role=development/Capability=NULL            | cdf              | 
+| cdf                                                       |   22 |     75 | /cdf/Role=NULL/Capability=NULL                            | cdf              | 
+| ciemat                                                    |   10 |     10 | ciemat                                                    | NULL             | 
+| cms                                                       |   41 |     45 | cms                                                       | CMS              | 
+| cms                                                       |   41 |     54 | /cms/uscms/Role=cmsuser/Capability=NULL                   | cms              | 
+| cms                                                       |   41 |     62 | /cms/Role=NULL/Capability=NULL                            | cms              | 
+| cms                                                       |   41 |     82 | /cms/Role=production/Capability=NULL                      | cms              | 
+| cms                                                       |   41 |     89 | /cms/Role=lcgadmin/Capability=NULL                        | cms              | 
+| cms                                                       |   41 |     90 | /cms/becms/Role=NULL/Capability=NULL                      | cms              | 
+| cms                                                       |   41 |     91 | /cms/twcms/Role=NULL/Capability=NULL                      | cms              | 
+| cms                                                       |   41 |     92 | /cms/dcms/Role=NULL/Capability=NULL                       | cms              | 
+| cms                                                       |   41 |     93 | /cms/Role=pilot/Capability=NULL                           | cms              | 
+| cms                                                       |   41 |     94 | /cms/escms/Role=NULL/Capability=NULL                      | cms              | 
+| dosar                                                     |   35 |     37 | dosar                                                     | DOSAR            | 
+| dosar                                                     |   35 |     74 | /dosar/Role=NULL/Capability=NULL                          | dosar            | 
+| dteam                                                     |   18 |     19 | dteam                                                     | DTEAM            | 
+| dteam                                                     |   18 |     24 | dteam                                                     | dteam            | 
+| dutchgrid                                                 |   16 |     16 | dutchgrid                                                 | NULL             | 
+| dzero                                                     |    2 |      2 | dzero                                                     | dzero            | 
+| dzero                                                     |    2 |     39 | dzero                                                     | DZERO            | 
+| dzero                                                     |    2 |     64 | /dzero/users/Role=NULL/Capability=NULL                    | dzero            | 
+| e-ciencia                                                 |   17 |     17 | e-ciencia                                                 | NULL             | 
+| engage                                                    |   33 |     35 | engage                                                    | Engage           | 
+| engage                                                    |   33 |     98 | engage                                                    | ENGAGE           | 
+| escience                                                  |    7 |      7 | escience                                                  | NULL             | 
+| fermilab                                                  |   28 |     30 | fermilab                                                  | FERMILAB         | 
+| fermilab                                                  |   28 |     48 | fermilab                                                  | Fermilab         | 
+| fermilab                                                  |   28 |     52 | /fermilab/Role=NULL/Capability=NULL                       | fermilab         | 
+| fermilab                                                  |   28 |     53 | /fermilab/grid/Role=NULL/Capability=NULL                  | fermilab         | 
+| fermilab                                                  |   28 |     60 | /fermilab/test/Role=NULL/Capability=NULL                  | fermilab         | 
+| fermilab                                                  |   28 |     71 | /fermilab/grid/Role=admin/Capability=NULL                 | fermilab         | 
+| fermilab-test                                             |   46 |     59 | fermilab-test                                             | FERMILAB         | 
+| geant4                                                    |   52 |     83 | geant4                                                    | GEANT4           | 
+| germangrid                                                |    8 |      8 | germangrid                                                | NULL             | 
+| gluex                                                     |   56 |     88 | gluex                                                     | Gluex            | 
+| gpn                                                       |   32 |     34 | gpn                                                       | gpn              | 
+| grid                                                      |   12 |     12 | grid                                                      | NULL             | 
+| grid-fr                                                   |   14 |     14 | grid-fr                                                   | NULL             | 
+| hcc                                                       |   54 |     85 | hcc                                                       | hcc              | 
+| hcc                                                       |   54 |     87 | /hcc/Role=NULL/Capability=NULL                            | hcc              | 
+| hellasgrid                                                |   34 |     36 | hellasgrid                                                | NULL             | 
+| hep                                                       |   21 |     22 | hep                                                       | NULL             | 
+| ifae                                                      |   23 |     25 | ifae                                                      | NULL             | 
+| infn                                                      |    6 |      6 | infn                                                      | NULL             | 
+| institute of physics of the academy of sciences of the cr |   15 |     15 | institute of physics of the academy of sciences of the cr | NULL             | 
+| kek                                                       |   31 |     33 | kek                                                       | NULL             | 
+| ligo                                                      |   27 |     29 | ligo                                                      | LIGO             | 
+| lipca                                                     |   20 |     21 | lipca                                                     | NULL             | 
+| lqcd                                                      |   43 |     47 | lqcd                                                      | LQCD             | 
+| mis                                                       |   29 |     31 | mis                                                       | MIS              | 
+| nanohub                                                   |   25 |     27 | nanohub                                                   | NANOHUB          | 
+| nebiogrid                                                 |   42 |     46 | nebiogrid                                                 | NEBioGrid        | 
+| ops                                                       |   40 |     44 | ops                                                       | OPS              | 
+| ops                                                       |   40 |     55 | /ops/Role=NULL/Capability=NULL                            | ops              | 
+| ops                                                       |   40 |     69 | ops                                                       | ops              | 
+| osg                                                       |    4 |      4 | osg                                                       | OSG              | 
+| osg                                                       |    4 |     57 | /osg/Role=pilot/Capability=NULL                           | osg              | 
+| osg                                                       |    4 |     67 | /osg/Role=NULL/Capability=NULL                            | osg              | 
+| osgedu                                                    |   48 |     73 | /osgedu/Role=NULL/Capability=NULL                         | osgedu           | 
+| osgedu                                                    |   48 |     78 | osgedu                                                    | OSGEDU           | 
+| pegrid                                                    |   51 |     80 | pegrid                                                    | PEGRID           | 
+| pic                                                       |   19 |     20 | pic                                                       | NULL             | 
+| rdig                                                      |    5 |      5 | rdig                                                      | NULL             | 
+| sbgrid                                                    |   26 |     28 | sbgrid                                                    | SBGrid           | 
+| sgvo                                                      |   57 |     95 | sgvo                                                      | SGVO             | 
+| star                                                      |   30 |     32 | star                                                      | STAR             | 
+| superbvo.org                                              |   53 |     84 | superbvo.org                                              | superbvo.org     | 
+| suragrid                                                  |   58 |     96 | suragrid                                                  | suragrid         | 
+| suragrid                                                  |   58 |     97 | suragrid                                                  | SURAGrid         | 
+| tigre                                                     |   47 |     72 | tigre                                                     | TIGRE            | 
+| usatlas                                                   |   11 |     11 | usatlas                                                   | atlas            | 
+| usatlas                                                   |   11 |     18 | usatlas                                                   | ATLAS            | 
+| usatlas                                                   |   11 |     65 | usatlas                                                   | usatlas          | 
+| uscms                                                     |    3 |      3 | uscms                                                     | CMS              | 
+| uscms                                                     |    3 |     76 | uscms                                                     | uscms            | 
++-----------------------------------------------------------+------+--------+-----------------------------------------------------------+------------------+
+============================================================
+VONameCorrection DELETE statements - unused ones
+============================================================
 --------------
 SELECT
    CONCAT("DELETE FROM VONameCorrection WHERE corrid = ", a.corrid ,";")
@@ -277,6 +287,9 @@ order by delete_sql
 | DELETE FROM VONameCorrection WHERE corrid = 49; | 
 | DELETE FROM VONameCorrection WHERE corrid = 50; | 
 +-------------------------------------------------+
+============================================================
+VONameCorrection dump of records to be deleted
+============================================================
 --------------
 SELECT *
 FROM VONameCorrection

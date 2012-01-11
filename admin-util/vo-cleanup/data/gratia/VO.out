@@ -1,0 +1,1086 @@
+
+=========================================================
+VOName being analized
+=========================================================
+--------------
+set @voname="TG-%"
+--------------
+
+========================================================
+Query - Total VO table entries for summary tables.
+========================================================
+--------------
+SELECT count(*) from VO
+--------------
+
++----------+
+| count(*) |
++----------+
+|      562 | 
++----------+
+========================================================
+Query - Unused VO table entries for summary tables.
+========================================================
+--------------
+SELECT count(*) FROM VO
+where VO.void not in (select distinct(void) from VONameCorrection)
+--------------
+
++----------+
+| count(*) |
++----------+
+|      207 | 
++----------+
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VO.void
+FROM
+   VO VO
+where 
+  VO.void not in (select distinct(void) from VONameCorrection) 
+order by 
+  GratiaVO
+ ,VO.void
+--------------
+
++-------------------------------------------------+------+
+| GratiaVO                                        | void |
++-------------------------------------------------+------+
+| /Engage/Role=NULL/Capability=NULL               |  247 | 
+| /atlas/Role=lcgadmin/Capability=NULL            |  259 | 
+| /atlas/usatlas/Role=production/Capability=NULL  |  244 | 
+| /cdf/Role=NULL/Capability=NULL                  |  225 | 
+| /cdf/glidecaf/Role=development/Capability=NULL  |  229 | 
+| /cdf/glidecaf/Role=namcaf/Capability=NULL       |  226 | 
+| /cdf/glidecaf/Role=testcaf/Capability=NULL      |  228 | 
+| /cms/Role=NULL/Capability=NULL                  |  250 | 
+| /cms/Role=lcgadmin/Capability=NULL              |  258 | 
+| /cms/Role=production/Capability=NULL            |  252 | 
+| /cms/uscms/Role=NULL/Capability=NULL            |  261 | 
+| /cms/uscms/Role=cmssoft/Capability=NULL         |  253 | 
+| /cms/uscms/Role=cmsuser/Capability=NULL         |  246 | 
+| /dzero/users/Role=NULL/Capability=NULL          |  251 | 
+| /fermilab/Role=NULL/Capability=NULL             |  227 | 
+| /gridex/Role=NULL/Capability=NULL               |  254 | 
+| /mis/Role=NULL/Capability=NULL                  |  257 | 
+| /nanohub/Role=NULL/Capability=NULL              |  249 | 
+| /ops/Role=lcgadmin/Capability=NULL              |  255 | 
+| /osg/Role=NULL/Capability=NULL                  |  260 | 
+| /osgedu/Role=NULL/Capability=NULL               |  248 | 
+| /star/Role=NULL/Capability=NULL                 |  256 | 
+| 1180053                                         |   88 | 
+| 1183335                                         |   89 | 
+| 1189588                                         |  192 | 
+| 1198495                                         |  210 | 
+| 1202574                                         |  217 | 
+| 1203635                                         |  223 | 
+| 1204018                                         |  224 | 
+| 1205281                                         |  230 | 
+| 492                                             |   90 | 
+| 568                                             |  184 | 
+| 913                                             |  233 | 
+| CompBioGrid                                     |   91 | 
+| Fermilab                                        |   93 | 
+| GLOW                                            |   94 | 
+| Gluex                                           |  375 | 
+| GridUNESP                                       |  379 | 
+| LIGO                                            |   95 | 
+| NEBioGrid                                       |  295 | 
+| NWICG                                           |  280 | 
+| NYSGRID                                         |  262 | 
+| Other                                           |  211 | 
+| RSV                                             |  265 | 
+| TGYRO                                           |  371 | 
+| TIGRE                                           |  283 | 
+| aa                                              |  359 | 
+| aceace                                          |  268 | 
+| ahouston                                        |  323 | 
+| am                                              |  275 | 
+| ap                                              |  194 | 
+| aru0                                            |  185 | 
+| as                                              |  213 | 
+| atlasprd                                        |  205 | 
+| atlassgm                                        |  204 | 
+| batelaan                                        |  311 | 
+| belashchenko                                    |  319 | 
+| berkowitz                                       |  324 | 
+| biocore                                         |  352 | 
+| bjs                                             |  367 | 
+| blane                                           |  180 | 
+| bleak                                           |  329 | 
+| bobaru                                          |  336 | 
+| boxu1                                           |  235 | 
+| brian                                           |  299 | 
+| bsc-cns                                         |  219 | 
+| bsteffen                                        |  321 | 
+| chandra                                         |  312 | 
+| chem9                                           |  104 | 
+| chen                                            |  270 | 
+| choi                                            |  380 | 
+| choueiry                                        |  308 | 
+| ciemat                                          |  105 | 
+| cms0                                            |  434 | 
+| cms1                                            |  435 | 
+| cms2                                            |  448 | 
+| csci4440                                        |  350 | 
+| cse856                                          |  353 | 
+| cyt701                                          |  293 | 
+| ddowney                                         |  328 | 
+| dhkim1                                          |  218 | 
+| dteamprd                                        |  206 | 
+| dweitzel                                        |  331 | 
+| dzenis                                          |  335 | 
+| eScience                                        |  113 | 
+| ebabin                                          |  330 | 
+| ecucs                                           |  377 | 
+| engagement                                      |  115 | 
+| erbb                                            |  287 | 
+| fermilab-test                                   |  118 | 
+| furtney                                         |  303 | 
+| gilda                                           |  363 | 
+| gin.ggf.org                                     |  123 | 
+| gladyshev                                       |  337 | 
+| goddard                                         |  307 | 
+| gvitu                                           |  189 | 
+| harbison                                        |  314 | 
+| hep                                             |  131 | 
+| icbr                                            |  269 | 
+| ifh1                                            |  197 | 
+| imt                                             |  243 | 
+| james                                           |  181 | 
+| jb                                              |  216 | 
+| jc                                              |  136 | 
+| jcd2                                            |  214 | 
+| jcyin                                           |  421 | 
+| jen7                                            |  199 | 
+| jiang                                           |  320 | 
+| jjs                                             |  288 | 
+| jl                                              |  387 | 
+| johns                                           |  289 | 
+| js                                              |  297 | 
+| jwang7                                          |  316 | 
+| kai                                             |  338 | 
+| kfki rmki ca                                    |  137 | 
+| kim                                             |  187 | 
+| kim1                                            |  395 | 
+| kiss2                                           |  241 | 
+| km                                              |  138 | 
+| kucc                                            |  231 | 
+| lhcb                                            |  141 | 
+| li                                              |  290 | 
+| ligy                                            |  394 | 
+| lin                                             |  372 | 
+| lipca                                           |  143 | 
+| local                                           |  389 | 
+| localUsers                                      |  212 | 
+| lsl1                                            |  432 | 
+| mb                                              |  222 | 
+| mech950                                         |  315 | 
+| mei                                             |  347 | 
+| mfurtney                                        |  342 | 
+| mfv                                             |  145 | 
+| mit                                             |  186 | 
+| mm                                              |  150 | 
+| mpi                                             |  196 | 
+| mrs                                             |  200 | 
+| mschram06/29/2                                  |  266 | 
+| mshafiullah                                     |  317 | 
+| mt5                                             |  191 | 
+| nakul02                                         |  416 | 
+| nano011/16/2                                    |  274 | 
+| national center for supercomputing applications |  152 | 
+| newUsatlasplt                                   |  237 | 
+| nogradi                                         |  341 | 
+| ntu                                             |  153 | 
+| oglesby                                         |  355 | 
+| opssgm                                          |  203 | 
+| osgbabar00                                      |  193 | 
+| osgivdglmis0                                    |  190 | 
+| osgusatlas00                                    |  188 | 
+| park                                            |  158 | 
+| pegrid0                                         |  291 | 
+| pg                                              |  160 | 
+| ph                                              |  161 | 
+| physmei                                         |  301 | 
+| plukashev                                       |  304 | 
+| pragma                                          |  162 | 
+| psk6                                            |  344 | 
+| purdue university                               |  163 | 
+| rdig                                            |  164 | 
+| reid                                            |  313 | 
+| rowe                                            |  309 | 
+| rsv                                             |  349 | 
+| rv                                              |  165 | 
+| sabirianov                                      |  364 | 
+| sahara                                          |  420 | 
+| saint                                           |  424 | 
+| sbgrid-RSV                                      |  296 | 
+| sgmatlas                                        |  426 | 
+| sk                                              |  167 | 
+| sm                                              |  368 | 
+| smith                                           |  183 | 
+| ss                                              |  168 | 
+| starace                                         |  318 | 
+| stevenlubin2                                    |  429 | 
+| sun                                             |  170 | 
+| swanson                                         |  322 | 
+| tigrepool0                                      |  182 | 
+| trgrid                                          |  215 | 
+| ts                                              |  201 | 
+| tsymbal                                         |  333 | 
+| tubio                                           |  366 | 
+| ub2                                             |  171 | 
+| ucm                                             |  239 | 
+| uscms                                           |  173 | 
+| uscms1                                          |  279 | 
+| uscmsPool                                       |  174 | 
+| uscmspool0                                      |  176 | 
+| uscmspool1                                      |  232 | 
+| uscmspool2                                      |  343 | 
+| ux001                                           |  177 | 
+| vam                                             |  209 | 
+| wang                                            |  178 | 
+| wilso                                           |  437 | 
+| woldt                                           |  325 | 
+| wolf2                                           |  240 | 
+| wood                                            |  361 | 
+| wpeng                                           |  332 | 
+| wu                                              |  294 | 
+| xzeng                                           |  306 | 
+| yang                                            |  281 | 
+| ysm                                             |  339 | 
+| zeng                                            |  326 | 
+| zeus                                            |  179 | 
+| zhang                                           |  242 | 
+| zhou                                            |  418 | 
++-------------------------------------------------+------+
+========================================================
+Query - Used VO table entries for summary tables.
+========================================================
+--------------
+SELECT count(*) FROM VO
+where VO.void in (select distinct(void) from VONameCorrection)
+--------------
+
++----------+
+| count(*) |
++----------+
+|      355 | 
++----------+
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VO.void
+FROM
+   VO VO
+where 
+  VO.void in (select distinct(void) from VONameCorrection) 
+order by 
+  GratiaVO
+ ,VO.void
+--------------
+
++-----------------+------+
+| GratiaVO        | void |
++-----------------+------+
+| ATLAS           |  447 | 
+| EXAMPLE         |  460 | 
+| Engage          |   92 | 
+| GRASE           |  386 | 
+| LBNE            |  370 | 
+| SBGrid          |  271 | 
+| SGVO            |  628 | 
+| TG-ASC050039N   |  544 | 
+| TG-ASC090089    |  534 | 
+| TG-AST070052N   |  559 | 
+| TG-AST090100    |  551 | 
+| TG-AST100043    |  600 | 
+| TG-AST110006    |  576 | 
+| TG-ATM010005N   |  579 | 
+| TG-ATM090002    |  554 | 
+| TG-ATM090060    |  563 | 
+| TG-ATM100051    |  578 | 
+| TG-ATM110019    |  552 | 
+| TG-BCS110002    |  591 | 
+| TG-CCR110003    |  533 | 
+| TG-CDA090008    |  536 | 
+| TG-CDA100007    |  526 | 
+| TG-CDA110012    |  542 | 
+| TG-CHE070074N   |  539 | 
+| TG-CHE080066N   |  527 | 
+| TG-CHE090006    |  557 | 
+| TG-CHE100058    |  570 | 
+| TG-CHE100095    |  518 | 
+| TG-CHE100113    |  597 | 
+| TG-CHE100142    |  553 | 
+| TG-CHE110021    |  602 | 
+| TG-CHE110064    |  581 | 
+| TG-CTS070034N   |  585 | 
+| TG-CTS090062    |  561 | 
+| TG-CTS090079    |  529 | 
+| TG-CTS100012    |  564 | 
+| TG-CTS100026    |  543 | 
+| TG-CTS100027    |  546 | 
+| TG-DMR080070    |  562 | 
+| TG-DMR090073    |  545 | 
+| TG-DMR090097    |  566 | 
+| TG-DMR100080    |  531 | 
+| TG-DMR110013    |  532 | 
+| TG-DMR110027    |  604 | 
+| TG-DMR110052    |  555 | 
+| TG-DMR110067    |  569 | 
+| TG-DMR110072    |  583 | 
+| TG-DMR110095    |  594 | 
+| TG-DMS100018    |  550 | 
+| TG-DMS110002    |  525 | 
+| TG-DMS110019    |  572 | 
+| TG-EAR080018T   |  523 | 
+| TG-EAR100012    |  558 | 
+| TG-EAR100021    |  567 | 
+| TG-EAR110015    |  535 | 
+| TG-IBN050000N   |  524 | 
+| TG-IBN090004    |  537 | 
+| TG-IBN100006    |  547 | 
+| TG-MCA03S007    |  610 | 
+| TG-MCA05S010    |  419 | 
+| TG-MCA07S022    |  615 | 
+| TG-MCA07S029    |  541 | 
+| TG-MCB040051N   |  548 | 
+| TG-MCB070015N   |  589 | 
+| TG-MCB090163    |  521 | 
+| TG-MCB100143    |  568 | 
+| TG-MCB110037    |  603 | 
+| TG-MCB110072    |  520 | 
+| TG-MCB110112    |  601 | 
+| TG-MCB110118    |  528 | 
+| TG-PHY100030    |  538 | 
+| TG-PHY110005    |  605 | 
+| TG-PHY110010    |  580 | 
+| TG-PHY110015    |  560 | 
+| TG-PHY110021    |  530 | 
+| TG-PHY110022    |  565 | 
+| TG-PHY110024    |  540 | 
+| TG-PHY110034    |  522 | 
+| TG-SES110002    |  577 | 
+| TG-STA060008N   |  519 | 
+| TG-STA060013N   |  556 | 
+| TG-TRA090014    |  549 | 
+| TG-TRA100018    |  586 | 
+| TG-TRA110019    |  573 | 
+| TG-TRA900337N   |  575 | 
+| TG-xxxxx        |  571 | 
+| UT-NTNL0033     |  645 | 
+| Unknown         |   96 | 
+| ab              |  624 | 
+| ac              |  623 | 
+| accelerator     |  236 | 
+| adesmet         |  507 | 
+| alice           |  286 | 
+| allen           |  358 | 
+| along           |  425 | 
+| ankur           |  508 | 
+| argoneut        |  474 | 
+| armino          |  640 | 
+| as2             |  444 | 
+| astro           |   97 | 
+| atlas           |  202 | 
+| auger           |   98 | 
+| austriangrid    |   99 | 
+| avery           |  649 | 
+| aw              |  621 | 
+| barnet          |  499 | 
+| baru-tro        |  646 | 
+| begrid          |  100 | 
+| belle           |  436 | 
+| bgs0            |  510 | 
+| biomed          |  310 | 
+| bmueller        |  595 | 
+| bnebgen         |  593 | 
+| bockelman       |  482 | 
+| bt              |  490 | 
+| c670            |  438 | 
+| camcs           |  276 | 
+| cc              |  622 | 
+| cdf             |  101 | 
+| cdms            |  102 | 
+| cec24testing    |  637 | 
+| cern            |  103 | 
+| cigi            |  208 | 
+| ck              |  440 | 
+| cmmap           |  465 | 
+| cms             |  106 | 
+| cnm20323        |  430 | 
+| compbiogrid     |  107 | 
+| cse435          |  633 | 
+| cse496          |  356 | 
+| cstaff          |  515 | 
+| cweiss          |  599 | 
+| cx32            |  644 | 
+| danb            |  509 | 
+| danielpark2     |  422 | 
+| datagrid-es     |  108 | 
+| dech            |  433 | 
+| default         |  461 | 
+| des             |  109 | 
+| dhinckley       |  505 | 
+| dosar           |  110 | 
+| dteam           |  111 | 
+| ducharme        |  334 | 
+| dyna            |  648 | 
+| dzero           |  112 | 
+| ebm             |  456 | 
+| el              |  625 | 
+| ema             |  369 | 
+| engage          |  114 | 
+| enmr            |  450 | 
+| epacg           |  485 | 
+| escience        |  116 | 
+| evayi           |  452 | 
+| example         |  454 | 
+| external        |  481 | 
+| fabrikant       |  362 | 
+| fermilab        |  117 | 
+| fgstore         |  285 | 
+| fgtest          |  351 | 
+| flowscience     |  302 | 
+| fmri            |  119 | 
+| foo             |  471 | 
+| fox             |  574 | 
+| g035            |  427 | 
+| gabi            |  476 | 
+| gadu            |  120 | 
+| gay             |  357 | 
+| gcedu           |  629 | 
+| gcvo            |  638 | 
+| geant4          |  121 | 
+| genec           |  584 | 
+| germangrid      |  122 | 
+| ghan            |  635 | 
+| glideinwms      |  632 | 
+| glow            |  124 | 
+| gluex           |  360 | 
+| gopala          |  483 | 
+| gpn             |  125 | 
+| grase           |  126 | 
+| gray7           |  385 | 
+| grid            |  127 | 
+| grid-fr         |  128 | 
+| grid14          |  613 | 
+| grid15          |  647 | 
+| grid16          |  627 | 
+| grid17          |  614 | 
+| gridex          |  129 | 
+| gridunesp       |  378 | 
+| grow            |  130 | 
+| gthain          |  517 | 
+| hcc             |  388 | 
+| hguanhua        |  592 | 
+| ht              |  608 | 
+| huang           |  457 | 
+| huihui          |  607 | 
+| hypercp         |  132 | 
+| i2u2            |  238 | 
+| icecube         |  282 | 
+| idb             |  300 | 
+| ifca            |  345 | 
+| ilc             |  133 | 
+| ilc4c           |  298 | 
+| ilddet          |  365 | 
+| infn            |  134 | 
+| ivdgl           |  135 | 
+| jaing           |  470 | 
+| jchristianson   |  516 | 
+| jd              |  619 | 
+| jdem            |  284 | 
+| jkong           |  643 | 
+| jmb             |  484 | 
+| jmcdaniel       |  497 | 
+| jmondal         |  501 | 
+| jms21           |  445 | 
+| k47k4           |  459 | 
+| king            |  478 | 
+| ksinterface     |  502 | 
+| ktev            |  139 | 
+| kuang           |  506 | 
+| lbne            |  417 | 
+| lee             |  140 | 
+| leiliz          |  609 | 
+| lhaupert        |  598 | 
+| ligo            |  142 | 
+| liu             |  463 | 
+| lius8           |  423 | 
+| llzhang         |  512 | 
+| loni_bc_02      |  403 | 
+| loni_binding04  |  409 | 
+| loni_cactus05   |  410 | 
+| loni_cavitands  |  408 | 
+| loni_coastal01  |  400 | 
+| loni_coe_lsu_02 |  399 | 
+| loni_coptah     |  414 | 
+| loni_density003 |  413 | 
+| loni_hep_09     |  411 | 
+| loni_i3sim04    |  402 | 
+| loni_jhabig09   |  397 | 
+| loni_metrics_09 |  412 | 
+| loni_numrel04   |  404 | 
+| loni_qcp_dms09  |  398 | 
+| loni_rel_mhd    |  401 | 
+| loni_resonator3 |  415 | 
+| loni_rhall09_1  |  396 | 
+| loni_training09 |  405 | 
+| loni_wickt      |  406 | 
+| lqcd            |  144 | 
+| lslipche        |  611 | 
+| lsst            |  373 | 
+| lwang           |  496 | 
+| m1248           |  475 | 
+| m670            |  439 | 
+| magrid          |  245 | 
+| manoj           |  498 | 
+| map             |  393 | 
+| mariachi        |  292 | 
+| matt            |  431 | 
+| mburke          |  641 | 
+| mh              |  616 | 
+| mille           |  348 | 
+| minerva         |  278 | 
+| miniboone       |  146 | 
+| minos           |  147 | 
+| mipp            |  148 | 
+| mis             |  149 | 
+| mpccc           |  442 | 
+| mrp9            |  469 | 
+| mu2e            |  354 | 
+| nanohub         |  151 | 
+| nebiogrid       |  305 | 
+| nees            |  392 | 
+| nickwu          |  606 | 
+| nova            |  376 | 
+| numi            |  273 | 
+| nwicg           |  154 | 
+| nysgrid         |  207 | 
+| ocucs           |  277 | 
+| odonovan        |  630 | 
+| oiv_test1       |  272 | 
+| ops             |  155 | 
+| osg             |  156 | 
+| osgedu          |  157 | 
+| osgu000         |  195 | 
+| other           |  221 | 
+| other EGEE      |  382 | 
+| ou2             |  407 | 
+| ouame           |  384 | 
+| pari            |  479 | 
+| parii           |  513 | 
+| patriot         |  159 | 
+| pegrid          |  374 | 
+| pgoyal          |  493 | 
+| pilatlas        |  473 | 
+| prdatlas        |  443 | 
+| pxq             |  612 | 
+| qpei            |  489 | 
+| renci           |  480 | 
+| rsakidja        |  491 | 
+| rsvuser         |  449 | 
+| sabs            |  590 | 
+| sagrid          |  428 | 
+| sbgrid          |  234 | 
+| sc              |  441 | 
+| sc11            |  642 | 
+| scidac          |  455 | 
+| sdss            |  166 | 
+| seneslab        |  487 | 
+| sgmenmr         |  464 | 
+| sgmenmrcirmmp   |  468 | 
+| sgmsagrid       |  503 | 
+| shah            |  451 | 
+| siddet          |  340 | 
+| singlyMappedOSG |  267 | 
+| sipe0           |  446 | 
+| sl              |  618 | 
+| soarbuild       |  504 | 
+| sp              |  617 | 
+| sqzhu           |  596 | 
+| star            |  169 | 
+| superbvo.org    |  381 | 
+| sura            |  472 | 
+| sura0           |  477 | 
+| suragrid        |  264 | 
+| symp            |  639 | 
+| t2k.org         |  383 | 
+| test            |  462 | 
+| test_proj       |  453 | 
+| tgyro           |  346 | 
+| th              |  620 | 
+| theory          |  263 | 
+| thomp           |  390 | 
+| tigre           |  198 | 
+| tmayeshi        |  514 | 
+| turne           |  467 | 
+| unknown         |  220 | 
+| uno             |  327 | 
+| usatlas         |  172 | 
+| uscmsPool1      |  175 | 
+| uscmsPool2      |  391 | 
+| users           |  636 | 
+| ux453           |  466 | 
+| wang1           |  587 | 
+| webportal       |  488 | 
+| wenger          |  486 | 
+| xzhu            |  495 | 
+| yethiraj        |  500 | 
+| yijieli         |  511 | 
+| yj7             |  631 | 
+| yl              |  626 | 
+| yru1            |  582 | 
+| yuguo1          |  458 | 
+| zheng           |  634 | 
+| zhijun          |  494 | 
+| zorba           |  492 | 
+| zwu7            |  588 | 
++-----------------+------+
+============================================================
+VO table DELETE statements - unused ones
+============================================================
+--------------
+SELECT
+   CONCAT("DELETE FROM VO WHERE void = ", a.void ,";")
+as delete_sql
+FROM  
+  ( SELECT distinct(void) FROM VO 
+   where VO.void not in (select distinct(void) from VONameCorrection)) a
+order by void
+--------------
+
++----------------------------------+
+| delete_sql                       |
++----------------------------------+
+| DELETE FROM VO WHERE void = 88;  | 
+| DELETE FROM VO WHERE void = 89;  | 
+| DELETE FROM VO WHERE void = 90;  | 
+| DELETE FROM VO WHERE void = 91;  | 
+| DELETE FROM VO WHERE void = 93;  | 
+| DELETE FROM VO WHERE void = 94;  | 
+| DELETE FROM VO WHERE void = 95;  | 
+| DELETE FROM VO WHERE void = 104; | 
+| DELETE FROM VO WHERE void = 105; | 
+| DELETE FROM VO WHERE void = 113; | 
+| DELETE FROM VO WHERE void = 115; | 
+| DELETE FROM VO WHERE void = 118; | 
+| DELETE FROM VO WHERE void = 123; | 
+| DELETE FROM VO WHERE void = 131; | 
+| DELETE FROM VO WHERE void = 136; | 
+| DELETE FROM VO WHERE void = 137; | 
+| DELETE FROM VO WHERE void = 138; | 
+| DELETE FROM VO WHERE void = 141; | 
+| DELETE FROM VO WHERE void = 143; | 
+| DELETE FROM VO WHERE void = 145; | 
+| DELETE FROM VO WHERE void = 150; | 
+| DELETE FROM VO WHERE void = 152; | 
+| DELETE FROM VO WHERE void = 153; | 
+| DELETE FROM VO WHERE void = 158; | 
+| DELETE FROM VO WHERE void = 160; | 
+| DELETE FROM VO WHERE void = 161; | 
+| DELETE FROM VO WHERE void = 162; | 
+| DELETE FROM VO WHERE void = 163; | 
+| DELETE FROM VO WHERE void = 164; | 
+| DELETE FROM VO WHERE void = 165; | 
+| DELETE FROM VO WHERE void = 167; | 
+| DELETE FROM VO WHERE void = 168; | 
+| DELETE FROM VO WHERE void = 170; | 
+| DELETE FROM VO WHERE void = 171; | 
+| DELETE FROM VO WHERE void = 173; | 
+| DELETE FROM VO WHERE void = 174; | 
+| DELETE FROM VO WHERE void = 176; | 
+| DELETE FROM VO WHERE void = 177; | 
+| DELETE FROM VO WHERE void = 178; | 
+| DELETE FROM VO WHERE void = 179; | 
+| DELETE FROM VO WHERE void = 180; | 
+| DELETE FROM VO WHERE void = 181; | 
+| DELETE FROM VO WHERE void = 182; | 
+| DELETE FROM VO WHERE void = 183; | 
+| DELETE FROM VO WHERE void = 184; | 
+| DELETE FROM VO WHERE void = 185; | 
+| DELETE FROM VO WHERE void = 186; | 
+| DELETE FROM VO WHERE void = 187; | 
+| DELETE FROM VO WHERE void = 188; | 
+| DELETE FROM VO WHERE void = 189; | 
+| DELETE FROM VO WHERE void = 190; | 
+| DELETE FROM VO WHERE void = 191; | 
+| DELETE FROM VO WHERE void = 192; | 
+| DELETE FROM VO WHERE void = 193; | 
+| DELETE FROM VO WHERE void = 194; | 
+| DELETE FROM VO WHERE void = 196; | 
+| DELETE FROM VO WHERE void = 197; | 
+| DELETE FROM VO WHERE void = 199; | 
+| DELETE FROM VO WHERE void = 200; | 
+| DELETE FROM VO WHERE void = 201; | 
+| DELETE FROM VO WHERE void = 203; | 
+| DELETE FROM VO WHERE void = 204; | 
+| DELETE FROM VO WHERE void = 205; | 
+| DELETE FROM VO WHERE void = 206; | 
+| DELETE FROM VO WHERE void = 209; | 
+| DELETE FROM VO WHERE void = 210; | 
+| DELETE FROM VO WHERE void = 211; | 
+| DELETE FROM VO WHERE void = 212; | 
+| DELETE FROM VO WHERE void = 213; | 
+| DELETE FROM VO WHERE void = 214; | 
+| DELETE FROM VO WHERE void = 215; | 
+| DELETE FROM VO WHERE void = 216; | 
+| DELETE FROM VO WHERE void = 217; | 
+| DELETE FROM VO WHERE void = 218; | 
+| DELETE FROM VO WHERE void = 219; | 
+| DELETE FROM VO WHERE void = 222; | 
+| DELETE FROM VO WHERE void = 223; | 
+| DELETE FROM VO WHERE void = 224; | 
+| DELETE FROM VO WHERE void = 225; | 
+| DELETE FROM VO WHERE void = 226; | 
+| DELETE FROM VO WHERE void = 227; | 
+| DELETE FROM VO WHERE void = 228; | 
+| DELETE FROM VO WHERE void = 229; | 
+| DELETE FROM VO WHERE void = 230; | 
+| DELETE FROM VO WHERE void = 231; | 
+| DELETE FROM VO WHERE void = 232; | 
+| DELETE FROM VO WHERE void = 233; | 
+| DELETE FROM VO WHERE void = 235; | 
+| DELETE FROM VO WHERE void = 237; | 
+| DELETE FROM VO WHERE void = 239; | 
+| DELETE FROM VO WHERE void = 240; | 
+| DELETE FROM VO WHERE void = 241; | 
+| DELETE FROM VO WHERE void = 242; | 
+| DELETE FROM VO WHERE void = 243; | 
+| DELETE FROM VO WHERE void = 244; | 
+| DELETE FROM VO WHERE void = 246; | 
+| DELETE FROM VO WHERE void = 247; | 
+| DELETE FROM VO WHERE void = 248; | 
+| DELETE FROM VO WHERE void = 249; | 
+| DELETE FROM VO WHERE void = 250; | 
+| DELETE FROM VO WHERE void = 251; | 
+| DELETE FROM VO WHERE void = 252; | 
+| DELETE FROM VO WHERE void = 253; | 
+| DELETE FROM VO WHERE void = 254; | 
+| DELETE FROM VO WHERE void = 255; | 
+| DELETE FROM VO WHERE void = 256; | 
+| DELETE FROM VO WHERE void = 257; | 
+| DELETE FROM VO WHERE void = 258; | 
+| DELETE FROM VO WHERE void = 259; | 
+| DELETE FROM VO WHERE void = 260; | 
+| DELETE FROM VO WHERE void = 261; | 
+| DELETE FROM VO WHERE void = 262; | 
+| DELETE FROM VO WHERE void = 265; | 
+| DELETE FROM VO WHERE void = 266; | 
+| DELETE FROM VO WHERE void = 268; | 
+| DELETE FROM VO WHERE void = 269; | 
+| DELETE FROM VO WHERE void = 270; | 
+| DELETE FROM VO WHERE void = 274; | 
+| DELETE FROM VO WHERE void = 275; | 
+| DELETE FROM VO WHERE void = 279; | 
+| DELETE FROM VO WHERE void = 280; | 
+| DELETE FROM VO WHERE void = 281; | 
+| DELETE FROM VO WHERE void = 283; | 
+| DELETE FROM VO WHERE void = 287; | 
+| DELETE FROM VO WHERE void = 288; | 
+| DELETE FROM VO WHERE void = 289; | 
+| DELETE FROM VO WHERE void = 290; | 
+| DELETE FROM VO WHERE void = 291; | 
+| DELETE FROM VO WHERE void = 293; | 
+| DELETE FROM VO WHERE void = 294; | 
+| DELETE FROM VO WHERE void = 295; | 
+| DELETE FROM VO WHERE void = 296; | 
+| DELETE FROM VO WHERE void = 297; | 
+| DELETE FROM VO WHERE void = 299; | 
+| DELETE FROM VO WHERE void = 301; | 
+| DELETE FROM VO WHERE void = 303; | 
+| DELETE FROM VO WHERE void = 304; | 
+| DELETE FROM VO WHERE void = 306; | 
+| DELETE FROM VO WHERE void = 307; | 
+| DELETE FROM VO WHERE void = 308; | 
+| DELETE FROM VO WHERE void = 309; | 
+| DELETE FROM VO WHERE void = 311; | 
+| DELETE FROM VO WHERE void = 312; | 
+| DELETE FROM VO WHERE void = 313; | 
+| DELETE FROM VO WHERE void = 314; | 
+| DELETE FROM VO WHERE void = 315; | 
+| DELETE FROM VO WHERE void = 316; | 
+| DELETE FROM VO WHERE void = 317; | 
+| DELETE FROM VO WHERE void = 318; | 
+| DELETE FROM VO WHERE void = 319; | 
+| DELETE FROM VO WHERE void = 320; | 
+| DELETE FROM VO WHERE void = 321; | 
+| DELETE FROM VO WHERE void = 322; | 
+| DELETE FROM VO WHERE void = 323; | 
+| DELETE FROM VO WHERE void = 324; | 
+| DELETE FROM VO WHERE void = 325; | 
+| DELETE FROM VO WHERE void = 326; | 
+| DELETE FROM VO WHERE void = 328; | 
+| DELETE FROM VO WHERE void = 329; | 
+| DELETE FROM VO WHERE void = 330; | 
+| DELETE FROM VO WHERE void = 331; | 
+| DELETE FROM VO WHERE void = 332; | 
+| DELETE FROM VO WHERE void = 333; | 
+| DELETE FROM VO WHERE void = 335; | 
+| DELETE FROM VO WHERE void = 336; | 
+| DELETE FROM VO WHERE void = 337; | 
+| DELETE FROM VO WHERE void = 338; | 
+| DELETE FROM VO WHERE void = 339; | 
+| DELETE FROM VO WHERE void = 341; | 
+| DELETE FROM VO WHERE void = 342; | 
+| DELETE FROM VO WHERE void = 343; | 
+| DELETE FROM VO WHERE void = 344; | 
+| DELETE FROM VO WHERE void = 347; | 
+| DELETE FROM VO WHERE void = 349; | 
+| DELETE FROM VO WHERE void = 350; | 
+| DELETE FROM VO WHERE void = 352; | 
+| DELETE FROM VO WHERE void = 353; | 
+| DELETE FROM VO WHERE void = 355; | 
+| DELETE FROM VO WHERE void = 359; | 
+| DELETE FROM VO WHERE void = 361; | 
+| DELETE FROM VO WHERE void = 363; | 
+| DELETE FROM VO WHERE void = 364; | 
+| DELETE FROM VO WHERE void = 366; | 
+| DELETE FROM VO WHERE void = 367; | 
+| DELETE FROM VO WHERE void = 368; | 
+| DELETE FROM VO WHERE void = 371; | 
+| DELETE FROM VO WHERE void = 372; | 
+| DELETE FROM VO WHERE void = 375; | 
+| DELETE FROM VO WHERE void = 377; | 
+| DELETE FROM VO WHERE void = 379; | 
+| DELETE FROM VO WHERE void = 380; | 
+| DELETE FROM VO WHERE void = 387; | 
+| DELETE FROM VO WHERE void = 389; | 
+| DELETE FROM VO WHERE void = 394; | 
+| DELETE FROM VO WHERE void = 395; | 
+| DELETE FROM VO WHERE void = 416; | 
+| DELETE FROM VO WHERE void = 418; | 
+| DELETE FROM VO WHERE void = 420; | 
+| DELETE FROM VO WHERE void = 421; | 
+| DELETE FROM VO WHERE void = 424; | 
+| DELETE FROM VO WHERE void = 426; | 
+| DELETE FROM VO WHERE void = 429; | 
+| DELETE FROM VO WHERE void = 432; | 
+| DELETE FROM VO WHERE void = 434; | 
+| DELETE FROM VO WHERE void = 435; | 
+| DELETE FROM VO WHERE void = 437; | 
+| DELETE FROM VO WHERE void = 448; | 
++----------------------------------+
+============================================================
+VO table dump of records to be deleted
+============================================================
+--------------
+SELECT * FROM VO
+where void not in (select distinct(void) from VONameCorrection)
+order by VOName
+--------------
+
++------+-------------------------------------------------+
+| VOid | VOName                                          |
++------+-------------------------------------------------+
+|  247 | /Engage/Role=NULL/Capability=NULL               | 
+|  259 | /atlas/Role=lcgadmin/Capability=NULL            | 
+|  244 | /atlas/usatlas/Role=production/Capability=NULL  | 
+|  225 | /cdf/Role=NULL/Capability=NULL                  | 
+|  229 | /cdf/glidecaf/Role=development/Capability=NULL  | 
+|  226 | /cdf/glidecaf/Role=namcaf/Capability=NULL       | 
+|  228 | /cdf/glidecaf/Role=testcaf/Capability=NULL      | 
+|  250 | /cms/Role=NULL/Capability=NULL                  | 
+|  258 | /cms/Role=lcgadmin/Capability=NULL              | 
+|  252 | /cms/Role=production/Capability=NULL            | 
+|  261 | /cms/uscms/Role=NULL/Capability=NULL            | 
+|  253 | /cms/uscms/Role=cmssoft/Capability=NULL         | 
+|  246 | /cms/uscms/Role=cmsuser/Capability=NULL         | 
+|  251 | /dzero/users/Role=NULL/Capability=NULL          | 
+|  227 | /fermilab/Role=NULL/Capability=NULL             | 
+|  254 | /gridex/Role=NULL/Capability=NULL               | 
+|  257 | /mis/Role=NULL/Capability=NULL                  | 
+|  249 | /nanohub/Role=NULL/Capability=NULL              | 
+|  255 | /ops/Role=lcgadmin/Capability=NULL              | 
+|  260 | /osg/Role=NULL/Capability=NULL                  | 
+|  248 | /osgedu/Role=NULL/Capability=NULL               | 
+|  256 | /star/Role=NULL/Capability=NULL                 | 
+|   88 | 1180053                                         | 
+|   89 | 1183335                                         | 
+|  192 | 1189588                                         | 
+|  210 | 1198495                                         | 
+|  217 | 1202574                                         | 
+|  223 | 1203635                                         | 
+|  224 | 1204018                                         | 
+|  230 | 1205281                                         | 
+|   90 | 492                                             | 
+|  184 | 568                                             | 
+|  233 | 913                                             | 
+|   91 | CompBioGrid                                     | 
+|   93 | Fermilab                                        | 
+|   94 | GLOW                                            | 
+|  375 | Gluex                                           | 
+|  379 | GridUNESP                                       | 
+|   95 | LIGO                                            | 
+|  295 | NEBioGrid                                       | 
+|  280 | NWICG                                           | 
+|  262 | NYSGRID                                         | 
+|  211 | Other                                           | 
+|  265 | RSV                                             | 
+|  371 | TGYRO                                           | 
+|  283 | TIGRE                                           | 
+|  359 | aa                                              | 
+|  268 | aceace                                          | 
+|  323 | ahouston                                        | 
+|  275 | am                                              | 
+|  194 | ap                                              | 
+|  185 | aru0                                            | 
+|  213 | as                                              | 
+|  205 | atlasprd                                        | 
+|  204 | atlassgm                                        | 
+|  311 | batelaan                                        | 
+|  319 | belashchenko                                    | 
+|  324 | berkowitz                                       | 
+|  352 | biocore                                         | 
+|  367 | bjs                                             | 
+|  180 | blane                                           | 
+|  329 | bleak                                           | 
+|  336 | bobaru                                          | 
+|  235 | boxu1                                           | 
+|  299 | brian                                           | 
+|  219 | bsc-cns                                         | 
+|  321 | bsteffen                                        | 
+|  312 | chandra                                         | 
+|  104 | chem9                                           | 
+|  270 | chen                                            | 
+|  380 | choi                                            | 
+|  308 | choueiry                                        | 
+|  105 | ciemat                                          | 
+|  434 | cms0                                            | 
+|  435 | cms1                                            | 
+|  448 | cms2                                            | 
+|  350 | csci4440                                        | 
+|  353 | cse856                                          | 
+|  293 | cyt701                                          | 
+|  328 | ddowney                                         | 
+|  218 | dhkim1                                          | 
+|  206 | dteamprd                                        | 
+|  331 | dweitzel                                        | 
+|  335 | dzenis                                          | 
+|  113 | eScience                                        | 
+|  330 | ebabin                                          | 
+|  377 | ecucs                                           | 
+|  115 | engagement                                      | 
+|  287 | erbb                                            | 
+|  118 | fermilab-test                                   | 
+|  303 | furtney                                         | 
+|  363 | gilda                                           | 
+|  123 | gin.ggf.org                                     | 
+|  337 | gladyshev                                       | 
+|  307 | goddard                                         | 
+|  189 | gvitu                                           | 
+|  314 | harbison                                        | 
+|  131 | hep                                             | 
+|  269 | icbr                                            | 
+|  197 | ifh1                                            | 
+|  243 | imt                                             | 
+|  181 | james                                           | 
+|  216 | jb                                              | 
+|  136 | jc                                              | 
+|  214 | jcd2                                            | 
+|  421 | jcyin                                           | 
+|  199 | jen7                                            | 
+|  320 | jiang                                           | 
+|  288 | jjs                                             | 
+|  387 | jl                                              | 
+|  289 | johns                                           | 
+|  297 | js                                              | 
+|  316 | jwang7                                          | 
+|  338 | kai                                             | 
+|  137 | kfki rmki ca                                    | 
+|  187 | kim                                             | 
+|  395 | kim1                                            | 
+|  241 | kiss2                                           | 
+|  138 | km                                              | 
+|  231 | kucc                                            | 
+|  141 | lhcb                                            | 
+|  290 | li                                              | 
+|  394 | ligy                                            | 
+|  372 | lin                                             | 
+|  143 | lipca                                           | 
+|  389 | local                                           | 
+|  212 | localUsers                                      | 
+|  432 | lsl1                                            | 
+|  222 | mb                                              | 
+|  315 | mech950                                         | 
+|  347 | mei                                             | 
+|  342 | mfurtney                                        | 
+|  145 | mfv                                             | 
+|  186 | mit                                             | 
+|  150 | mm                                              | 
+|  196 | mpi                                             | 
+|  200 | mrs                                             | 
+|  266 | mschram06/29/2                                  | 
+|  317 | mshafiullah                                     | 
+|  191 | mt5                                             | 
+|  416 | nakul02                                         | 
+|  274 | nano011/16/2                                    | 
+|  152 | national center for supercomputing applications | 
+|  237 | newUsatlasplt                                   | 
+|  341 | nogradi                                         | 
+|  153 | ntu                                             | 
+|  355 | oglesby                                         | 
+|  203 | opssgm                                          | 
+|  193 | osgbabar00                                      | 
+|  190 | osgivdglmis0                                    | 
+|  188 | osgusatlas00                                    | 
+|  158 | park                                            | 
+|  291 | pegrid0                                         | 
+|  160 | pg                                              | 
+|  161 | ph                                              | 
+|  301 | physmei                                         | 
+|  304 | plukashev                                       | 
+|  162 | pragma                                          | 
+|  344 | psk6                                            | 
+|  163 | purdue university                               | 
+|  164 | rdig                                            | 
+|  313 | reid                                            | 
+|  309 | rowe                                            | 
+|  349 | rsv                                             | 
+|  165 | rv                                              | 
+|  364 | sabirianov                                      | 
+|  420 | sahara                                          | 
+|  424 | saint                                           | 
+|  296 | sbgrid-RSV                                      | 
+|  426 | sgmatlas                                        | 
+|  167 | sk                                              | 
+|  368 | sm                                              | 
+|  183 | smith                                           | 
+|  168 | ss                                              | 
+|  318 | starace                                         | 
+|  429 | stevenlubin2                                    | 
+|  170 | sun                                             | 
+|  322 | swanson                                         | 
+|  182 | tigrepool0                                      | 
+|  215 | trgrid                                          | 
+|  201 | ts                                              | 
+|  333 | tsymbal                                         | 
+|  366 | tubio                                           | 
+|  171 | ub2                                             | 
+|  239 | ucm                                             | 
+|  173 | uscms                                           | 
+|  279 | uscms1                                          | 
+|  174 | uscmsPool                                       | 
+|  176 | uscmspool0                                      | 
+|  232 | uscmspool1                                      | 
+|  343 | uscmspool2                                      | 
+|  177 | ux001                                           | 
+|  209 | vam                                             | 
+|  178 | wang                                            | 
+|  437 | wilso                                           | 
+|  325 | woldt                                           | 
+|  240 | wolf2                                           | 
+|  361 | wood                                            | 
+|  332 | wpeng                                           | 
+|  294 | wu                                              | 
+|  306 | xzeng                                           | 
+|  281 | yang                                            | 
+|  339 | ysm                                             | 
+|  326 | zeng                                            | 
+|  179 | zeus                                            | 
+|  242 | zhang                                           | 
+|  418 | zhou                                            | 
++------+-------------------------------------------------+

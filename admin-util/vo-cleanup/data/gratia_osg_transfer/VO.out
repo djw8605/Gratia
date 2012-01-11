@@ -1,0 +1,156 @@
+
+=========================================================
+VOName being analized
+=========================================================
+--------------
+set @voname="TG-%"
+--------------
+
+========================================================
+Query - Total VO table entries for summary tables.
+========================================================
+--------------
+SELECT count(*) from VO
+--------------
+
++----------+
+| count(*) |
++----------+
+|       58 | 
++----------+
+========================================================
+Query - Unused VO table entries for summary tables.
+========================================================
+--------------
+SELECT count(*) FROM VO
+where VO.void not in (select distinct(void) from VONameCorrection)
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VO.void
+FROM
+   VO VO
+where 
+  VO.void not in (select distinct(void) from VONameCorrection) 
+order by 
+  GratiaVO
+ ,VO.void
+--------------
+
+========================================================
+Query - Used VO table entries for summary tables.
+========================================================
+--------------
+SELECT count(*) FROM VO
+where VO.void in (select distinct(void) from VONameCorrection)
+--------------
+
++----------+
+| count(*) |
++----------+
+|       58 | 
++----------+
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VO.void
+FROM
+   VO VO
+where 
+  VO.void in (select distinct(void) from VONameCorrection) 
+order by 
+  GratiaVO
+ ,VO.void
+--------------
+
++-----------------------------------------------------------+------+
+| GratiaVO                                                  | void |
++-----------------------------------------------------------+------+
+| Engage                                                    |   50 | 
+| GridUNESP                                                 |   44 | 
+| LIGO                                                      |   49 | 
+| RSV                                                       |   45 | 
+| SBGrid                                                    |   55 | 
+| Unknown                                                   |    1 | 
+| aegis                                                     |   36 | 
+| ap                                                        |    9 | 
+| apacgrid                                                  |   24 | 
+| as                                                        |   39 | 
+| atlas                                                     |   13 | 
+| cdf                                                       |   22 | 
+| ciemat                                                    |   10 | 
+| cms                                                       |   41 | 
+| dosar                                                     |   35 | 
+| dteam                                                     |   18 | 
+| dutchgrid                                                 |   16 | 
+| dzero                                                     |    2 | 
+| e-ciencia                                                 |   17 | 
+| engage                                                    |   33 | 
+| escience                                                  |    7 | 
+| fermilab                                                  |   28 | 
+| fermilab-test                                             |   46 | 
+| geant4                                                    |   52 | 
+| germangrid                                                |    8 | 
+| gluex                                                     |   56 | 
+| gpn                                                       |   32 | 
+| grid                                                      |   12 | 
+| grid-fr                                                   |   14 | 
+| hcc                                                       |   54 | 
+| hellasgrid                                                |   34 | 
+| hep                                                       |   21 | 
+| ifae                                                      |   23 | 
+| infn                                                      |    6 | 
+| institute of physics of the academy of sciences of the cr |   15 | 
+| kek                                                       |   31 | 
+| ligo                                                      |   27 | 
+| lipca                                                     |   20 | 
+| lqcd                                                      |   43 | 
+| mis                                                       |   29 | 
+| nanohub                                                   |   25 | 
+| nebiogrid                                                 |   42 | 
+| null                                                      |   37 | 
+| ops                                                       |   40 | 
+| osg                                                       |    4 | 
+| osgedu                                                    |   48 | 
+| pegrid                                                    |   51 | 
+| pic                                                       |   19 | 
+| rdig                                                      |    5 | 
+| sbgrid                                                    |   26 | 
+| sgvo                                                      |   57 | 
+| star                                                      |   30 | 
+| superbvo.org                                              |   53 | 
+| suragrid                                                  |   58 | 
+| tigre                                                     |   47 | 
+| usatlas                                                   |   11 | 
+| usatlas3                                                  |   38 | 
+| uscms                                                     |    3 | 
++-----------------------------------------------------------+------+
+============================================================
+VO table DELETE statements - unused ones
+============================================================
+--------------
+SELECT
+   CONCAT("DELETE FROM VO WHERE void = ", a.void ,";")
+as delete_sql
+FROM  
+  ( SELECT distinct(void) FROM VO 
+   where VO.void not in (select distinct(void) from VONameCorrection)) a
+order by void
+--------------
+
+============================================================
+VO table dump of records to be deleted
+============================================================
+--------------
+SELECT * FROM VO
+where void not in (select distinct(void) from VONameCorrection)
+order by VOName
+--------------
+

@@ -1,0 +1,554 @@
+
+=========================================================
+VOName being analized
+=========================================================
+--------------
+set @voname="TG-%"
+--------------
+
+========================================================
+Query - Total VO table entries for summary tables.
+========================================================
+--------------
+SELECT count(*) from VO
+--------------
+
++----------+
+| count(*) |
++----------+
+|      456 | 
++----------+
+========================================================
+Query - Unused VO table entries for summary tables.
+========================================================
+--------------
+SELECT count(*) FROM VO
+where VO.void not in (select distinct(void) from VONameCorrection)
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VO.void
+FROM
+   VO VO
+where 
+  VO.void not in (select distinct(void) from VONameCorrection) 
+order by 
+  GratiaVO
+ ,VO.void
+--------------
+
+========================================================
+Query - Used VO table entries for summary tables.
+========================================================
+--------------
+SELECT count(*) FROM VO
+where VO.void in (select distinct(void) from VONameCorrection)
+--------------
+
++----------+
+| count(*) |
++----------+
+|      456 | 
++----------+
+--------------
+SELECT 
+   VO.VOName as GratiaVO
+  ,VO.void
+FROM
+   VO VO
+where 
+  VO.void in (select distinct(void) from VONameCorrection) 
+order by 
+  GratiaVO
+ ,VO.void
+--------------
+
++-------------------------------------------------+------+
+| GratiaVO                                        | void |
++-------------------------------------------------+------+
+| /cdf/Role=NULL/Capability=NULL                  |  206 | 
+| /cdf/glidecaf/Role=namcaf/Capability=NULL       |  207 | 
+| 1178843                                         |   79 | 
+| 1180053                                         |   80 | 
+| 1183335                                         |   81 | 
+| 1189588                                         |  175 | 
+| 1198495                                         |  193 | 
+| 1202574                                         |  198 | 
+| 1203635                                         |  204 | 
+| 1204018                                         |  205 | 
+| 492                                             |   82 | 
+| 568                                             |  169 | 
+| ATLAS                                           |   83 | 
+| ATLAS (nr)                                      |  515 | 
+| CMS                                             |   84 | 
+| CompBioGrid                                     |   85 | 
+| CompBioGrid (nr)                                |  255 | 
+| DOSAR                                           |   86 | 
+| DZero                                           |   87 | 
+| Engage                                          |   88 | 
+| Engage (nr)                                     |  254 | 
+| GLOW                                            |   89 | 
+| GLOW (nr)                                       |  414 | 
+| Gluex (nr)                                      |  410 | 
+| GridEx                                          |   90 | 
+| GridUNESP (nr)                                  |  420 | 
+| LIGO                                            |   91 | 
+| LSST (nr)                                       |  407 | 
+| MIS                                             |   92 | 
+| NEBioGrid (nr)                                  |  253 | 
+| NWICG (nr)                                      |  236 | 
+| Other                                           |  194 | 
+| RSV                                             |  210 | 
+| RSV (nr)                                        |  223 | 
+| SBGrid (nr)                                     |  243 | 
+| SGVO (nr)                                       |  823 | 
+| TG-ASC050039N (nr)                              |  671 | 
+| TG-AST070052N (nr)                              |  796 | 
+| TG-AST090100 (nr)                               |  763 | 
+| TG-AST100043 (nr)                               |  754 | 
+| TG-ATM010005N (nr)                              |  788 | 
+| TG-ATM090002 (nr)                               |  765 | 
+| TG-ATM090060 (nr)                               |  797 | 
+| TG-ATM110019 (nr)                               |  698 | 
+| TG-CDA100007 (nr)                               |  684 | 
+| TG-CDA110012 (nr)                               |  685 | 
+| TG-CHE070074N (nr)                              |  720 | 
+| TG-CHE080066N (nr)                              |  686 | 
+| TG-CHE090006 (nr)                               |  728 | 
+| TG-CHE100058 (nr)                               |  700 | 
+| TG-CHE100095 (nr)                               |  673 | 
+| TG-CHE100113 (nr)                               |  742 | 
+| TG-CHE110064 (nr)                               |  674 | 
+| TG-CTS070034N (nr)                              |  688 | 
+| TG-CTS090062 (nr)                               |  746 | 
+| TG-CTS100012 (nr)                               |  701 | 
+| TG-CTS100026 (nr)                               |  729 | 
+| TG-CTS100027 (nr)                               |  800 | 
+| TG-DMR080070 (nr)                               |  702 | 
+| TG-DMR100080 (nr)                               |  768 | 
+| TG-DMR110013 (nr)                               |  689 | 
+| TG-DMR110027 (nr)                               |  802 | 
+| TG-DMR110052 (nr)                               |  703 | 
+| TG-DMR110072 (nr)                               |  690 | 
+| TG-DMR110095 (nr)                               |  722 | 
+| TG-DMS100018 (nr)                               |  747 | 
+| TG-DMS110002 (nr)                               |  757 | 
+| TG-EAR080018T (nr)                              |  691 | 
+| TG-EAR110015 (nr)                               |  676 | 
+| TG-IBN050000N (nr)                              |  704 | 
+| TG-IBN090004 (nr)                               |  730 | 
+| TG-IBN100006 (nr)                               |  705 | 
+| TG-MCA03S007 (nr)                               |  791 | 
+| TG-MCA05S010 (nr)                               |  860 | 
+| TG-MCA07S022 (nr)                               |  814 | 
+| TG-MCA07S029 (nr)                               |  792 | 
+| TG-MCB040051N (nr)                              |  749 | 
+| TG-MCB070015N (nr)                              |  710 | 
+| TG-MCB090163 (nr)                               |  692 | 
+| TG-MCB110037 (nr)                               |  793 | 
+| TG-MCB110072 (nr)                               |  677 | 
+| TG-MCB110112 (nr)                               |  759 | 
+| TG-PHY100030 (nr)                               |  716 | 
+| TG-PHY110005 (nr)                               |  771 | 
+| TG-PHY110010 (nr)                               |  679 | 
+| TG-PHY110021 (nr)                               |  712 | 
+| TG-PHY110034 (nr)                               |  680 | 
+| TG-STA060008N (nr)                              |  681 | 
+| TGYRO (nr)                                      |  402 | 
+| TIGRE (nr)                                      |  239 | 
+| UT-NTNL0033 (nr)                                |  883 | 
+| Unknown                                         |   93 | 
+| Unknown (nr)                                    |  467 | 
+| aa (nr)                                         |  351 | 
+| ab (nr)                                         |  803 | 
+| ac (nr)                                         |  804 | 
+| accelerator                                     |  208 | 
+| aceace                                          |  211 | 
+| aceace (nr)                                     |  225 | 
+| adesmet (nr)                                    |  636 | 
+| ahouston (nr)                                   |  314 | 
+| alice                                           |  244 | 
+| along (nr)                                      |  479 | 
+| ankur (nr)                                      |  639 | 
+| ap                                              |  178 | 
+| argoneut                                        |  574 | 
+| armino (nr)                                     |  880 | 
+| aru0                                            |  171 | 
+| as                                              |  195 | 
+| as2 (nr)                                        |  512 | 
+| atlas                                           |  185 | 
+| atlas (nr)                                      |  226 | 
+| atlasprd                                        |  189 | 
+| atlassgm                                        |  186 | 
+| auger                                           |   94 | 
+| auger (nr)                                      |  444 | 
+| austriangrid                                    |   95 | 
+| avery (nr)                                      |  889 | 
+| aw (nr)                                         |  805 | 
+| baru-tro (nr)                                   |  886 | 
+| batelaan (nr)                                   |  281 | 
+| begrid                                          |   96 | 
+| belashchenko (nr)                               |  274 | 
+| belle                                           |  507 | 
+| bgs0 (nr)                                       |  650 | 
+| biocore (nr)                                    |  324 | 
+| biomed (nr)                                     |  272 | 
+| bjs (nr)                                        |  389 | 
+| blane                                           |  170 | 
+| bmueller (nr)                                   |  733 | 
+| bockelman (nr)                                  |  835 | 
+| bsc-cns                                         |  200 | 
+| bt (nr)                                         |  607 | 
+| c670 (nr)                                       |  504 | 
+| camcs (nr)                                      |  233 | 
+| cdf                                             |   97 | 
+| cdms                                            |   98 | 
+| cern                                            |   99 | 
+| chandra (nr)                                    |  283 | 
+| chem9                                           |  184 | 
+| chen                                            |  214 | 
+| chen (nr)                                       |  222 | 
+| choi (nr)                                       |  421 | 
+| choueiry (nr)                                   |  259 | 
+| ciemat                                          |  100 | 
+| cigi                                            |  191 | 
+| ck (nr)                                         |  505 | 
+| cmmap (nr)                                      |  559 | 
+| cms                                             |  101 | 
+| cms0 (nr)                                       |  497 | 
+| cms1 (nr)                                       |  495 | 
+| cms2 (nr)                                       |  519 | 
+| compbiogrid                                     |  102 | 
+| csci4440 (nr)                                   |  320 | 
+| cse435 (nr)                                     |  841 | 
+| cse496 (nr)                                     |  370 | 
+| cstaff (nr)                                     |  848 | 
+| cweiss (nr)                                     |  745 | 
+| cx32 (nr)                                       |  884 | 
+| cyt701 (nr)                                     |  252 | 
+| danb (nr)                                       |  659 | 
+| danielpark2 (nr)                                |  493 | 
+| datagrid-es                                     |  103 | 
+| ddowney (nr)                                    |  338 | 
+| dech (nr)                                       |  492 | 
+| default (nr)                                    |  540 | 
+| des                                             |  104 | 
+| dhinckley (nr)                                  |  631 | 
+| dhkim1                                          |  199 | 
+| dosar                                           |  105 | 
+| dteam                                           |  106 | 
+| dteam (nr)                                      |  230 | 
+| dteamprd                                        |  188 | 
+| ducharme (nr)                                   |  310 | 
+| dyna (nr)                                       |  888 | 
+| dzenis (nr)                                     |  335 | 
+| dzero                                           |  107 | 
+| ecucs (nr)                                      |  412 | 
+| el (nr)                                         |  807 | 
+| engage                                          |  108 | 
+| engagement                                      |  109 | 
+| enmr (nr)                                       |  523 | 
+| epacg (nr)                                      |  637 | 
+| escience                                        |  110 | 
+| evayi (nr)                                      |  525 | 
+| example (nr)                                    |  531 | 
+| external (nr)                                   |  597 | 
+| fabrikant (nr)                                  |  380 | 
+| fermilab                                        |  111 | 
+| fermilab-test                                   |  112 | 
+| fermilab-test (nr)                              |  246 | 
+| fgstore                                         |  361 | 
+| fgstore (nr)                                    |  242 | 
+| fgtest                                          |  428 | 
+| fgtest (nr)                                     |  322 | 
+| fmri                                            |  167 | 
+| fox (nr)                                        |  660 | 
+| furtney (nr)                                    |  289 | 
+| gabi (nr)                                       |  575 | 
+| gadu                                            |  113 | 
+| gay (nr)                                        |  345 | 
+| gcedu                                           |  878 | 
+| gcvo                                            |  874 | 
+| geant4                                          |  114 | 
+| genec (nr)                                      |  669 | 
+| germangrid                                      |  115 | 
+| gilda (nr)                                      |  399 | 
+| gin.ggf.org                                     |  116 | 
+| glideinwms (nr)                                 |  836 | 
+| glow                                            |  117 | 
+| gluex                                           |  366 | 
+| gluex (nr)                                      |  362 | 
+| goddard (nr)                                    |  263 | 
+| gpn                                             |  118 | 
+| grase                                           |  119 | 
+| grid                                            |  120 | 
+| grid (nr)                                       |  821 | 
+| grid-fr                                         |  121 | 
+| grid14 (nr)                                     |  815 | 
+| grid15 (nr)                                     |  887 | 
+| grid16 (nr)                                     |  822 | 
+| grid17 (nr)                                     |  816 | 
+| gridex                                          |  122 | 
+| gridex (nr)                                     |  240 | 
+| gridunesp                                       |  441 | 
+| grow                                            |  123 | 
+| gthain (nr)                                     |  657 | 
+| harbison (nr)                                   |  294 | 
+| hcc                                             |  432 | 
+| hep                                             |  124 | 
+| hguanhua (nr)                                   |  713 | 
+| ht (nr)                                         |  784 | 
+| huang (nr)                                      |  535 | 
+| huihui (nr)                                     |  785 | 
+| hypercp                                         |  125 | 
+| iVDgL                                           |  126 | 
+| icbr                                            |  212 | 
+| icbr (nr)                                       |  224 | 
+| icecube                                         |  237 | 
+| idb (nr)                                        |  260 | 
+| ifh1                                            |  181 | 
+| ilc                                             |  127 | 
+| ilc4c                                           |  360 | 
+| ilc4c (nr)                                      |  257 | 
+| ilddet                                          |  388 | 
+| infn                                            |  128 | 
+| ivdgl                                           |  129 | 
+| ivdgl (nr)                                      |  231 | 
+| james                                           |  179 | 
+| jcd2                                            |  196 | 
+| jchristianson (nr)                              |  658 | 
+| jcyin (nr)                                      |  483 | 
+| jd (nr)                                         |  808 | 
+| jdem                                            |  241 | 
+| jen7                                            |  183 | 
+| jiang (nr)                                      |  286 | 
+| jjs (nr)                                        |  245 | 
+| jkong (nr)                                      |  882 | 
+| jl (nr)                                         |  439 | 
+| jmb (nr)                                        |  611 | 
+| jmcdaniel (nr)                                  |  617 | 
+| jmondal (nr)                                    |  618 | 
+| jms21 (nr)                                      |  513 | 
+| johns (nr)                                      |  247 | 
+| js (nr)                                         |  256 | 
+| k47k4 (nr)                                      |  538 | 
+| kfki rmki ca                                    |  130 | 
+| kim                                             |  173 | 
+| king (nr)                                       |  592 | 
+| km                                              |  131 | 
+| ktev                                            |  132 | 
+| kuang (nr)                                      |  643 | 
+| lbne                                            |  466 | 
+| lee                                             |  133 | 
+| lee (nr)                                        |  547 | 
+| leiliz (nr)                                     |  786 | 
+| lhaupert (nr)                                   |  773 | 
+| lhcb                                            |  134 | 
+| lhcb (nr)                                       |  221 | 
+| li (nr)                                         |  248 | 
+| ligo                                            |  135 | 
+| ligy (nr)                                       |  442 | 
+| lin (nr)                                        |  406 | 
+| lipca                                           |  136 | 
+| liu (nr)                                        |  545 | 
+| llzhang (nr)                                    |  647 | 
+| local (nr)                                      |  435 | 
+| loni_binding04 (nr)                             |  450 | 
+| loni_cactus05 (nr)                              |  449 | 
+| loni_cavitands (nr)                             |  447 | 
+| loni_coptah (nr)                                |  459 | 
+| loni_density003 (nr)                            |  455 | 
+| loni_hep_09 (nr)                                |  453 | 
+| loni_i3sim04 (nr)                               |  448 | 
+| loni_jhabig09 (nr)                              |  458 | 
+| loni_metrics_09 (nr)                            |  454 | 
+| loni_qcp_dms09 (nr)                             |  456 | 
+| loni_resonator3 (nr)                            |  461 | 
+| loni_rhall09_1 (nr)                             |  446 | 
+| lsl1 (nr)                                       |  489 | 
+| lslipche (nr)                                   |  794 | 
+| lsst                                            |  425 | 
+| lwang (nr)                                      |  619 | 
+| m1248 (nr)                                      |  736 | 
+| m670 (nr)                                       |  585 | 
+| manoj (nr)                                      |  620 | 
+| map                                             |  877 | 
+| map (nr)                                        |  522 | 
+| mariachi                                        |  250 | 
+| matt (nr)                                       |  488 | 
+| mb                                              |  203 | 
+| mb (nr)                                         |  228 | 
+| mech950 (nr)                                    |  273 | 
+| mei (nr)                                        |  313 | 
+| mh (nr)                                         |  809 | 
+| mille (nr)                                      |  316 | 
+| minerva                                         |  234 | 
+| miniboone                                       |  137 | 
+| minos                                           |  138 | 
+| mipp                                            |  139 | 
+| mipp (nr)                                       |  227 | 
+| mis                                             |  140 | 
+| mit                                             |  172 | 
+| mm                                              |  141 | 
+| mpccc (nr)                                      |  508 | 
+| mpi                                             |  180 | 
+| mrp9 (nr)                                       |  571 | 
+| mt5                                             |  177 | 
+| mu2e                                            |  376 | 
+| nano011/16/2                                    |  218 | 
+| nanohub                                         |  142 | 
+| national center for supercomputing applications |  143 | 
+| nebiogrid                                       |  333 | 
+| nees                                            |  587 | 
+| nickwu (nr)                                     |  775 | 
+| nova                                            |  411 | 
+| ntu                                             |  144 | 
+| numi                                            |  217 | 
+| nwicg                                           |  145 | 
+| nysgrid                                         |  190 | 
+| ocucs (nr)                                      |  232 | 
+| oglesby (nr)                                    |  339 | 
+| oiv_test1                                       |  216 | 
+| ops                                             |  146 | 
+| opssgm                                          |  187 | 
+| osg                                             |  147 | 
+| osgbabar00                                      |  176 | 
+| osgbabar00 (nr)                                 |  430 | 
+| osgedu                                          |  148 | 
+| osgu000 (nr)                                    |  655 | 
+| osgusatlas00                                    |  174 | 
+| other                                           |  202 | 
+| other EGEE                                      |  429 | 
+| ou2 (nr)                                        |  445 | 
+| ouame (nr)                                      |  443 | 
+| pari (nr)                                       |  599 | 
+| parii (nr)                                      |  652 | 
+| park                                            |  149 | 
+| patriot                                         |  150 | 
+| pegrid (nr)                                     |  409 | 
+| pegrid0 (nr)                                    |  249 | 
+| pgoyal (nr)                                     |  621 | 
+| ph                                              |  151 | 
+| physmei (nr)                                    |  264 | 
+| pilatlas (nr)                                   |  572 | 
+| plukashev (nr)                                  |  261 | 
+| pragma                                          |  152 | 
+| prdatlas (nr)                                   |  573 | 
+| purdue university                               |  153 | 
+| pxq (nr)                                        |  799 | 
+| qpei (nr)                                       |  608 | 
+| rdig                                            |  154 | 
+| reid (nr)                                       |  287 | 
+| renci (nr)                                      |  598 | 
+| rowe (nr)                                       |  265 | 
+| rsakidja (nr)                                   |  622 | 
+| rsv (nr)                                        |  319 | 
+| rsvuser (nr)                                    |  516 | 
+| sabirianov (nr)                                 |  382 | 
+| sabs (nr)                                       |  709 | 
+| sagrid (nr)                                     |  484 | 
+| sahara (nr)                                     |  491 | 
+| saint (nr)                                      |  487 | 
+| sbgrid                                          |  209 | 
+| sc (nr)                                         |  506 | 
+| sc11 (nr)                                       |  881 | 
+| scidac (nr)                                     |  533 | 
+| sdss                                            |  155 | 
+| seneslab (nr)                                   |  609 | 
+| sgmatlas (nr)                                   |  481 | 
+| sgmenmr (nr)                                    |  549 | 
+| sgmenmrcirmmp (nr)                              |  558 | 
+| sgmsagrid (nr)                                  |  638 | 
+| shah (nr)                                       |  524 | 
+| siddet                                          |  356 | 
+| siddet (nr)                                     |  278 | 
+| sipe0 (nr)                                      |  514 | 
+| sl (nr)                                         |  810 | 
+| sm (nr)                                         |  401 | 
+| soarbuild (nr)                                  |  633 | 
+| sp (nr)                                         |  811 | 
+| sqzhu (nr)                                      |  776 | 
+| ss                                              |  156 | 
+| star                                            |  157 | 
+| sun                                             |  158 | 
+| superbvo.org                                    |  833 | 
+| superbvo.org (nr)                               |  427 | 
+| sura (nr)                                       |  569 | 
+| sura0 (nr)                                      |  801 | 
+| suragrid                                        |  213 | 
+| suragrid (nr)                                   |  219 | 
+| symp (nr)                                       |  853 | 
+| theory                                          |  215 | 
+| thomp (nr)                                      |  438 | 
+| tigre                                           |  182 | 
+| tigre (nr)                                      |  229 | 
+| tigrepool0                                      |  168 | 
+| tmayeshi (nr)                                   |  653 | 
+| trgrid                                          |  197 | 
+| tubio (nr)                                      |  395 | 
+| turne (nr)                                      |  556 | 
+| unknown                                         |  201 | 
+| uno (nr)                                        |  311 | 
+| usatlas                                         |  159 | 
+| uscms                                           |  160 | 
+| uscms1 (nr)                                     |  235 | 
+| uscmsPool                                       |  161 | 
+| uscmsPool (nr)                                  |  266 | 
+| uscmsPool1                                      |  162 | 
+| uscmsPool2 (nr)                                 |  437 | 
+| uscmspool0                                      |  163 | 
+| uscmspool2 (nr)                                 |  296 | 
+| users (nr)                                      |  844 | 
+| ux001                                           |  164 | 
+| vam                                             |  192 | 
+| wang                                            |  165 | 
+| webportal (nr)                                  |  613 | 
+| wenger (nr)                                     |  610 | 
+| wilso (nr)                                      |  503 | 
+| wood (nr)                                       |  379 | 
+| wu (nr)                                         |  251 | 
+| xzeng (nr)                                      |  262 | 
+| xzhu (nr)                                       |  623 | 
+| yang (nr)                                       |  238 | 
+| yethiraj (nr)                                   |  624 | 
+| yijieli (nr)                                    |  649 | 
+| yj7 (nr)                                        |  827 | 
+| yru1 (nr)                                       |  714 | 
+| yuguo1 (nr)                                     |  537 | 
+| zeng (nr)                                       |  275 | 
+| zeus                                            |  166 | 
+| zeus (nr)                                       |  220 | 
+| zhijun (nr)                                     |  625 | 
+| zhou (nr)                                       |  471 | 
+| zorba (nr)                                      |  626 | 
+| zwu7 (nr)                                       |  696 | 
++-------------------------------------------------+------+
+============================================================
+VO table DELETE statements - unused ones
+============================================================
+--------------
+SELECT
+   CONCAT("DELETE FROM VO WHERE void = ", a.void ,";")
+as delete_sql
+FROM  
+  ( SELECT distinct(void) FROM VO 
+   where VO.void not in (select distinct(void) from VONameCorrection)) a
+order by void
+--------------
+
+============================================================
+VO table dump of records to be deleted
+============================================================
+--------------
+SELECT * FROM VO
+where void not in (select distinct(void) from VONameCorrection)
+order by VOName
+--------------
+
