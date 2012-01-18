@@ -317,6 +317,7 @@ public class MonitorStatus extends HttpServlet
          StringBuffer queueBuffer = new StringBuffer();
          PreparedStatement statement = connection.prepareStatement(fgProcessQueueLengthQuery);
          ResultSet resultSet = statement.executeQuery();
+
          while(resultSet.next()) {
             int q = resultSet.getInt(1);
             long nFiles = resultSet.getLong(2);
@@ -333,6 +334,9 @@ public class MonitorStatus extends HttpServlet
                } else {
                   // We can't fix it from here, let's display the
                   // wrong numbers :(
+                  append(queueBuffer,"queuesize",q,nFiles,xml);
+                  append(queueBuffer,"record-queue",q,nRecords,xml);
+                  return queueBuffer;
                }
             }
             append(queueBuffer,"queuesize",q,nFiles,xml);
