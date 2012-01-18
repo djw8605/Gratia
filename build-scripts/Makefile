@@ -501,6 +501,7 @@ reporting: birt-reporting
 	find $(war-dir)/$@ -depth -type d -name .svn -exec rm -rf {} \;
 	# -- Copy required class files in from other services:
 	mkdir -p $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/administration
+	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(administration)/net/sf/gratia/administration/MonitorStatus*.java
 	cp $(classes-dir)/net/sf/gratia/administration/MonitorStatus*.class $(war-dir)/$@/WEB-INF/classes/net/sf/gratia/administration
 	# --- copy the web.xml  file ---
 	jar -cfM $(target)/gratia-reporting.war -C $(war-dir)/$@ .
