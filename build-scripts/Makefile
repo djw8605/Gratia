@@ -551,7 +551,6 @@ birt-reporting: $(reportsrc)/src/net/sf/gratia/reporting/Versions.java
 	cp $(classes-dir)/$@/net/sf/gratia/administration/*.class $(jar-dir)/$@/net/sf/gratia/administration
 	cp $(classes-dir)/$@/net/sf/gratia/reporting/exceptions/*.class $(jar-dir)/$@/net/sf/gratia/reporting/exceptions
 	jar -cvfM $(target)/gratiaReporting.jar -C $(jar-dir)/$@ .
-	jar tf $(target)/gratiaReporting.jar
 	rm -rf $(jar-dir)/$@
 	# --- Target: birt-reporting COMPLETED at $(shell date) ---
 
