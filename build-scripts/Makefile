@@ -536,19 +536,22 @@ birt-reporting: $(reportsrc)/src/net/sf/gratia/reporting/Versions.java
 	# --- Target: birt-reporting ---
 	# ------------------------------
 	rm -rf $(jar-dir)/$@
-	mkdir -p $(classes-dir) $(target)
+	mkdir -p $(classes-dir)/$@ $(target)
 	mkdir -p $(jar-dir)/$@/WEB-INF
 	mkdir -p $(jar-dir)/$@/WEB-INF/tlds
 	mkdir -p $(jar-dir)/$@/net/sf/gratia/util
 	mkdir -p $(jar-dir)/$@/net/sf/gratia/reporting/exceptions
-	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(util)/net/sf/gratia/util/*.java
-	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/reporting/exceptions/*.java
-	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/reporting/*.java
-	javac -d $(classes-dir) -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/administration/*.java
-	cp $(classes-dir)/net/sf/gratia/util/*.class $(jar-dir)/$@/net/sf/gratia/util
-	cp $(classes-dir)/net/sf/gratia/reporting/*.class $(jar-dir)/$@/net/sf/gratia/reporting
-	cp $(classes-dir)/net/sf/gratia/reporting/exceptions/*.class $(jar-dir)/$@/net/sf/gratia/reporting/exceptions
+	mkdir -p $(jar-dir)/$@/net/sf/gratia/administration
+	javac -d $(classes-dir)/$@ -cp $(classpath) -extdirs $(commonLib) $(util)/net/sf/gratia/util/*.java
+	javac -d $(classes-dir)/$@ -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/reporting/exceptions/*.java
+	javac -d $(classes-dir)/$@ -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/reporting/*.java
+	javac -d $(classes-dir)/$@ -cp $(classpath) -extdirs $(commonLib) $(reportsrc)/src/net/sf/gratia/administration/*.java
+	cp $(classes-dir)/$@/net/sf/gratia/util/*.class $(jar-dir)/$@/net/sf/gratia/util
+	cp $(classes-dir)/$@/net/sf/gratia/reporting/*.class $(jar-dir)/$@/net/sf/gratia/reporting
+	cp $(classes-dir)/$@/net/sf/gratia/administration/*.class $(jar-dir)/$@/net/sf/gratia/administration
+	cp $(classes-dir)/$@/net/sf/gratia/reporting/exceptions/*.class $(jar-dir)/$@/net/sf/gratia/reporting/exceptions
 	jar -cvfM $(target)/gratiaReporting.jar -C $(jar-dir)/$@ .
+	jar tf $(target)/gratiaReporting.jar
 	rm -rf $(jar-dir)/$@
 	# --- Target: birt-reporting COMPLETED at $(shell date) ---
 
