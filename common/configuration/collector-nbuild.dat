@@ -89,7 +89,7 @@
    db_port => "3306",
    remote_host => "gr8x4.fnal.gov",
    UserConfig => "UserConfig_osg_daily.xml",
-   PostInstallCmdPreamble => '[[ "$action" == *"stored"* ]] || continue',
+   PostInstallCmdPreamble => '[[ "$action" == *"stored"* || "$action" == *"statistics"* || "$action" == *"count"* ]] || continue',
    staticReports => 0,
    jsvc => "/data/jsvc/bin/jsvc",
    "properties.attributes" =>
