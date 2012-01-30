@@ -1,9 +1,16 @@
+Thu Jan 26 14:16:52 CST 2012
+
+mysql --table --verbose --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia_osg_daily
 
 =========================================================
 VOName being analized
 =========================================================
 --------------
 set @voname="TG-%"
+--------------
+
+--------------
+set @mydate=""
 --------------
 
 ========================================================

@@ -71,7 +71,7 @@ where
   and VO.VOid         = VC.VOid
   and VC.corrid       = Main.VOCorrid
 -- 3 months back
-  and EndTime > "2011-09-01"
+  and EndTime > @mydate
   and Main.ProbeName  = Probe.ProbeName
   and Probe.siteid    = Site.siteid
 group by 

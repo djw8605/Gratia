@@ -39,12 +39,18 @@ function run_mysql {
 $(cat $tmpfile)
 "
   fi
-  mv $tmpfile $outfile
+  cat $tmpfile >>$outfile
+  remove_file $tmpfile
   remove_file $sqlfile
 }
 #----------------
 function analyze_table {
+  local table="$1"
+  local mydate="$2"
   logdebug "... in function analyze_table"
+  if [ -z "$table" ];then
+    logerr "Programming error. Function analyze_table requires an argument"
+  fi
   local outfile=$outputdir/$table.out
   local sqlfile=$outputdir/sqlfile.$table
   local table_sql=$sqlDir/$table.sql
@@ -56,13 +62,18 @@ cat >$sqlfile <<EOF;rtn=$?
 \! echo   VOName being analized
 \! echo =========================================================
 set @voname="${voname}";
+set @mydate="${mydate}";
 `cat $table_sql`
 EOF
   run_mysql $sqlfile $outfile
 }
 #----------------
 function create_delete_file {
+  local table="$1"
   logdebug "... in function create_delete_file"
+  if [ -z "$table" ];then
+    logerr "Programming error. Function create_delete_file requires an argument"
+  fi
   local sqlfile=$outputdir/sqlfile.$table
   local outfile=$outputdir/delete_${table}.out
   local table_delete=$sqlDir/${table}_delete.sql
@@ -179,6 +190,8 @@ function validate_args {
       "--db" | "-db"             ) dbs=$2;     shift   ;;
       "--verbose" | "-verbose"   ) VERBOSE=1           ;;
       "--voc-only" | "-voc-only" ) VOC_ONLY=1;         ;;
+      "--site-vo-only" | "-site-vo-only" ) SITE_VO_ONLY=1;         ;;
+      "--date" | "-date" ) SITE_VO_DATE=$2; shift      ;;
       "--help" | "-help" | "--h" | "-h" ) usage;exit 1 ;;
       * ) echo  "ERROR: Invalid command line argument" ; usage; exit 1 ;;
     esac
@@ -187,6 +200,10 @@ function validate_args {
   if [ $VOC_ONLY -eq 1 ];then
     if [ ! -z "$voname" ];then
       usage;logerr "--vo option is should not be used with --voc-only" 
+    fi
+  elif [ $SITE_VO_ONLY -eq 1 ];then
+    if [ ! -z "$voname" ];then
+      usage;logerr "--vo option is should not be used with --site-vo-only" 
     fi
   else
     if [ -z "$voname" ];then
@@ -237,14 +254,18 @@ function clean_all_directories {
 }
 #----------------
 function perform_voname_analysis {
-  logdebug "================================================"
-  logdebug "--- Perform the queries for each db and table --"
+  logdebug "#####################################################"
+  logdebug "#### perform_voname_analysis ########################"
+  logdebug "#####################################################"
+  archive_date="$(date -d '-3 month' +'%Y-%m-%d')"
+  logdebug "archive_date used: $archive_date"
   for db in $dbs
   do
-    outputdir="$outputDir/$db"
-    logdebug "=========================="
-    logdebug "Database: $db" 
+    logdebug "======================="
+    logdebug "== Database: $db" 
+    logdebug "======================="
     set_db_parameters $db
+    outputdir="$outputDir/$db"
     check_for_vo_usage
     if [ $NOT_FOUND -eq 1 ];then
       continue
@@ -257,27 +278,55 @@ function perform_voname_analysis {
       if [ $EMPTY -eq 1 ];then
         continue
       fi
-      analyze_table
-      create_delete_file
+      analyze_table $table $archive_date
+      create_delete_file $table 
     done
   done
 }
 #-----------------
 function check_for_unused_corrids {
-  logdebug "==========================================================="
-  for table in VONameCorrection VO
+  logdebug "#####################################################"
+  logdebug "#### check_for_unused_corrids #######################"
+  logdebug "#####################################################"
+  for db in $dbs
   do
-    logdebug "-- check the $table table for unused entries ---"
-    for db in $dbs
+    logdebug "======================="
+    logdebug "== Database: $db" 
+    logdebug "======================="
+    set_db_parameters $db
+    outputdir="$outputDir/$db"
+    make_dir $outputdir
+    for table in VONameCorrection VO 
     do
-      outputdir="$outputDir/$db"
       logdebug "------------------"
-      logdebug "Database: $db" 
-      outputdir="$outputDir/$db"
-      make_dir $outputdir
-      set_db_parameters $db
-      analyze_table
-      create_delete_file
+      logdebug "Table: $table"
+      analyze_table $table
+      create_delete_file $table
+    done
+  done
+}
+#-----------------
+function site_vo_listing {
+  logdebug "#####################################################"
+  logdebug "#### site_vo_listing ################################"
+  logdebug "#####################################################"
+  for db in $dbs
+  do
+    logdebug "======================="
+    logdebug "== Database: $db" 
+    logdebug "======================="
+    set_db_parameters $db
+    outputdir="$outputDir/$db"
+    make_dir $outputdir
+    for table in MasterSummaryData
+    do
+      logdebug "------------------"
+      logdebug "Table: $table"
+      check_for_empty_table
+      if [ $EMPTY -eq 1 ];then
+        continue
+      fi
+      analyze_table Site-VO-$table $SITE_VO_DATE
     done
   done
 }
@@ -285,8 +334,9 @@ function check_for_unused_corrids {
 #----------------
 function usage {
   echo "\
-Usage: $PGM --vo voname [--db dbname] [--verbose]
-       $PGM --voc-only  [--db dbname] [--verbose]
+Usage: $PGM --vo voname     [--db dbname] [--verbose]
+       $PGM --voc-only      [--db dbname] [--verbose]
+       $PGM --site-vo-only  [--db dbname] [--verbose] [--date endtime]
 
 Modes:
 --vo 
@@ -305,6 +355,13 @@ Modes:
      Some of these may not be able to be deleted if the JobUsageRecord
      still exists (foreign key constraint) but can be once the JUR record
      is archived.
+
+--site-vo-only
+     This mode is intended to provide a listing of site and vos for that site.
+     It's purpose is to identify sites that are sending invalid vo names
+     via their probes.
+     The optional --date (YYYY-MM-DD) argument allows you to restict the query 
+     to only those entries whose completion date is greater than that value.
 
 The summary tables that are searched are:
 VONameCorrection
@@ -328,8 +385,10 @@ Output from the script will be created in a ${outputDir}/[DB_NAME] directory:
 PGM=`basename $0`
 outputDir="./data"
 sqlDir="./vo-cleanup-sql"
-VERBOSE=0             # debug mode
-VOC_ONLY=0            # do only the VONameCorrection table
+VERBOSE=0        # debug mode
+VOC_ONLY=0       # do only the VONameCorrection table
+SITE_VO_ONLY=0   # do only the Site/VO summary report 
+SITE_VO_DATE=    # only used in Site/VO summary report and restricts endtime
 
 dbs="\
 gratia 
@@ -348,10 +407,16 @@ validate_args $*
 validate_dbs   
 validate_environ
 clean_all_directories
-if [ $VOC_ONLY -eq 0 ];then
-  perform_voname_analysis
+if [ $VOC_ONLY -eq 1 ];then
+  check_for_unused_corrids 
+  exit 0
+elif [ $SITE_VO_ONLY -eq 1 ];then
+  site_vo_listing $SITE_VO_DATE
+  exit 0
 fi
+perform_voname_analysis
 check_for_unused_corrids 
+site_vo_listing $SITE_VO_DATE
 
 exit 0
 

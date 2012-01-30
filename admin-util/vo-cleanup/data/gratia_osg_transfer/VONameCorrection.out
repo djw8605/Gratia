@@ -1,9 +1,16 @@
+Thu Jan 26 14:16:52 CST 2012
+
+mysql --table --verbose --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia_osg_transfer
 
 =========================================================
 VOName being analized
 =========================================================
 --------------
 set @voname="TG-%"
+--------------
+
+--------------
+set @mydate=""
 --------------
 
 
@@ -130,7 +137,7 @@ and (
 +----------------+
 | nbr_of_entries |
 +----------------+
-|             94 | 
+|            103 | 
 +----------------+
 --------------
 SELECT 
@@ -165,10 +172,15 @@ order by
 +-----------------------------------------------------------+------+--------+-----------------------------------------------------------+------------------+
 | Engage                                                    |   50 |     79 | /Engage/LSST/Role=NULL/Capability=NULL                    | Engage           | 
 | Engage                                                    |   50 |     99 | /Engage/Role=NULL/Capability=NULL                         | Engage           | 
+| Engage                                                    |   50 |    104 | /Engage/UCSDGrid/Role=NULL/Capability=NULL                | Engage           | 
+| GLOW                                                      |   60 |    102 | /GLOW/Role=NULL/Capability=NULL                           | GLOW             | 
+| Gluex                                                     |   59 |    100 | /Gluex/Role=NULL/Capability=NULL                          | Gluex            | 
 | GridUNESP                                                 |   44 |     51 | GridUNESP                                                 | GridUNESP        | 
 | LIGO                                                      |   49 |     77 | LIGO                                                      | NULL             | 
+| LIGO                                                      |   49 |    101 | /LIGO/Role=NULL/Capability=NULL                           | LIGO             | 
 | RSV                                                       |   45 |     56 | RSV                                                       | RSV              | 
 | SBGrid                                                    |   55 |     86 | /SBGrid/Role=NULL/Capability=NULL                         | SBGrid           | 
+| SBGrid                                                    |   55 |    108 | /SBGrid/WeNMR/Role=NULL/Capability=NULL                   | SBGrid           | 
 | Unknown                                                   |    1 |      1 | Unknown                                                   | NULL             | 
 | aegis                                                     |   36 |     38 | aegis                                                     | NULL             | 
 | ap                                                        |    9 |      9 | ap                                                        | NULL             | 
@@ -195,6 +207,7 @@ order by
 | cms                                                       |   41 |     92 | /cms/dcms/Role=NULL/Capability=NULL                       | cms              | 
 | cms                                                       |   41 |     93 | /cms/Role=pilot/Capability=NULL                           | cms              | 
 | cms                                                       |   41 |     94 | /cms/escms/Role=NULL/Capability=NULL                      | cms              | 
+| cms                                                       |   41 |    103 | /cms/Role=priorityuser/Capability=NULL                    | cms              | 
 | dosar                                                     |   35 |     37 | dosar                                                     | DOSAR            | 
 | dosar                                                     |   35 |     74 | /dosar/Role=NULL/Capability=NULL                          | dosar            | 
 | dteam                                                     |   18 |     19 | dteam                                                     | DTEAM            | 
@@ -215,6 +228,7 @@ order by
 | fermilab                                                  |   28 |     71 | /fermilab/grid/Role=admin/Capability=NULL                 | fermilab         | 
 | fermilab-test                                             |   46 |     59 | fermilab-test                                             | FERMILAB         | 
 | geant4                                                    |   52 |     83 | geant4                                                    | GEANT4           | 
+| geant4                                                    |   52 |    106 | /geant4/Role=lcgadmin/Capability=NULL                     | geant4           | 
 | germangrid                                                |    8 |      8 | germangrid                                                | NULL             | 
 | gluex                                                     |   56 |     88 | gluex                                                     | Gluex            | 
 | gpn                                                       |   32 |     34 | gpn                                                       | gpn              | 
@@ -232,8 +246,10 @@ order by
 | lipca                                                     |   20 |     21 | lipca                                                     | NULL             | 
 | lqcd                                                      |   43 |     47 | lqcd                                                      | LQCD             | 
 | mis                                                       |   29 |     31 | mis                                                       | MIS              | 
+| mis                                                       |   29 |    107 | /mis/Role=NULL/Capability=NULL                            | mis              | 
 | nanohub                                                   |   25 |     27 | nanohub                                                   | NANOHUB          | 
 | nebiogrid                                                 |   42 |     46 | nebiogrid                                                 | NEBioGrid        | 
+| nees                                                      |   61 |    105 | /nees/Role=NULL/Capability=NULL                           | nees             | 
 | ops                                                       |   40 |     44 | ops                                                       | OPS              | 
 | ops                                                       |   40 |     55 | /ops/Role=NULL/Capability=NULL                            | ops              | 
 | ops                                                       |   40 |     69 | ops                                                       | ops              | 

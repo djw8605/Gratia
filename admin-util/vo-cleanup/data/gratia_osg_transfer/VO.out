@@ -1,9 +1,16 @@
+Thu Jan 26 14:16:52 CST 2012
+
+mysql --table --verbose --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia_osg_transfer
 
 =========================================================
 VOName being analized
 =========================================================
 --------------
 set @voname="TG-%"
+--------------
+
+--------------
+set @mydate=""
 --------------
 
 ========================================================
@@ -16,7 +23,7 @@ SELECT count(*) from VO
 +----------+
 | count(*) |
 +----------+
-|       58 | 
+|       61 | 
 +----------+
 ========================================================
 Query - Unused VO table entries for summary tables.
@@ -55,7 +62,7 @@ where VO.void in (select distinct(void) from VONameCorrection)
 +----------+
 | count(*) |
 +----------+
-|       58 | 
+|       61 | 
 +----------+
 --------------
 SELECT 
@@ -74,6 +81,8 @@ order by
 | GratiaVO                                                  | void |
 +-----------------------------------------------------------+------+
 | Engage                                                    |   50 | 
+| GLOW                                                      |   60 | 
+| Gluex                                                     |   59 | 
 | GridUNESP                                                 |   44 | 
 | LIGO                                                      |   49 | 
 | RSV                                                       |   45 | 
@@ -115,6 +124,7 @@ order by
 | mis                                                       |   29 | 
 | nanohub                                                   |   25 | 
 | nebiogrid                                                 |   42 | 
+| nees                                                      |   61 | 
 | null                                                      |   37 | 
 | ops                                                       |   40 | 
 | osg                                                       |    4 | 

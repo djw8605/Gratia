@@ -1,9 +1,16 @@
+Thu Jan 26 14:16:49 CST 2012
+
+mysql --table --verbose --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
 
 =========================================================
 VOName being analized
 =========================================================
 --------------
 set @voname="TG-%"
+--------------
+
+--------------
+set @mydate=""
 --------------
 
 
@@ -20,11 +27,6 @@ where VOName like @voname
 group by VOName
 --------------
 
-+--------------+-------------+
-| VOName       | JUR_records |
-+--------------+-------------+
-| TG-MCA05S010 |           9 | 
-+--------------+-------------+
 
 =========================================================
 VO table count of the VOName
@@ -38,7 +40,7 @@ where VOName like @voname
 +--------------+
 | GratiaVO_cnt |
 +--------------+
-|           79 | 
+|            0 | 
 +--------------+
 
 =========================================================
@@ -53,7 +55,7 @@ where VOName like @voname
 +-------------+
 | ProbeVO_cnt |
 +-------------+
-|          79 | 
+|           0 | 
 +-------------+
 ========================================================
 Query - Unused VONameCorrection table entries.
@@ -82,62 +84,6 @@ order by
  ,ReportableVOName
 --------------
 
-+-----------+------+--------+------------------+------------------+
-| GratiaVO  | void | corrid | ProbeVO          | ReportableVOName |
-+-----------+------+--------+------------------+------------------+
-| auger     |   98 |     53 | auger            | auger            | 
-| cdf       |  101 |     62 | cdf              | cdf              | 
-| cdms      |  102 |     66 | cdms             | cdms             | 
-| cern      |  103 |     68 | cern             | cern             | 
-| cms       |  106 |    267 | uscms            | uscms            | 
-| cms       |  106 |    270 | uscmsPool        | uscmsPool        | 
-| cms       |  106 |    273 | uscmsPool1       | uscmsPool1       | 
-| cms       |  106 |    276 | uscmspool0       | uscmspool0       | 
-| cms       |  106 |    277 | uscmspool1       | NULL             | 
-| des       |  109 |     80 | des              | des              | 
-| dosar     |  110 |     83 | dosar            | dosar            | 
-| engage    |  114 |     97 | engagement       | engagement       | 
-| fermilab  |  117 |    103 | fermilab         | fermilab         | 
-| fmri      |  119 |    109 | fmri             | fmri             | 
-| gadu      |  120 |    112 | gadu             | gadu             | 
-| geant4    |  121 |    115 | geant4           | geant4           | 
-| grase     |  126 |    128 | grase            | grase            | 
-| gridex    |  129 |    135 | gridex           | gridex           | 
-| grow      |  130 |    138 | grow             | grow             | 
-| hypercp   |  132 |    142 | hypercp          | hypercp          | 
-| i2u2      |  238 |    143 | i2u2             | I2U2             | 
-| ilc       |  133 |    147 | ilc              | ilc              | 
-| infn      |  134 |    150 | infn             | infn             | 
-| ivdgl     |  135 |    154 | ivdgl            | ivdgl            | 
-| ktev      |  139 |    169 | ktev             | ktev             | 
-| ligo      |  142 |    178 | ligo             | ligo             | 
-| ligo      |  142 |    281 | ux001            | ux001            | 
-| magrid    |  245 |    182 | magrid           | NULL             | 
-| miniboone |  146 |    188 | miniboone        | miniboone        | 
-| osg       |  156 |    221 | osg              | osg              | 
-| osgedu    |  157 |    225 | osgedu           | osgedu           | 
-| other     |  221 |     27 | 1202574          | NULL             | 
-| other     |  221 |     28 | 1203635          | NULL             | 
-| other     |  221 |     30 | 1205281          | NULL             | 
-| other     |  221 |     57 | blane            | blane            | 
-| other     |  221 |    118 | gin.ggf.org      | gin.ggf.org      | 
-| other     |  221 |    156 | james            | james            | 
-| other     |  221 |    165 | km               | km               | 
-| other     |  221 |    172 | lee              | lee              | 
-| other     |  221 |    199 | mm               | mm               | 
-| other     |  221 |    231 | park             | park             | 
-| other     |  221 |    245 | smith            | smith            | 
-| other     |  221 |    247 | ss               | ss               | 
-| other     |  221 |    284 | wang             | wang             | 
-| other     |  221 |    326 | mschram06/29/2   | NULL             | 
-| sbgrid    |  234 |    350 | /SBGrid/Role=RSV | SBGrid           | 
-| sdss      |  166 |    242 | sdss             | sdss             | 
-| tigre     |  198 |    255 | tigrepool0       | tigrepool0       | 
-| unknown   |  220 |     41 | Unknown          | Unknown          | 
-| usatlas   |  172 |    228 | osgusatlas00     | NULL             | 
-| usatlas   |  172 |    229 | osgusatlas00     | ATLAS            | 
-| usatlas   |  172 |    264 | usatlas          | usatlas          | 
-+-----------+------+--------+------------------+------------------+
 ========================================================
 Query - VONameCorrection table entries not in VO.
 ========================================================
@@ -182,7 +128,7 @@ and (
 +----------------+
 | nbr_of_entries |
 +----------------+
-|            844 | 
+|            765 | 
 +----------------+
 --------------
 SELECT 
@@ -215,95 +161,9 @@ order by
 +-----------------+------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------------------------+
 | GratiaVO        | void | corrid | ProbeVO                                               | ReportableVOName                                                                                             |
 +-----------------+------+--------+-------------------------------------------------------+--------------------------------------------------------------------------------------------------------------+
-| ATLAS           |  447 |    630 | ATLAS                                                 | ATLAS                                                                                                        | 
 | EXAMPLE         |  460 |    648 | EXAMPLE                                               | NULL                                                                                                         | 
-| Engage          |   92 |    854 | /Engage/EIC/Role=NULL/Capability=NULL                 | Engage                                                                                                       | 
-| Engage          |   92 |    892 | /Engage/pheno/Role=NULL/Capability=NULL               | Engage                                                                                                       | 
 | GRASE           |  386 |    533 | /GRASE/Role=NULL/Capability=NULL                      | GRASE                                                                                                        | 
 | LBNE            |  370 |    499 | /Engage/LBNE/Role=NULL/Capability=NULL                | Engage                                                                                                       | 
-| SBGrid          |  271 |    613 | /SBGrid/Role=software/Capability=NULL                 | SBGrid                                                                                                       | 
-| SBGrid          |  271 |    683 | /SBGrid/eNMR/Role=NULL/Capability=NULL                | SBGrid                                                                                                       | 
-| SBGrid          |  271 |    861 | /SBGrid/WeNMR/Role=NULL/Capability=NULL               | SBGrid                                                                                                       | 
-| SGVO            |  628 |    851 | SGVO                                                  | SGVO                                                                                                         | 
-| TG-ASC050039N   |  544 |    762 | TG-ASC050039N                                         | NULL                                                                                                         | 
-| TG-ASC090089    |  534 |    752 | TG-ASC090089                                          | NULL                                                                                                         | 
-| TG-AST070052N   |  559 |    777 | TG-AST070052N                                         | NULL                                                                                                         | 
-| TG-AST090100    |  551 |    769 | TG-AST090100                                          | NULL                                                                                                         | 
-| TG-AST100043    |  600 |    820 | TG-AST100043                                          | NULL                                                                                                         | 
-| TG-AST110006    |  576 |    794 | TG-AST110006                                          | NULL                                                                                                         | 
-| TG-ATM010005N   |  579 |    797 | TG-ATM010005N                                         | NULL                                                                                                         | 
-| TG-ATM090002    |  554 |    772 | TG-ATM090002                                          | NULL                                                                                                         | 
-| TG-ATM090060    |  563 |    781 | TG-ATM090060                                          | NULL                                                                                                         | 
-| TG-ATM100051    |  578 |    796 | TG-ATM100051                                          | NULL                                                                                                         | 
-| TG-ATM110019    |  552 |    770 | TG-ATM110019                                          | NULL                                                                                                         | 
-| TG-BCS110002    |  591 |    810 | TG-BCS110002                                          | NULL                                                                                                         | 
-| TG-CCR110003    |  533 |    751 | TG-CCR110003                                          | NULL                                                                                                         | 
-| TG-CDA090008    |  536 |    754 | TG-CDA090008                                          | NULL                                                                                                         | 
-| TG-CDA100007    |  526 |    744 | TG-CDA100007                                          | NULL                                                                                                         | 
-| TG-CDA110012    |  542 |    760 | TG-CDA110012                                          | NULL                                                                                                         | 
-| TG-CHE070074N   |  539 |    757 | TG-CHE070074N                                         | NULL                                                                                                         | 
-| TG-CHE080066N   |  527 |    745 | TG-CHE080066N                                         | NULL                                                                                                         | 
-| TG-CHE090006    |  557 |    775 | TG-CHE090006                                          | NULL                                                                                                         | 
-| TG-CHE100058    |  570 |    788 | TG-CHE100058                                          | NULL                                                                                                         | 
-| TG-CHE100095    |  518 |    736 | TG-CHE100095                                          | NULL                                                                                                         | 
-| TG-CHE100113    |  597 |    817 | TG-CHE100113                                          | NULL                                                                                                         | 
-| TG-CHE100142    |  553 |    771 | TG-CHE100142                                          | NULL                                                                                                         | 
-| TG-CHE110021    |  602 |    822 | TG-CHE110021                                          | NULL                                                                                                         | 
-| TG-CHE110064    |  581 |    799 | TG-CHE110064                                          | NULL                                                                                                         | 
-| TG-CTS070034N   |  585 |    803 | TG-CTS070034N                                         | NULL                                                                                                         | 
-| TG-CTS090062    |  561 |    779 | TG-CTS090062                                          | NULL                                                                                                         | 
-| TG-CTS090079    |  529 |    747 | TG-CTS090079                                          | NULL                                                                                                         | 
-| TG-CTS100012    |  564 |    782 | TG-CTS100012                                          | NULL                                                                                                         | 
-| TG-CTS100026    |  543 |    761 | TG-CTS100026                                          | NULL                                                                                                         | 
-| TG-CTS100027    |  546 |    764 | TG-CTS100027                                          | NULL                                                                                                         | 
-| TG-DMR080070    |  562 |    780 | TG-DMR080070                                          | NULL                                                                                                         | 
-| TG-DMR090073    |  545 |    763 | TG-DMR090073                                          | NULL                                                                                                         | 
-| TG-DMR090097    |  566 |    784 | TG-DMR090097                                          | NULL                                                                                                         | 
-| TG-DMR100080    |  531 |    749 | TG-DMR100080                                          | NULL                                                                                                         | 
-| TG-DMR110013    |  532 |    750 | TG-DMR110013                                          | NULL                                                                                                         | 
-| TG-DMR110027    |  604 |    824 | TG-DMR110027                                          | NULL                                                                                                         | 
-| TG-DMR110052    |  555 |    773 | TG-DMR110052                                          | NULL                                                                                                         | 
-| TG-DMR110067    |  569 |    787 | TG-DMR110067                                          | NULL                                                                                                         | 
-| TG-DMR110072    |  583 |    801 | TG-DMR110072                                          | NULL                                                                                                         | 
-| TG-DMR110095    |  594 |    813 | TG-DMR110095                                          | NULL                                                                                                         | 
-| TG-DMS100018    |  550 |    768 | TG-DMS100018                                          | NULL                                                                                                         | 
-| TG-DMS110002    |  525 |    743 | TG-DMS110002                                          | NULL                                                                                                         | 
-| TG-DMS110019    |  572 |    790 | TG-DMS110019                                          | NULL                                                                                                         | 
-| TG-EAR080018T   |  523 |    741 | TG-EAR080018T                                         | NULL                                                                                                         | 
-| TG-EAR100012    |  558 |    776 | TG-EAR100012                                          | NULL                                                                                                         | 
-| TG-EAR100021    |  567 |    785 | TG-EAR100021                                          | NULL                                                                                                         | 
-| TG-EAR110015    |  535 |    753 | TG-EAR110015                                          | NULL                                                                                                         | 
-| TG-IBN050000N   |  524 |    742 | TG-IBN050000N                                         | NULL                                                                                                         | 
-| TG-IBN090004    |  537 |    755 | TG-IBN090004                                          | NULL                                                                                                         | 
-| TG-IBN100006    |  547 |    765 | TG-IBN100006                                          | NULL                                                                                                         | 
-| TG-MCA03S007    |  610 |    831 | TG-MCA03S007                                          | NULL                                                                                                         | 
-| TG-MCA05S010    |  419 |    586 | TG-MCA05S010                                          | NULL                                                                                                         | 
-| TG-MCA07S022    |  615 |    836 | TG-MCA07S022                                          | NULL                                                                                                         | 
-| TG-MCA07S029    |  541 |    759 | TG-MCA07S029                                          | NULL                                                                                                         | 
-| TG-MCB040051N   |  548 |    766 | TG-MCB040051N                                         | NULL                                                                                                         | 
-| TG-MCB070015N   |  589 |    808 | TG-MCB070015N                                         | NULL                                                                                                         | 
-| TG-MCB090163    |  521 |    739 | TG-MCB090163                                          | NULL                                                                                                         | 
-| TG-MCB100143    |  568 |    786 | TG-MCB100143                                          | NULL                                                                                                         | 
-| TG-MCB110037    |  603 |    823 | TG-MCB110037                                          | NULL                                                                                                         | 
-| TG-MCB110072    |  520 |    738 | TG-MCB110072                                          | NULL                                                                                                         | 
-| TG-MCB110112    |  601 |    821 | TG-MCB110112                                          | NULL                                                                                                         | 
-| TG-MCB110118    |  528 |    746 | TG-MCB110118                                          | NULL                                                                                                         | 
-| TG-PHY100030    |  538 |    756 | TG-PHY100030                                          | NULL                                                                                                         | 
-| TG-PHY110005    |  605 |    825 | TG-PHY110005                                          | NULL                                                                                                         | 
-| TG-PHY110010    |  580 |    798 | TG-PHY110010                                          | NULL                                                                                                         | 
-| TG-PHY110015    |  560 |    778 | TG-PHY110015                                          | NULL                                                                                                         | 
-| TG-PHY110021    |  530 |    748 | TG-PHY110021                                          | NULL                                                                                                         | 
-| TG-PHY110022    |  565 |    783 | TG-PHY110022                                          | NULL                                                                                                         | 
-| TG-PHY110024    |  540 |    758 | TG-PHY110024                                          | NULL                                                                                                         | 
-| TG-PHY110034    |  522 |    740 | TG-PHY110034                                          | NULL                                                                                                         | 
-| TG-SES110002    |  577 |    795 | TG-SES110002                                          | NULL                                                                                                         | 
-| TG-STA060008N   |  519 |    737 | TG-STA060008N                                         | NULL                                                                                                         | 
-| TG-STA060013N   |  556 |    774 | TG-STA060013N                                         | NULL                                                                                                         | 
-| TG-TRA090014    |  549 |    767 | TG-TRA090014                                          | NULL                                                                                                         | 
-| TG-TRA100018    |  586 |    804 | TG-TRA100018                                          | NULL                                                                                                         | 
-| TG-TRA110019    |  573 |    791 | TG-TRA110019                                          | NULL                                                                                                         | 
-| TG-TRA900337N   |  575 |    793 | TG-TRA900337N                                         | NULL                                                                                                         | 
-| TG-xxxxx        |  571 |    789 | TG-xxxxx                                              | NULL                                                                                                         | 
 | UT-NTNL0033     |  645 |    886 | UT-NTNL0033                                           | NULL                                                                                                         | 
 | Unknown         |   96 |    579 | Unknown                                               | error reading the file, /home/samgrid/.globus/job/gluskap.phys.uconn.edu/13544.1278275952/x509_up            | 
 | Unknown         |   96 |    606 | Unknown                                               | error opening the file, /opt/osg/home/osg/.globus/job/osg-nemo-ce.phys.uwm.edu/6811.1286423227/x509_up       | 
@@ -334,7 +194,6 @@ order by
 | as2             |  444 |    625 | as2                                                   | NULL                                                                                                         | 
 | astro           |   97 |     46 | astro                                                 | NULL                                                                                                         | 
 | astro           |   97 |    523 | /fermilab/astro/Role=NULL/Capability=NULL             | fermilab                                                                                                     | 
-| atlas           |  202 |    893 | /atlas/phys-gener/Role=production/Capability=NULL     | atlas                                                                                                        | 
 | auger           |   98 |     51 | auger                                                 | NULL                                                                                                         | 
 | auger           |   98 |     52 | auger                                                 | AUGER                                                                                                        | 
 | auger           |   98 |    546 | /auger/FNAL/Role=NULL/Capability=NULL                 | auger                                                                                                        | 
@@ -499,6 +358,8 @@ order by
 | engage          |  114 |    486 | /Engage/Oceanography/HARP/Role=NULL/Capability=NULL   | Engage                                                                                                       | 
 | engage          |  114 |    629 | /Engage/UCSDGrid/Role=NULL/Capability=NULL            | Engage                                                                                                       | 
 | engage          |  114 |    634 | /Engage/NEES/Role=NULL/Capability=NULL                | Engage                                                                                                       | 
+| engage          |  114 |    854 | /Engage/EIC/Role=NULL/Capability=NULL                 | Engage                                                                                                       | 
+| engage          |  114 |    892 | /Engage/pheno/Role=NULL/Capability=NULL               | Engage                                                                                                       | 
 | enmr            |  450 |    636 | enmr                                                  | NULL                                                                                                         | 
 | epacg           |  485 |    695 | epacg                                                 | NULL                                                                                                         | 
 | escience        |  116 |     92 | eScience                                              | NULL                                                                                                         | 
@@ -930,8 +791,6 @@ order by
 | other EGEE      |  382 |    321 | /lhcb/Role=lcgadmin/Capability=NULL                   | lhcb                                                                                                         | 
 | other EGEE      |  382 |    327 | /lhcb/Role=NULL/Capability=NULL                       | lhcb                                                                                                         | 
 | other EGEE      |  382 |    513 | osgu000                                               | superbvo.org                                                                                                 | 
-| other EGEE      |  382 |    518 | /superbvo.org/Role=SoftwareManager/Capability=NULL    | superbvo.org                                                                                                 | 
-| other EGEE      |  382 |    519 | /superbvo.org/Role=NULL/Capability=NULL               | superbvo.org                                                                                                 | 
 | ou2             |  407 |    564 | ou2                                                   | NULL                                                                                                         | 
 | ou2             |  407 |    626 | ou2                                                   | DOSAR                                                                                                        | 
 | ouame           |  384 |    529 | ouame                                                 | NULL                                                                                                         | 
@@ -960,6 +819,9 @@ order by
 | sbgrid          |  234 |    379 | /SBGrid/Role=NULL/Capability=NULL                     | SBGrid                                                                                                       | 
 | sbgrid          |  234 |    382 | /SBGrid/Role=RSV/Capability=NULL                      | SBGrid                                                                                                       | 
 | sbgrid          |  234 |    386 | /SBGrid/Role=VO-Admin/Capability=NULL                 | SBGrid                                                                                                       | 
+| sbgrid          |  234 |    613 | /SBGrid/Role=software/Capability=NULL                 | SBGrid                                                                                                       | 
+| sbgrid          |  234 |    683 | /SBGrid/eNMR/Role=NULL/Capability=NULL                | SBGrid                                                                                                       | 
+| sbgrid          |  234 |    861 | /SBGrid/WeNMR/Role=NULL/Capability=NULL               | SBGrid                                                                                                       | 
 | sc              |  441 |    616 | sc                                                    | NULL                                                                                                         | 
 | sc11            |  642 |    881 | sc11                                                  | NULL                                                                                                         | 
 | scidac          |  455 |    642 | scidac                                                | NULL                                                                                                         | 
@@ -985,16 +847,19 @@ order by
 | star            |  169 |    249 | star                                                  | STAR                                                                                                         | 
 | star            |  169 |    250 | star                                                  | Star                                                                                                         | 
 | star            |  169 |    251 | star                                                  | star                                                                                                         | 
+| superbvo.org    |  381 |    518 | /superbvo.org/Role=SoftwareManager/Capability=NULL    | superbvo.org                                                                                                 | 
+| superbvo.org    |  381 |    519 | /superbvo.org/Role=NULL/Capability=NULL               | superbvo.org                                                                                                 | 
 | superbvo.org    |  381 |    662 | /superbvo.org/Role=ProductionManager/Capability=NULL  | superbvo.org                                                                                                 | 
 | superbvo.org    |  381 |    860 | superbvo.org                                          | superbvo.org                                                                                                 | 
-| sura            |  472 |    666 | sura                                                  | sgvo                                                                                                         | 
-| sura            |  472 |    718 | sura                                                  | suragrid                                                                                                     | 
-| sura0           |  477 |    681 | sura0                                                 | suragrid                                                                                                     | 
-| sura0           |  477 |    692 | sura0                                                 | SGVO                                                                                                         | 
 | suragrid        |  264 |    309 | suragrid                                              | SURAgrid                                                                                                     | 
 | suragrid        |  264 |    660 | /suragrid/Role=NULL/Capability=NULL                   | suragrid                                                                                                     | 
+| suragrid        |  264 |    666 | sura                                                  | sgvo                                                                                                         | 
 | suragrid        |  264 |    667 | suragrid                                              | SURAGRID                                                                                                     | 
+| suragrid        |  264 |    681 | sura0                                                 | suragrid                                                                                                     | 
+| suragrid        |  264 |    692 | sura0                                                 | SGVO                                                                                                         | 
+| suragrid        |  264 |    718 | sura                                                  | suragrid                                                                                                     | 
 | suragrid        |  264 |    826 | suragrid                                              | SURAGrid                                                                                                     | 
+| suragrid        |  264 |    851 | SGVO                                                  | SGVO                                                                                                         | 
 | symp            |  639 |    872 | symp                                                  | NULL                                                                                                         | 
 | t2k.org         |  383 |    525 | /t2k.org/Role=NULL/Capability=NULL                    | t2k.org                                                                                                      | 
 | test            |  462 |    650 | test                                                  | NULL                                                                                                         | 
@@ -1040,6 +905,8 @@ order by
 | usatlas         |  172 |    550 | /atlas/phys-sm/Role=production/Capability=NULL        | atlas                                                                                                        | 
 | usatlas         |  172 |    584 | /atlas/lcg1/Role=NULL/Capability=NULL                 | atlas                                                                                                        | 
 | usatlas         |  172 |    594 | sgmatlas                                              | NULL                                                                                                         | 
+| usatlas         |  172 |    630 | ATLAS                                                 | ATLAS                                                                                                        | 
+| usatlas         |  172 |    893 | /atlas/phys-gener/Role=production/Capability=NULL     | atlas                                                                                                        | 
 | uscmsPool1      |  175 |    720 | uscmsPool1                                            | SBGrid                                                                                                       | 
 | uscmsPool2      |  391 |    879 | uscmsPool2                                            | NULL                                                                                                         | 
 | users           |  636 |    866 | users                                                 | users                                                                                                        | 
@@ -1080,62 +947,6 @@ FROM
 order by delete_sql
 --------------
 
-+--------------------------------------------------+
-| delete_sql                                       |
-+--------------------------------------------------+
-| DELETE FROM VONameCorrection WHERE corrid = 103; | 
-| DELETE FROM VONameCorrection WHERE corrid = 109; | 
-| DELETE FROM VONameCorrection WHERE corrid = 112; | 
-| DELETE FROM VONameCorrection WHERE corrid = 115; | 
-| DELETE FROM VONameCorrection WHERE corrid = 118; | 
-| DELETE FROM VONameCorrection WHERE corrid = 128; | 
-| DELETE FROM VONameCorrection WHERE corrid = 135; | 
-| DELETE FROM VONameCorrection WHERE corrid = 138; | 
-| DELETE FROM VONameCorrection WHERE corrid = 142; | 
-| DELETE FROM VONameCorrection WHERE corrid = 143; | 
-| DELETE FROM VONameCorrection WHERE corrid = 147; | 
-| DELETE FROM VONameCorrection WHERE corrid = 150; | 
-| DELETE FROM VONameCorrection WHERE corrid = 154; | 
-| DELETE FROM VONameCorrection WHERE corrid = 156; | 
-| DELETE FROM VONameCorrection WHERE corrid = 165; | 
-| DELETE FROM VONameCorrection WHERE corrid = 169; | 
-| DELETE FROM VONameCorrection WHERE corrid = 172; | 
-| DELETE FROM VONameCorrection WHERE corrid = 178; | 
-| DELETE FROM VONameCorrection WHERE corrid = 182; | 
-| DELETE FROM VONameCorrection WHERE corrid = 188; | 
-| DELETE FROM VONameCorrection WHERE corrid = 199; | 
-| DELETE FROM VONameCorrection WHERE corrid = 221; | 
-| DELETE FROM VONameCorrection WHERE corrid = 225; | 
-| DELETE FROM VONameCorrection WHERE corrid = 228; | 
-| DELETE FROM VONameCorrection WHERE corrid = 229; | 
-| DELETE FROM VONameCorrection WHERE corrid = 231; | 
-| DELETE FROM VONameCorrection WHERE corrid = 242; | 
-| DELETE FROM VONameCorrection WHERE corrid = 245; | 
-| DELETE FROM VONameCorrection WHERE corrid = 247; | 
-| DELETE FROM VONameCorrection WHERE corrid = 255; | 
-| DELETE FROM VONameCorrection WHERE corrid = 264; | 
-| DELETE FROM VONameCorrection WHERE corrid = 267; | 
-| DELETE FROM VONameCorrection WHERE corrid = 270; | 
-| DELETE FROM VONameCorrection WHERE corrid = 273; | 
-| DELETE FROM VONameCorrection WHERE corrid = 276; | 
-| DELETE FROM VONameCorrection WHERE corrid = 277; | 
-| DELETE FROM VONameCorrection WHERE corrid = 27;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 281; | 
-| DELETE FROM VONameCorrection WHERE corrid = 284; | 
-| DELETE FROM VONameCorrection WHERE corrid = 28;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 30;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 326; | 
-| DELETE FROM VONameCorrection WHERE corrid = 350; | 
-| DELETE FROM VONameCorrection WHERE corrid = 41;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 53;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 57;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 62;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 66;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 68;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 80;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 83;  | 
-| DELETE FROM VONameCorrection WHERE corrid = 97;  | 
-+--------------------------------------------------+
 ============================================================
 VONameCorrection dump of records to be deleted
 ============================================================
@@ -1154,59 +965,3 @@ WHERE corrid in
  )
 --------------
 
-+--------+------------------+------------------+------+
-| corrid | VOName           | ReportableVOName | VOid |
-+--------+------------------+------------------+------+
-|     27 | 1202574          | NULL             |  221 | 
-|     28 | 1203635          | NULL             |  221 | 
-|     30 | 1205281          | NULL             |  221 | 
-|     41 | Unknown          | Unknown          |  220 | 
-|     53 | auger            | auger            |   98 | 
-|     57 | blane            | blane            |  221 | 
-|     62 | cdf              | cdf              |  101 | 
-|     66 | cdms             | cdms             |  102 | 
-|     68 | cern             | cern             |  103 | 
-|     80 | des              | des              |  109 | 
-|     83 | dosar            | dosar            |  110 | 
-|     97 | engagement       | engagement       |  114 | 
-|    103 | fermilab         | fermilab         |  117 | 
-|    109 | fmri             | fmri             |  119 | 
-|    112 | gadu             | gadu             |  120 | 
-|    115 | geant4           | geant4           |  121 | 
-|    118 | gin.ggf.org      | gin.ggf.org      |  221 | 
-|    128 | grase            | grase            |  126 | 
-|    135 | gridex           | gridex           |  129 | 
-|    138 | grow             | grow             |  130 | 
-|    142 | hypercp          | hypercp          |  132 | 
-|    143 | i2u2             | I2U2             |  238 | 
-|    147 | ilc              | ilc              |  133 | 
-|    150 | infn             | infn             |  134 | 
-|    154 | ivdgl            | ivdgl            |  135 | 
-|    156 | james            | james            |  221 | 
-|    165 | km               | km               |  221 | 
-|    169 | ktev             | ktev             |  139 | 
-|    172 | lee              | lee              |  221 | 
-|    178 | ligo             | ligo             |  142 | 
-|    182 | magrid           | NULL             |  245 | 
-|    188 | miniboone        | miniboone        |  146 | 
-|    199 | mm               | mm               |  221 | 
-|    221 | osg              | osg              |  156 | 
-|    225 | osgedu           | osgedu           |  157 | 
-|    228 | osgusatlas00     | NULL             |  172 | 
-|    229 | osgusatlas00     | ATLAS            |  172 | 
-|    231 | park             | park             |  221 | 
-|    242 | sdss             | sdss             |  166 | 
-|    245 | smith            | smith            |  221 | 
-|    247 | ss               | ss               |  221 | 
-|    255 | tigrepool0       | tigrepool0       |  198 | 
-|    264 | usatlas          | usatlas          |  172 | 
-|    267 | uscms            | uscms            |  106 | 
-|    270 | uscmsPool        | uscmsPool        |  106 | 
-|    273 | uscmsPool1       | uscmsPool1       |  106 | 
-|    276 | uscmspool0       | uscmspool0       |  106 | 
-|    277 | uscmspool1       | NULL             |  106 | 
-|    281 | ux001            | ux001            |  142 | 
-|    284 | wang             | wang             |  221 | 
-|    326 | mschram06/29/2   | NULL             |  221 | 
-|    350 | /SBGrid/Role=RSV | SBGrid           |  234 | 
-+--------+------------------+------------------+------+

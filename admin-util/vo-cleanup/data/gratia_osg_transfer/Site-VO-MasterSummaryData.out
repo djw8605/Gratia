@@ -1,0 +1,409 @@
+Thu Jan 26 14:18:36 CST 2012
+
+mysql --table --verbose --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia_osg_transfer
+
+=========================================================
+VOName being analized
+=========================================================
+--------------
+set @voname="TG-%"
+--------------
+
+--------------
+set @mydate="2011-01-01"
+--------------
+
+
+=========================================================
+MasterSummaryData - Site/VO
+The purpose is to identify where non-registered VO
+names are coming from ... I think
+=========================================================
+=========================================================
+VOs used at a single Site
+with void and vocorrid
+and VC.VOName and VC.ReportableVOName which are the
+the values that came up on the probe.
+
+For a given VO from a given Site, there may be more
+than one VONameCorrection table entry.
+=========================================================
+--------------
+SELECT
+   VO.VOName as GratiaVO
+  ,Site.SiteName AS Site
+  ,VO.void 
+  ,VC.corrid
+  ,VC.VOName 
+  ,VC.ReportableVOName
+  ,max(date_format(EndTime,"%Y-%m-%d")) as Latest
+  ,min(date_format(EndTime,"%Y-%m-%d")) as Earliest
+  ,Sum(Njobs) as TotalJobs
+  ,count(*) as rec_cnt
+FROM
+     MasterSummaryData Main
+    ,VO
+    ,VONameCorrection VC
+    ,Site
+    ,Probe
+where
+      Main.EndTime    > @mydate
+  and Main.VOCorrid   = VC.corrid
+  and VC.VOid         = VO.VOid
+  and Main.ProbeName  = Probe.ProbeName
+  and Probe.siteid    = Site.siteid
+  and VO.VOName in (
+  SELECT GratiaVO FROM (
+    SELECT
+       VO.VOName as GratiaVO
+      ,count(distinct(Site.SiteName)) as NbrOfSites
+    FROM
+         MasterSummaryData Main
+        ,VO
+        ,VONameCorrection VC
+        ,Site
+        ,Probe
+    where
+        Main.EndTime    > @mydate
+      and Main.ProbeName  = Probe.ProbeName
+      and Probe.siteid    = Site.siteid
+      and Main.VOCorrid   = VC.corrid
+      and VC.VOid         = VO.VOid
+    group by
+       GratiaVO
+
+    ) a
+    WHERE a.NbrOfSites = 1
+    order by
+       GratiaVO
+    ) 
+group by
+   GratiaVO
+  ,Site
+  ,VO.void 
+  ,VC.corrid
+--------------
+
++----------+--------+------+--------+----------------------------------------+------------------+------------+------------+-----------+---------+
+| GratiaVO | Site   | void | corrid | VOName                                 | ReportableVOName | Latest     | Earliest   | TotalJobs | rec_cnt |
++----------+--------+------+--------+----------------------------------------+------------------+------------+------------+-----------+---------+
+| dzero    | UCSDT2 |    2 |     64 | /dzero/users/Role=NULL/Capability=NULL | dzero            | 2012-01-12 | 2012-01-04 |       442 |      14 | 
++----------+--------+------+--------+----------------------------------------+------------------+------------+------------+-----------+---------+
+=========================================================
+VOs used at a single Site
+=========================================================
+--------------
+SELECT * FROM (
+SELECT
+   a.GratiaVO
+  ,count(a.Site) as NbrOfSites
+  ,a.Site
+  ,max(a.Latest) as Latest
+  ,min(a.Earliest) as Earliest
+  ,sum(a.TotalJobs) as TotalJobs
+  ,sum(a.rec_cnt) as NbrOfRecs
+FROM (
+SELECT
+   VO.VOName as GratiaVO
+  ,Site.SiteName AS Site
+  ,min(date_format(EndTime,"%Y-%m")) as Earliest
+  ,max(date_format(EndTime,"%Y-%m")) as Latest
+  ,Sum(Njobs) as TotalJobs
+  ,count(*) as rec_cnt
+FROM
+     MasterSummaryData Main
+    ,VO
+    ,VONameCorrection VC
+    ,Site
+    ,Probe
+where
+      Main.EndTime    > @mydate
+  and Main.VOCorrid   = VC.corrid
+  and VC.VOid         = VO.VOid
+  and Main.ProbeName  = Probe.ProbeName
+  and Probe.siteid    = Site.siteid
+group by
+   GratiaVO
+  ,Site
+
+) a
+group by
+   a.GratiaVO
+
+) b
+WHERE b.NbrOfSites = 1
+--------------
+
++----------+------------+--------+---------+----------+-----------+-----------+
+| GratiaVO | NbrOfSites | Site   | Latest  | Earliest | TotalJobs | NbrOfRecs |
++----------+------------+--------+---------+----------+-----------+-----------+
+| dzero    |          1 | UCSDT2 | 2012-01 | 2012-01  |       442 |        14 | 
++----------+------------+--------+---------+----------+-----------+-----------+
+=========================================================
+VOs used at more than 1 Site
+=========================================================
+--------------
+SELECT * FROM (
+SELECT
+   a.GratiaVO
+
+  ,count(a.Site) as NbrOfSites
+  ,max(a.Latest)
+  ,min(a.Earliest)
+  ,sum(a.TotalJobs)
+  ,sum(a.rec_cnt)
+FROM (
+SELECT
+   VO.VOName as GratiaVO
+  ,Site.SiteName AS Site
+  ,min(date_format(EndTime,"%Y-%m")) as Earliest
+  ,max(date_format(EndTime,"%Y-%m")) as Latest
+  ,Sum(Njobs) as TotalJobs
+  ,count(*) as rec_cnt
+FROM
+     MasterSummaryData Main
+    ,VO
+    ,VONameCorrection VC
+    ,Site
+    ,Probe
+where
+      Main.EndTime    > @mydate
+  and Main.VOCorrid   = VC.corrid
+  and VC.VOid         = VO.VOid
+  and Main.ProbeName  = Probe.ProbeName
+  and Probe.siteid    = Site.siteid
+group by
+   GratiaVO
+  ,Site
+
+) a
+group by
+   a.GratiaVO
+
+) b
+WHERE b.NbrOfSites > 1
+--------------
+
++----------+------------+---------------+-----------------+------------------+----------------+
+| GratiaVO | NbrOfSites | max(a.Latest) | min(a.Earliest) | sum(a.TotalJobs) | sum(a.rec_cnt) |
++----------+------------+---------------+-----------------+------------------+----------------+
+| Engage   |          2 | 2012-01       | 2012-01         |            35464 |            165 | 
+| GLOW     |          2 | 2012-01       | 2012-01         |             4675 |             65 | 
+| Gluex    |          2 | 2012-01       | 2012-01         |             5627 |            128 | 
+| LIGO     |          2 | 2012-01       | 2012-01         |             2152 |             30 | 
+| SBGrid   |          2 | 2012-01       | 2012-01         |              315 |             43 | 
+| cms      |          3 | 2012-01       | 2011-05         |           114278 |           1814 | 
+| geant4   |          2 | 2012-01       | 2012-01         |               86 |             31 | 
+| hcc      |          2 | 2012-01       | 2012-01         |             3129 |             45 | 
+| mis      |          2 | 2012-01       | 2012-01         |                4 |              2 | 
+| nees     |          2 | 2012-01       | 2012-01         |               26 |             20 | 
++----------+------------+---------------+-----------------+------------------+----------------+
+=========================================================
+Ordered by GratiaVO, Site, Latest
+=========================================================
+--------------
+SELECT
+   a.GratiaVO
+  ,a.Site
+  ,a.Latest
+  ,a.Earliest
+  ,a.TotalJobs
+  ,a.rec_cnt
+FROM (
+SELECT
+   VO.VOName as GratiaVO
+  ,Site.SiteName AS Site
+  ,min(date_format(EndTime,"%Y-%m")) as Earliest
+  ,max(date_format(EndTime,"%Y-%m")) as Latest
+  ,Sum(Njobs) as TotalJobs
+  ,count(*) as rec_cnt
+FROM
+     MasterSummaryData Main
+    ,VO
+    ,VONameCorrection VC
+    ,Site
+    ,Probe
+where
+      Main.EndTime    > @mydate
+  and Main.VOCorrid   = VC.corrid
+  and VC.VOid         = VO.VOid
+  and Main.ProbeName  = Probe.ProbeName
+  and Probe.siteid    = Site.siteid
+group by
+   GratiaVO
+  ,Site
+
+) a
+order by
+   a.GratiaVO
+  ,a.Site
+  ,a.Latest desc
+--------------
+
++----------+----------+---------+----------+-----------+---------+
+| GratiaVO | Site     | Latest  | Earliest | TotalJobs | rec_cnt |
++----------+----------+---------+----------+-----------+---------+
+| Engage   | UCSDT2   | 2012-01 | 2012-01  |     18512 |      82 | 
+| Engage   | UCSDT2-B | 2012-01 | 2012-01  |     16952 |      83 | 
+| GLOW     | UCSDT2   | 2012-01 | 2012-01  |      2328 |      32 | 
+| GLOW     | UCSDT2-B | 2012-01 | 2012-01  |      2347 |      33 | 
+| Gluex    | UCSDT2   | 2012-01 | 2012-01  |      2697 |      66 | 
+| Gluex    | UCSDT2-B | 2012-01 | 2012-01  |      2930 |      62 | 
+| LIGO     | UCSDT2   | 2012-01 | 2012-01  |      1065 |      15 | 
+| LIGO     | UCSDT2-B | 2012-01 | 2012-01  |      1087 |      15 | 
+| SBGrid   | UCSDT2   | 2012-01 | 2012-01  |       164 |      22 | 
+| SBGrid   | UCSDT2-B | 2012-01 | 2012-01  |       151 |      21 | 
+| cms      | Red      | 2011-05 | 2011-05  |      6770 |     251 | 
+| cms      | UCSDT2   | 2012-01 | 2011-12  |     54070 |     785 | 
+| cms      | UCSDT2-B | 2012-01 | 2012-01  |     53438 |     778 | 
+| dzero    | UCSDT2   | 2012-01 | 2012-01  |       442 |      14 | 
+| geant4   | UCSDT2   | 2012-01 | 2012-01  |        43 |      15 | 
+| geant4   | UCSDT2-B | 2012-01 | 2012-01  |        43 |      16 | 
+| hcc      | UCSDT2   | 2012-01 | 2012-01  |      1586 |      21 | 
+| hcc      | UCSDT2-B | 2012-01 | 2012-01  |      1543 |      24 | 
+| mis      | UCSDT2   | 2012-01 | 2012-01  |         2 |       1 | 
+| mis      | UCSDT2-B | 2012-01 | 2012-01  |         2 |       1 | 
+| nees     | UCSDT2   | 2012-01 | 2012-01  |        13 |       9 | 
+| nees     | UCSDT2-B | 2012-01 | 2012-01  |        13 |      11 | 
++----------+----------+---------+----------+-----------+---------+
+=========================================================
+Ordered by Site, GratiaVO, Latest
+=========================================================
+--------------
+SELECT
+   a.Site
+  ,a.GratiaVO
+  ,a.Latest
+  ,a.Earliest
+  ,a.TotalJobs
+  ,a.rec_cnt
+FROM (
+SELECT
+   Site.SiteName AS Site
+  ,VO.VOName as GratiaVO
+  ,min(date_format(EndTime,"%Y-%m")) as Earliest
+  ,max(date_format(EndTime,"%Y-%m")) as Latest
+  ,Sum(Njobs) as TotalJobs
+  ,count(*) as rec_cnt
+FROM
+     MasterSummaryData Main
+    ,VO
+    ,VONameCorrection VC
+    ,Site
+    ,Probe
+where
+      Main.EndTime    > @mydate
+  and Main.VOCorrid   = VC.corrid
+  and VC.VOid         = VO.VOid
+  and Main.ProbeName  = Probe.ProbeName
+  and Probe.siteid    = Site.siteid
+group by
+   GratiaVO
+  ,Site
+
+) a
+order by
+   a.Site
+  ,a.GratiaVO
+  ,a.Latest desc
+--------------
+
++----------+----------+---------+----------+-----------+---------+
+| Site     | GratiaVO | Latest  | Earliest | TotalJobs | rec_cnt |
++----------+----------+---------+----------+-----------+---------+
+| Red      | cms      | 2011-05 | 2011-05  |      6770 |     251 | 
+| UCSDT2   | Engage   | 2012-01 | 2012-01  |     18512 |      82 | 
+| UCSDT2   | GLOW     | 2012-01 | 2012-01  |      2328 |      32 | 
+| UCSDT2   | Gluex    | 2012-01 | 2012-01  |      2697 |      66 | 
+| UCSDT2   | LIGO     | 2012-01 | 2012-01  |      1065 |      15 | 
+| UCSDT2   | SBGrid   | 2012-01 | 2012-01  |       164 |      22 | 
+| UCSDT2   | cms      | 2012-01 | 2011-12  |     54070 |     785 | 
+| UCSDT2   | dzero    | 2012-01 | 2012-01  |       442 |      14 | 
+| UCSDT2   | geant4   | 2012-01 | 2012-01  |        43 |      15 | 
+| UCSDT2   | hcc      | 2012-01 | 2012-01  |      1586 |      21 | 
+| UCSDT2   | mis      | 2012-01 | 2012-01  |         2 |       1 | 
+| UCSDT2   | nees     | 2012-01 | 2012-01  |        13 |       9 | 
+| UCSDT2-B | Engage   | 2012-01 | 2012-01  |     16952 |      83 | 
+| UCSDT2-B | GLOW     | 2012-01 | 2012-01  |      2347 |      33 | 
+| UCSDT2-B | Gluex    | 2012-01 | 2012-01  |      2930 |      62 | 
+| UCSDT2-B | LIGO     | 2012-01 | 2012-01  |      1087 |      15 | 
+| UCSDT2-B | SBGrid   | 2012-01 | 2012-01  |       151 |      21 | 
+| UCSDT2-B | cms      | 2012-01 | 2012-01  |     53438 |     778 | 
+| UCSDT2-B | geant4   | 2012-01 | 2012-01  |        43 |      16 | 
+| UCSDT2-B | hcc      | 2012-01 | 2012-01  |      1543 |      24 | 
+| UCSDT2-B | mis      | 2012-01 | 2012-01  |         2 |       1 | 
+| UCSDT2-B | nees     | 2012-01 | 2012-01  |        13 |      11 | 
++----------+----------+---------+----------+-----------+---------+
+=========================================================
+Ordered by GratiaVO, Site, Probe, Latest
+=========================================================
+--------------
+SELECT
+   a.GratiaVO
+  ,a.Site
+  ,a.ProbeName
+  ,a.Latest
+  ,a.Earliest
+  ,a.TotalJobs
+  ,a.rec_cnt
+FROM (
+SELECT
+   VO.VOName as GratiaVO
+  ,Site.SiteName AS Site
+  ,Main.ProbeName AS ProbeName
+  ,min(date_format(EndTime,"%Y-%m")) as Earliest
+  ,max(date_format(EndTime,"%Y-%m")) as Latest
+  ,Sum(Njobs) as TotalJobs
+  ,count(*) as rec_cnt
+FROM
+     MasterSummaryData Main
+    ,VO
+    ,VONameCorrection VC
+    ,Site
+    ,Probe
+where
+      Main.EndTime    > @mydate
+  and Main.VOCorrid   = VC.corrid
+  and VC.VOid         = VO.VOid
+  and Main.ProbeName  = Probe.ProbeName
+  and Probe.siteid    = Site.siteid
+group by
+   GratiaVO
+  ,Site
+  ,ProbeName
+
+) a
+order by
+   a.GratiaVO
+  ,a.Site
+  ,a.ProbeName
+  ,a.Latest desc
+--------------
+
++----------+----------+-----------------------------+---------+----------+-----------+---------+
+| GratiaVO | Site     | ProbeName                   | Latest  | Earliest | TotalJobs | rec_cnt |
++----------+----------+-----------------------------+---------+----------+-----------+---------+
+| Engage   | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2012-01  |     18512 |      82 | 
+| Engage   | UCSDT2-B | condor:osg-gw-4.t2.ucsd.edu | 2012-01 | 2012-01  |     16952 |      83 | 
+| GLOW     | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2012-01  |      2328 |      32 | 
+| GLOW     | UCSDT2-B | condor:osg-gw-4.t2.ucsd.edu | 2012-01 | 2012-01  |      2347 |      33 | 
+| Gluex    | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2012-01  |      2697 |      66 | 
+| Gluex    | UCSDT2-B | condor:osg-gw-4.t2.ucsd.edu | 2012-01 | 2012-01  |      2930 |      62 | 
+| LIGO     | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2012-01  |      1065 |      15 | 
+| LIGO     | UCSDT2-B | condor:osg-gw-4.t2.ucsd.edu | 2012-01 | 2012-01  |      1087 |      15 | 
+| SBGrid   | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2012-01  |       164 |      22 | 
+| SBGrid   | UCSDT2-B | condor:osg-gw-4.t2.ucsd.edu | 2012-01 | 2012-01  |       151 |      21 | 
+| cms      | Red      | condor:red-gw1.unl.edu      | 2011-05 | 2011-05  |      3420 |     125 | 
+| cms      | Red      | condor:red-gw2.unl.edu      | 2011-05 | 2011-05  |      3350 |     126 | 
+| cms      | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2011-12  |     54070 |     785 | 
+| cms      | UCSDT2-B | condor:osg-gw-4.t2.ucsd.edu | 2012-01 | 2012-01  |     53438 |     778 | 
+| dzero    | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2012-01  |       442 |      14 | 
+| geant4   | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2012-01  |        43 |      15 | 
+| geant4   | UCSDT2-B | condor:osg-gw-4.t2.ucsd.edu | 2012-01 | 2012-01  |        43 |      16 | 
+| hcc      | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2012-01  |      1586 |      21 | 
+| hcc      | UCSDT2-B | condor:osg-gw-4.t2.ucsd.edu | 2012-01 | 2012-01  |      1543 |      24 | 
+| mis      | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2012-01  |         2 |       1 | 
+| mis      | UCSDT2-B | condor:osg-gw-4.t2.ucsd.edu | 2012-01 | 2012-01  |         2 |       1 | 
+| nees     | UCSDT2   | condor:osg-gw-2.t2.ucsd.edu | 2012-01 | 2012-01  |        13 |       9 | 
+| nees     | UCSDT2-B | condor:osg-gw-4.t2.ucsd.edu | 2012-01 | 2012-01  |        13 |      11 | 
++----------+----------+-----------------------------+---------+----------+-----------+---------+
