@@ -1,4 +1,4 @@
-Thu Jan 26 14:16:49 CST 2012
+Fri Feb  3 07:22:52 CST 2012
 
 mysql --table --verbose --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
 
@@ -128,7 +128,7 @@ and (
 +----------------+
 | nbr_of_entries |
 +----------------+
-|            765 | 
+|            725 | 
 +----------------+
 --------------
 SELECT 
@@ -176,8 +176,6 @@ order by
 | Unknown         |   96 |    874 | Unknown                                               | error reading the file, /nfs/gridusers/uscms511/.globus/job/heposg01.colorado.edu/726.1318782608/x509_up     | 
 | Unknown         |   96 |    882 | Unknown                                               | error opening the file, /home/hcc/.globus/job/cit-gatekeeper.ultralight.org/30088.1320805577/x509_up         | 
 | Unknown         |   96 |    897 | Unknown                                               | error reading the file, /home/GRIDUSERS/rsvuser/.globus/job/antaeus.hpcc.ttu.edu/13606.1326008222/x509_up    | 
-| ab              |  624 |    845 | ab                                                    | NULL                                                                                                         | 
-| ac              |  623 |    844 | ac                                                    | NULL                                                                                                         | 
 | accelerator     |  236 |     42 | accelerator                                           | FERMILAB                                                                                                     | 
 | accelerator     |  236 |    311 | /fermilab/accelerator/Role=NULL/Capability=NULL       | fermilab                                                                                                     | 
 | adesmet         |  507 |    719 | adesmet                                               | adesmet                                                                                                      | 
@@ -191,7 +189,6 @@ order by
 | ankur           |  508 |    722 | ankur                                                 | ankur                                                                                                        | 
 | argoneut        |  474 |    673 | argoneut                                              | FERMILAB                                                                                                     | 
 | armino          |  640 |    877 | armino                                                | NULL                                                                                                         | 
-| as2             |  444 |    625 | as2                                                   | NULL                                                                                                         | 
 | astro           |   97 |     46 | astro                                                 | NULL                                                                                                         | 
 | astro           |   97 |    523 | /fermilab/astro/Role=NULL/Capability=NULL             | fermilab                                                                                                     | 
 | auger           |   98 |     51 | auger                                                 | NULL                                                                                                         | 
@@ -202,24 +199,19 @@ order by
 | auger           |   98 |    578 | /auger/Role=NULL/Capability=NULL                      | auger                                                                                                        | 
 | austriangrid    |   99 |     54 | austriangrid                                          | NULL                                                                                                         | 
 | avery           |  649 |    896 | avery                                                 | avery                                                                                                        | 
-| aw              |  621 |    842 | aw                                                    | NULL                                                                                                         | 
 | barnet          |  499 |    709 | barnet                                                | barnet                                                                                                       | 
 | baru-tro        |  646 |    889 | baru-tro                                              | NULL                                                                                                         | 
 | begrid          |  100 |     55 | begrid                                                | NULL                                                                                                         | 
 | belle           |  436 |    607 | /belle/Role=NULL/Capability=NULL                      | belle                                                                                                        | 
 | belle           |  436 |    617 | /belle/Role=lcgadmin/Capability=NULL                  | belle                                                                                                        | 
 | belle           |  436 |    622 | belle                                                 | belle                                                                                                        | 
-| bgs0            |  510 |    725 | bgs0                                                  | NULL                                                                                                         | 
 | biomed          |  310 |    416 | /biomed/Role=NULL/Capability=NULL                     | biomed                                                                                                       | 
 | bmueller        |  595 |    815 | bmueller                                              | bmueller                                                                                                     | 
-| bnebgen         |  593 |    812 | bnebgen                                               | NULL                                                                                                         | 
 | bockelman       |  482 |    689 | bockelman                                             | bockelman                                                                                                    | 
 | bt              |  490 |    700 | bt                                                    | bt                                                                                                           | 
 | c670            |  438 |    610 | c670                                                  | LIGO                                                                                                         | 
 | c670            |  438 |    611 | c670                                                  | hcc                                                                                                          | 
 | c670            |  438 |    635 | c670                                                  | Ligo                                                                                                         | 
-| camcs           |  276 |    532 | camcs                                                 | DOSAR                                                                                                        | 
-| cc              |  622 |    843 | cc                                                    | NULL                                                                                                         | 
 | cdf             |  101 |      4 | /cdf/Role=NULL/Capability=NULL                        | cdf                                                                                                          | 
 | cdf             |  101 |      5 | /cdf/glidecaf/Role=development/Capability=NULL        | cdf                                                                                                          | 
 | cdf             |  101 |      6 | /cdf/glidecaf/Role=namcaf/Capability=NULL             | cdf                                                                                                          | 
@@ -236,7 +228,6 @@ order by
 | cigi            |  208 |     71 | cigi                                                  | CIGI                                                                                                         | 
 | cigi            |  208 |    354 | /cigi/Role=NULL/Capability=NULL                       | cigi                                                                                                         | 
 | ck              |  440 |    614 | ck                                                    | NULL                                                                                                         | 
-| cmmap           |  465 |    655 | cmmap                                                 | NULL                                                                                                         | 
 | cms             |  106 |      8 | /cms/Role=NULL/Capability=NULL                        | cms                                                                                                          | 
 | cms             |  106 |      9 | /cms/Role=lcgadmin/Capability=NULL                    | cms                                                                                                          | 
 | cms             |  106 |     10 | /cms/Role=production/Capability=NULL                  | cms                                                                                                          | 
@@ -346,8 +337,6 @@ order by
 | dzero           |  112 |    293 | /dzero/users/Role=D0Production/Capability=NULL        | dzero                                                                                                        | 
 | dzero           |  112 |    357 | /dzero/Role=NULL/Capability=NULL                      | dzero                                                                                                        | 
 | dzero           |  112 |    364 | /dzero/users/Role=analysis/Capability=NULL            | dzero                                                                                                        | 
-| ebm             |  456 |    644 | ebm                                                   | NULL                                                                                                         | 
-| el              |  625 |    846 | el                                                    | NULL                                                                                                         | 
 | ema             |  369 |    498 | ema                                                   | mech950                                                                                                      | 
 | engage          |  114 |      1 | /Engage/Role=NULL/Capability=NULL                     | Engage                                                                                                       | 
 | engage          |  114 |     35 | Engage                                                | Engage                                                                                                       | 
@@ -413,7 +402,6 @@ order by
 | geant4          |  121 |    371 | /geant4/Role=NULL/Capability=NULL                     | geant4                                                                                                       | 
 | genec           |  584 |    802 | genec                                                 | genec                                                                                                        | 
 | germangrid      |  122 |    116 | germangrid                                            | NULL                                                                                                         | 
-| ghan            |  635 |    865 | ghan                                                  | NULL                                                                                                         | 
 | glideinwms      |  632 |    862 | glideinwms                                            | glideinwms                                                                                                   | 
 | glow            |  124 |     37 | GLOW                                                  | GLOW                                                                                                         | 
 | glow            |  124 |    119 | glow                                                  | NULL                                                                                                         | 
@@ -426,7 +414,6 @@ order by
 | gluex           |  360 |    509 | /Gluex/Role=NULL/Capability=NULL                      | Gluex                                                                                                        | 
 | gluex           |  360 |    621 | /Gluex/production/Role=NULL/Capability=NULL           | Gluex                                                                                                        | 
 | gluex           |  360 |    712 | gluex                                                 | gluex                                                                                                        | 
-| gopala          |  483 |    691 | gopala                                                | NULL                                                                                                         | 
 | gpn             |  125 |    122 | gpn                                                   | NULL                                                                                                         | 
 | gpn             |  125 |    123 | gpn                                                   | GPN                                                                                                          | 
 | gpn             |  125 |    124 | gpn                                                   | gpn                                                                                                          | 
@@ -436,6 +423,8 @@ order by
 | grase           |  126 |    127 | grase                                                 | Grase                                                                                                        | 
 | gray7           |  385 |    531 | gray7                                                 | NULL                                                                                                         | 
 | grid            |  127 |    848 | grid                                                  | cms                                                                                                          | 
+| grid            |  127 |    899 | grid                                                  | Engage                                                                                                       | 
+| grid            |  127 |    900 | grid                                                  | GLOW                                                                                                         | 
 | grid-fr         |  128 |    130 | grid-fr                                               | NULL                                                                                                         | 
 | grid14          |  613 |    834 | grid14                                                | NULL                                                                                                         | 
 | grid14          |  613 |    853 | grid14                                                | GLOW                                                                                                         | 
@@ -464,8 +453,6 @@ order by
 | hcc             |  388 |    679 | /hcc/testgroup/Role=collab/Capability=NULL            | hcc                                                                                                          | 
 | hcc             |  388 |    878 | /hcc/cse435/Role=NULL/Capability=NULL                 | hcc                                                                                                          | 
 | hguanhua        |  592 |    811 | hguanhua                                              | hguanhua                                                                                                     | 
-| ht              |  608 |    829 | ht                                                    | NULL                                                                                                         | 
-| huang           |  457 |    645 | huang                                                 | NULL                                                                                                         | 
 | huihui          |  607 |    828 | huihui                                                | huihui                                                                                                       | 
 | hypercp         |  132 |    141 | hypercp                                               | FERMILAB                                                                                                     | 
 | hypercp         |  132 |    303 | /fermilab/hypercp/Role=NULL/Capability=NULL           | fermilab                                                                                                     | 
@@ -494,7 +481,6 @@ order by
 | ivdgl           |  135 |    472 | osgivdglmis0                                          | NULL                                                                                                         | 
 | jaing           |  470 |    664 | jaing                                                 | NULL                                                                                                         | 
 | jchristianson   |  516 |    734 | jchristianson                                         | jchristianson                                                                                                | 
-| jd              |  619 |    840 | jd                                                    | NULL                                                                                                         | 
 | jdem            |  284 |    376 | /jdem/Role=NULL/Capability=NULL                       | jdem                                                                                                         | 
 | jdem            |  284 |    380 | jdem                                                  | JDEM                                                                                                         | 
 | jkong           |  643 |    883 | jkong                                                 | jkong                                                                                                        | 
@@ -503,7 +489,6 @@ order by
 | jmondal         |  501 |    711 | jmondal                                               | jmondal                                                                                                      | 
 | jms21           |  445 |    627 | jms21                                                 | NULL                                                                                                         | 
 | k47k4           |  459 |    647 | k47k4                                                 | NULL                                                                                                         | 
-| king            |  478 |    684 | king                                                  | NULL                                                                                                         | 
 | ksinterface     |  502 |    713 | ksinterface                                           | ksinterface                                                                                                  | 
 | ktev            |  139 |    166 | ktev                                                  | NULL                                                                                                         | 
 | ktev            |  139 |    167 | ktev                                                  | FERMILAB                                                                                                     | 
@@ -514,9 +499,7 @@ order by
 | lbne            |  417 |    858 | lbne                                                  | LBNE                                                                                                         | 
 | lbne            |  417 |    891 | /lbne/Role=Analysis/Capability=NULL                   | lbne                                                                                                         | 
 | lbne            |  417 |    894 | /lbne/Role=pilot/Capability=NULL                      | lbne                                                                                                         | 
-| lee             |  140 |    653 | lee                                                   | cms                                                                                                          | 
 | leiliz          |  609 |    830 | leiliz                                                | leiliz                                                                                                       | 
-| lhaupert        |  598 |    818 | lhaupert                                              | NULL                                                                                                         | 
 | ligo            |  142 |     38 | LIGO                                                  | NULL                                                                                                         | 
 | ligo            |  142 |     39 | LIGO                                                  | LIGO                                                                                                         | 
 | ligo            |  142 |    175 | ligo                                                  | NULL                                                                                                         | 
@@ -525,7 +508,6 @@ order by
 | ligo            |  142 |    279 | ux001                                                 | NULL                                                                                                         | 
 | ligo            |  142 |    280 | ux001                                                 | Ligo                                                                                                         | 
 | ligo            |  142 |    289 | /LIGO/Role=NULL/Capability=NULL                       | LIGO                                                                                                         | 
-| liu             |  463 |    651 | liu                                                   | NULL                                                                                                         | 
 | lius8           |  423 |    590 | lius8                                                 | NULL                                                                                                         | 
 | llzhang         |  512 |    727 | llzhang                                               | llzhang                                                                                                      | 
 | loni_bc_02      |  403 |    560 | loni_bc_02                                            | NULL                                                                                                         | 
@@ -548,7 +530,6 @@ order by
 | loni_training09 |  405 |    562 | loni_training09                                       | NULL                                                                                                         | 
 | loni_wickt      |  406 |    563 | loni_wickt                                            | NULL                                                                                                         | 
 | lqcd            |  144 |    181 | lqcd                                                  | LQCD                                                                                                         | 
-| lslipche        |  611 |    832 | lslipche                                              | NULL                                                                                                         | 
 | lsst            |  373 |    502 | /Engage/LSST/Role=NULL/Capability=NULL                | Engage                                                                                                       | 
 | lwang           |  496 |    706 | lwang                                                 | lwang                                                                                                        | 
 | m1248           |  475 |    676 | m1248                                                 | Star                                                                                                         | 
@@ -561,8 +542,6 @@ order by
 | mariachi        |  292 |    392 | /mariachi                                             | mariachi                                                                                                     | 
 | matt            |  431 |    600 | matt                                                  | NULL                                                                                                         | 
 | mburke          |  641 |    880 | mburke                                                | NULL                                                                                                         | 
-| mh              |  616 |    837 | mh                                                    | NULL                                                                                                         | 
-| mille           |  348 |    459 | mille                                                 | NULL                                                                                                         | 
 | minerva         |  278 |    362 | /fermilab/minerva/Role=NULL/Capability=NULL           | fermilab                                                                                                     | 
 | minerva         |  278 |    363 | minerva                                               | FERMILAB                                                                                                     | 
 | minerva         |  278 |    494 | /fermilab/minerva/Role=Analysis/Capability=NULL       | fermilab                                                                                                     | 
@@ -589,7 +568,6 @@ order by
 | mpccc           |  442 |    618 | mpccc                                                 | OSG                                                                                                          | 
 | mpccc           |  442 |    643 | mpccc                                                 | Ligo                                                                                                         | 
 | mpccc           |  442 |    859 | mpccc                                                 | Star                                                                                                         | 
-| mrp9            |  469 |    659 | mrp9                                                  | NULL                                                                                                         | 
 | mu2e            |  354 |    468 | /fermilab/mu2e/Role=NULL/Capability=NULL              | fermilab                                                                                                     | 
 | mu2e            |  354 |    483 | mu2e                                                  | FERMILAB                                                                                                     | 
 | nanohub         |  151 |     18 | /nanohub/Role=NULL/Capability=NULL                    | nanohub                                                                                                      | 
@@ -618,7 +596,6 @@ order by
 | nysgrid         |  207 |    213 | nysgrid                                               | NYSGRID                                                                                                      | 
 | nysgrid         |  207 |    214 | nysgrid                                               | nysgrid                                                                                                      | 
 | nysgrid         |  207 |    290 | /NYSGRID/Role=NULL/Capability=NULL                    | NYSGRID                                                                                                      | 
-| ocucs           |  277 |    530 | ocucs                                                 | DOSAR                                                                                                        | 
 | odonovan        |  630 |    856 | odonovan                                              | odonovan                                                                                                     | 
 | oiv_test1       |  272 |    344 | /oiv_test1                                            | oiv_test1                                                                                                    | 
 | ops             |  155 |     19 | /ops/Role=lcgadmin/Capability=NULL                    | ops                                                                                                          | 
@@ -791,12 +768,8 @@ order by
 | other EGEE      |  382 |    321 | /lhcb/Role=lcgadmin/Capability=NULL                   | lhcb                                                                                                         | 
 | other EGEE      |  382 |    327 | /lhcb/Role=NULL/Capability=NULL                       | lhcb                                                                                                         | 
 | other EGEE      |  382 |    513 | osgu000                                               | superbvo.org                                                                                                 | 
-| ou2             |  407 |    564 | ou2                                                   | NULL                                                                                                         | 
-| ou2             |  407 |    626 | ou2                                                   | DOSAR                                                                                                        | 
+| ou2             |  651 |    901 | ou2                                                   | DOSAR                                                                                                        | 
 | ouame           |  384 |    529 | ouame                                                 | NULL                                                                                                         | 
-| pari            |  479 |    686 | pari                                                  | NULL                                                                                                         | 
-| parii           |  513 |    728 | parii                                                 | NULL                                                                                                         | 
-| parii           |  513 |    873 | parii                                                 | DOSAR                                                                                                        | 
 | patriot         |  159 |    232 | patriot                                               | FERMILAB                                                                                                     | 
 | patriot         |  159 |    341 | /fermilab/patriot/Role=NULL/Capability=NULL           | fermilab                                                                                                     | 
 | pegrid          |  374 |    391 | pegrid0                                               | PEGRID                                                                                                       | 
@@ -822,8 +795,6 @@ order by
 | sbgrid          |  234 |    613 | /SBGrid/Role=software/Capability=NULL                 | SBGrid                                                                                                       | 
 | sbgrid          |  234 |    683 | /SBGrid/eNMR/Role=NULL/Capability=NULL                | SBGrid                                                                                                       | 
 | sbgrid          |  234 |    861 | /SBGrid/WeNMR/Role=NULL/Capability=NULL               | SBGrid                                                                                                       | 
-| sc              |  441 |    616 | sc                                                    | NULL                                                                                                         | 
-| sc11            |  642 |    881 | sc11                                                  | NULL                                                                                                         | 
 | scidac          |  455 |    642 | scidac                                                | NULL                                                                                                         | 
 | sdss            |  166 |    240 | sdss                                                  | NULL                                                                                                         | 
 | sdss            |  166 |    241 | sdss                                                  | SDSS                                                                                                         | 
@@ -832,15 +803,10 @@ order by
 | sgmenmr         |  464 |    654 | sgmenmr                                               | NULL                                                                                                         | 
 | sgmenmrcirmmp   |  468 |    658 | sgmenmrcirmmp                                         | NULL                                                                                                         | 
 | sgmsagrid       |  503 |    714 | sgmsagrid                                             | NULL                                                                                                         | 
-| shah            |  451 |    637 | shah                                                  | NULL                                                                                                         | 
 | siddet          |  340 |    448 | siddet                                                | ILC                                                                                                          | 
 | singlyMappedOSG |  267 |    129 | grid                                                  | NULL                                                                                                         | 
 | singlyMappedOSG |  267 |    431 | grid                                                  | grid                                                                                                         | 
-| sipe0           |  446 |    628 | sipe0                                                 | NULL                                                                                                         | 
-| sipe0           |  446 |    690 | sipe0                                                 | DOSAR                                                                                                        | 
-| sl              |  618 |    839 | sl                                                    | NULL                                                                                                         | 
 | soarbuild       |  504 |    715 | soarbuild                                             | soarbuild                                                                                                    | 
-| sp              |  617 |    838 | sp                                                    | NULL                                                                                                         | 
 | sqzhu           |  596 |    816 | sqzhu                                                 | sqzhu                                                                                                        | 
 | star            |  169 |     22 | /star/Role=NULL/Capability=NULL                       | star                                                                                                         | 
 | star            |  169 |    248 | star                                                  | NULL                                                                                                         | 
@@ -860,12 +826,10 @@ order by
 | suragrid        |  264 |    718 | sura                                                  | suragrid                                                                                                     | 
 | suragrid        |  264 |    826 | suragrid                                              | SURAGrid                                                                                                     | 
 | suragrid        |  264 |    851 | SGVO                                                  | SGVO                                                                                                         | 
-| symp            |  639 |    872 | symp                                                  | NULL                                                                                                         | 
 | t2k.org         |  383 |    525 | /t2k.org/Role=NULL/Capability=NULL                    | t2k.org                                                                                                      | 
 | test            |  462 |    650 | test                                                  | NULL                                                                                                         | 
 | test_proj       |  453 |    640 | test_proj                                             | NULL                                                                                                         | 
 | tgyro           |  346 |    400 | /Engage/Fusion/TGYRO/Role=NULL/Capability=NULL        | Engage                                                                                                       | 
-| th              |  620 |    841 | th                                                    | NULL                                                                                                         | 
 | theory          |  263 |    299 | /fermilab/theory/Role=NULL/Capability=NULL            | fermilab                                                                                                     | 
 | theory          |  263 |    300 | theory                                                | FERMILAB                                                                                                     | 
 | thomp           |  390 |    543 | thomp                                                 | NULL                                                                                                         | 
@@ -875,7 +839,6 @@ order by
 | tigre           |  198 |    373 | /tigre                                                | tigre                                                                                                        | 
 | tigre           |  198 |    456 | tigre                                                 | TIGRE                                                                                                        | 
 | tmayeshi        |  514 |    730 | tmayeshi                                              | tmayeshi                                                                                                     | 
-| turne           |  467 |    657 | turne                                                 | NULL                                                                                                         | 
 | unknown         |  220 |     40 | Unknown                                               | NULL                                                                                                         | 
 | uno             |  327 |    435 | uno                                                   | uno                                                                                                          | 
 | usatlas         |  172 |      2 | /atlas/Role=lcgadmin/Capability=NULL                  | atlas                                                                                                        | 
@@ -910,19 +873,16 @@ order by
 | uscmsPool1      |  175 |    720 | uscmsPool1                                            | SBGrid                                                                                                       | 
 | uscmsPool2      |  391 |    879 | uscmsPool2                                            | NULL                                                                                                         | 
 | users           |  636 |    866 | users                                                 | users                                                                                                        | 
-| ux453           |  466 |    656 | ux453                                                 | NULL                                                                                                         | 
-| wang1           |  587 |    805 | wang1                                                 | NULL                                                                                                         | 
+| vinod           |  650 |    898 | vinod                                                 | vinod                                                                                                        | 
 | webportal       |  488 |    698 | webportal                                             | webportal                                                                                                    | 
 | wenger          |  486 |    696 | wenger                                                | wenger                                                                                                       | 
 | xzhu            |  495 |    705 | xzhu                                                  | xzhu                                                                                                         | 
 | yethiraj        |  500 |    710 | yethiraj                                              | yethiraj                                                                                                     | 
 | yijieli         |  511 |    726 | yijieli                                               | yijieli                                                                                                      | 
 | yj7             |  631 |    857 | yj7                                                   | NULL                                                                                                         | 
-| yl              |  626 |    847 | yl                                                    | NULL                                                                                                         | 
 | yru1            |  582 |    800 | yru1                                                  | NULL                                                                                                         | 
 | yru1            |  582 |    850 | yru1                                                  | DOSAR                                                                                                        | 
 | yuguo1          |  458 |    646 | yuguo1                                                | NULL                                                                                                         | 
-| zheng           |  634 |    864 | zheng                                                 | NULL                                                                                                         | 
 | zhijun          |  494 |    704 | zhijun                                                | zhijun                                                                                                       | 
 | zorba           |  492 |    702 | zorba                                                 | zorba                                                                                                        | 
 | zwu7            |  588 |    806 | zwu7                                                  | zwu7                                                                                                         | 

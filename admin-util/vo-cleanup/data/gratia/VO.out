@@ -1,4 +1,4 @@
-Thu Jan 26 14:16:51 CST 2012
+Fri Feb  3 07:22:53 CST 2012
 
 mysql --table --verbose --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
 
@@ -23,7 +23,7 @@ SELECT count(*) from VO
 +----------+
 | count(*) |
 +----------+
-|      267 | 
+|      228 | 
 +----------+
 ========================================================
 Query - Unused VO table entries for summary tables.
@@ -62,7 +62,7 @@ where VO.void in (select distinct(void) from VONameCorrection)
 +----------+
 | count(*) |
 +----------+
-|      267 | 
+|      228 | 
 +----------+
 --------------
 SELECT 
@@ -85,8 +85,6 @@ order by
 | LBNE            |  370 | 
 | UT-NTNL0033     |  645 | 
 | Unknown         |   96 | 
-| ab              |  624 | 
-| ac              |  623 | 
 | accelerator     |  236 | 
 | adesmet         |  507 | 
 | alice           |  286 | 
@@ -95,32 +93,25 @@ order by
 | ankur           |  508 | 
 | argoneut        |  474 | 
 | armino          |  640 | 
-| as2             |  444 | 
 | astro           |   97 | 
 | auger           |   98 | 
 | austriangrid    |   99 | 
 | avery           |  649 | 
-| aw              |  621 | 
 | barnet          |  499 | 
 | baru-tro        |  646 | 
 | begrid          |  100 | 
 | belle           |  436 | 
-| bgs0            |  510 | 
 | biomed          |  310 | 
 | bmueller        |  595 | 
-| bnebgen         |  593 | 
 | bockelman       |  482 | 
 | bt              |  490 | 
 | c670            |  438 | 
-| camcs           |  276 | 
-| cc              |  622 | 
 | cdf             |  101 | 
 | cdms            |  102 | 
 | cec24testing    |  637 | 
 | cern            |  103 | 
 | cigi            |  208 | 
 | ck              |  440 | 
-| cmmap           |  465 | 
 | cms             |  106 | 
 | cnm20323        |  430 | 
 | compbiogrid     |  107 | 
@@ -141,8 +132,6 @@ order by
 | ducharme        |  334 | 
 | dyna            |  648 | 
 | dzero           |  112 | 
-| ebm             |  456 | 
-| el              |  625 | 
 | ema             |  369 | 
 | engage          |  114 | 
 | enmr            |  450 | 
@@ -168,11 +157,9 @@ order by
 | geant4          |  121 | 
 | genec           |  584 | 
 | germangrid      |  122 | 
-| ghan            |  635 | 
 | glideinwms      |  632 | 
 | glow            |  124 | 
 | gluex           |  360 | 
-| gopala          |  483 | 
 | gpn             |  125 | 
 | grase           |  126 | 
 | gray7           |  385 | 
@@ -188,8 +175,6 @@ order by
 | gthain          |  517 | 
 | hcc             |  388 | 
 | hguanhua        |  592 | 
-| ht              |  608 | 
-| huang           |  457 | 
 | huihui          |  607 | 
 | hypercp         |  132 | 
 | icecube         |  282 | 
@@ -202,7 +187,6 @@ order by
 | ivdgl           |  135 | 
 | jaing           |  470 | 
 | jchristianson   |  516 | 
-| jd              |  619 | 
 | jdem            |  284 | 
 | jkong           |  643 | 
 | jmb             |  484 | 
@@ -210,16 +194,12 @@ order by
 | jmondal         |  501 | 
 | jms21           |  445 | 
 | k47k4           |  459 | 
-| king            |  478 | 
 | ksinterface     |  502 | 
 | ktev            |  139 | 
 | kuang           |  506 | 
 | lbne            |  417 | 
-| lee             |  140 | 
 | leiliz          |  609 | 
-| lhaupert        |  598 | 
 | ligo            |  142 | 
-| liu             |  463 | 
 | lius8           |  423 | 
 | llzhang         |  512 | 
 | loni_bc_02      |  403 | 
@@ -242,7 +222,6 @@ order by
 | loni_training09 |  405 | 
 | loni_wickt      |  406 | 
 | lqcd            |  144 | 
-| lslipche        |  611 | 
 | lsst            |  373 | 
 | lwang           |  496 | 
 | m1248           |  475 | 
@@ -252,15 +231,12 @@ order by
 | mariachi        |  292 | 
 | matt            |  431 | 
 | mburke          |  641 | 
-| mh              |  616 | 
-| mille           |  348 | 
 | minerva         |  278 | 
 | miniboone       |  146 | 
 | minos           |  147 | 
 | mipp            |  148 | 
 | mis             |  149 | 
 | mpccc           |  442 | 
-| mrp9            |  469 | 
 | mu2e            |  354 | 
 | nanohub         |  151 | 
 | nebiogrid       |  305 | 
@@ -270,7 +246,6 @@ order by
 | numi            |  273 | 
 | nwicg           |  154 | 
 | nysgrid         |  207 | 
-| ocucs           |  277 | 
 | odonovan        |  630 | 
 | oiv_test1       |  272 | 
 | ops             |  155 | 
@@ -279,10 +254,8 @@ order by
 | osgu000         |  195 | 
 | other           |  221 | 
 | other EGEE      |  382 | 
-| ou2             |  407 | 
+| ou2             |  651 | 
 | ouame           |  384 | 
-| pari            |  479 | 
-| parii           |  513 | 
 | patriot         |  159 | 
 | pegrid          |  374 | 
 | pgoyal          |  493 | 
@@ -296,54 +269,42 @@ order by
 | sabs            |  590 | 
 | sagrid          |  428 | 
 | sbgrid          |  234 | 
-| sc              |  441 | 
-| sc11            |  642 | 
 | scidac          |  455 | 
 | sdss            |  166 | 
 | seneslab        |  487 | 
 | sgmenmr         |  464 | 
 | sgmenmrcirmmp   |  468 | 
 | sgmsagrid       |  503 | 
-| shah            |  451 | 
 | siddet          |  340 | 
 | singlyMappedOSG |  267 | 
-| sipe0           |  446 | 
-| sl              |  618 | 
 | soarbuild       |  504 | 
-| sp              |  617 | 
 | sqzhu           |  596 | 
 | star            |  169 | 
 | superbvo.org    |  381 | 
 | suragrid        |  264 | 
-| symp            |  639 | 
 | t2k.org         |  383 | 
 | test            |  462 | 
 | test_proj       |  453 | 
 | tgyro           |  346 | 
-| th              |  620 | 
 | theory          |  263 | 
 | thomp           |  390 | 
 | tigre           |  198 | 
 | tmayeshi        |  514 | 
-| turne           |  467 | 
 | unknown         |  220 | 
 | uno             |  327 | 
 | usatlas         |  172 | 
 | uscmsPool1      |  175 | 
 | uscmsPool2      |  391 | 
 | users           |  636 | 
-| ux453           |  466 | 
-| wang1           |  587 | 
+| vinod           |  650 | 
 | webportal       |  488 | 
 | wenger          |  486 | 
 | xzhu            |  495 | 
 | yethiraj        |  500 | 
 | yijieli         |  511 | 
 | yj7             |  631 | 
-| yl              |  626 | 
 | yru1            |  582 | 
 | yuguo1          |  458 | 
-| zheng           |  634 | 
 | zhijun          |  494 | 
 | zorba           |  492 | 
 | zwu7            |  588 | 
