@@ -20,13 +20,13 @@ class SSMInterface:
   """
 
   #############################
-  def __init__(self,config_file):
+  def __init__(self,config_file,ssm_home):
     self.config = ConfigParser.ConfigParser()
     if not os.path.isfile(config_file):
       raise SSMException("""The SSM configuration file does not exist (%s).""" % config_file)
     self.configFile = config_file
     self.config.read(config_file)
-    self.ssm_master = "/home/gratia/interfaces/ssm.apel-lcg/SSM/ssm-0.7/src/ssm/ssm_master.py"
+    self.ssm_master = "%s/ssm/ssm_master.py" % ssm_home
     self.outgoing = "%s/outgoing" % self.config.get("messagedb","path")
     self.__validate__() 
 

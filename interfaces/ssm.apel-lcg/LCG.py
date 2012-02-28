@@ -786,6 +786,8 @@ def SendXmlHtmlFiles(filename,dest):
 def RunLCGUpdate(params,type):
   """ Performs the update of the APEL database """
   configfile = params["SSMConfig"]
+  ssm_home   = params["SSMHome"]
+  ssm_home   
   os.putenv("SSM_HOME",params["SSMHome"])
 
   Logit("---------------------")
@@ -804,7 +806,7 @@ def RunLCGUpdate(params,type):
            "count"  : commands.getoutput("grep -c '%%' %s" % file), 
          } )
   try:
-    ssm = SSMInterface.SSMInterface(configfile)
+    ssm = SSMInterface.SSMInterface(configfile,ssm_home)
     ssm.send_outgoing(file)
   except SSMInterface.SSMException,e:
     raise Exception(e)
