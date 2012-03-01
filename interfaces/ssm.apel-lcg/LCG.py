@@ -55,8 +55,6 @@ gFilterParameters = {"GratiaCollector"      :None,
                     }
 gDatabaseParameters = {"GratiaHost":None,
                        "GratiaPort":None,
-                       "GratiaUser":None,
-                       "GratiaPswd":None,
                        "GratiaDB"  :None,
                        "SSMHome"   :None,
                        "SSMConfig" :None,
@@ -510,16 +508,14 @@ def CheckGratiaDBAvailability(params):
   """ Checks the availability of the Gratia database. """
   CheckDB(params["GratiaHost"], 
           params["GratiaPort"], 
-          params["GratiaUser"], 
-          params["GratiaPswd"], 
           params["GratiaDB"]) 
 
 #-----------------------------------------------
-def CheckDB(host,port,user,pswd,db):
+def CheckDB(host,port,db):
   """ Checks the availability of a MySql database. """
 
   Logit("Checking availability on %s:%s of %s database" % (host,port,db))
-  connectString = " --defaults-extra-file='%s' -h %s --port=%s -u %s %s " % (pswd,host,port,user,db)
+  connectString = " -h %s --port=%s -u reader -preader %s " % (host,port,db)
   command = "mysql %s -e status" % connectString
   (status, output) = commands.getstatusoutput(command)
   if status == 0:
@@ -705,11 +701,9 @@ def RunGratiaQuery(select,params,LogResults=True,headers=False):
   Logit("Running query on %s of the %s db" % (params["GratiaHost"],params["GratiaDB"]))
   host = params["GratiaHost"]
   port = params["GratiaPort"] 
-  user = params["GratiaUser"] 
-  pswd = params["GratiaPswd"] 
   db   = params["GratiaDB"]
 
-  connectString = CreateConnectString(host,port,user,pswd,db,headers)
+  connectString = CreateConnectString(host,port,db,headers)
   (status,output) = commands.getstatusoutput("echo '" + select + "' | " + connectString)
   results = EvaluateMySqlResults((status,output))
   if len(results) == 0:
@@ -821,15 +815,13 @@ def RunLCGUpdate(params,type):
   Logit("------------------------------")
 
 #------------------------------------------------
-def CreateConnectString(host,port,user,pswd,db,headers=False):
+def CreateConnectString(host,port,db,headers=False):
   col_names = ""
   if not headers:
     col_names = "--disable-column-names"
-  return "mysql --defaults-extra-file='%(pswd)s' %(col)s -h %(host)s --port=%(port)s -u %(user)s %(db)s " % \
-      { "pswd" : pswd,
-        "host" : host,
+  return "mysql  %(col)s -h %(host)s --port=%(port)s -u reader -preader %(db)s " % \
+      {  "host" : host,
         "port" : port,
-        "user" : user,
         "db"   : db,
         "col"  : col_names,
        }
