@@ -9,12 +9,12 @@
 # Previous month's transfers
 # For just the 1st n days of the month to insure all have reported
 #-------------------------------------------------------------------------
-0 0 1-15 * *   dir=/home/gratia/interfaces/apel-lcg; cd $dir; ./lcg.sh --config=lcg.conf --date=previous --update
+0 0 1-15 * *   dir=/home/gratia/interfaces/ssm.apel-lcg; cd $dir; ./lcg.sh --config=lcg.conf --date=previous --update
 #
 #-------------------------------------------------------------------------
 # Current month's transfers. 
 # Always daily.
 #-------------------------------------------------------------------------
-0 01 * * *   dir=/home/gratia/interfaces/apel-lcg; cd $dir; ./lcg.sh --config=lcg.conf --date=current --update
+0 01 * * *   dir=/home/gratia/interfaces/ssm.apel-lcg; cd $dir; ./lcg.sh --config=lcg.conf --date=current --update
 #
 #-------------------------------------------------------------------------
