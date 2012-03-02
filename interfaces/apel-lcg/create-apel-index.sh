@@ -180,9 +180,9 @@ EOF
 #---------------------
 function write_nebraska_description {
  cat >>$index <<EOF
-Additional information related to WLCG Tier 1 and Tier 2 CMS and ATLAS Gratia 
-data can be seen at the 
-<a href="http://red-web.unl.edu/gratia/wlcg_reporting">Nebraska WLCG Reporting site</a>.  These pages will
+Additional information related to WLCG Tier 1/Tier 2 CMS, ATLAS and ALICE Gratia
+ data can be seen at the 
+<a href="http://gratiaweb.grid.iu.edu/gratia/wlcg_reporting">OSG WLCG Reporting site</a>.  These pages will
 show:
 <ol>
 <li> WLCG Accounting Summaries</li>
