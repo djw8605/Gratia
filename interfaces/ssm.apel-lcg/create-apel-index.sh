@@ -246,7 +246,7 @@ rm -f $index
 #----------------
 # Find the dates
 #----------------
-dates="$(ls *.xml *.html |egrep -v index.html|cut -d'.' -f1|sort -ur)"
+dates="$(ls *.dat *.html |egrep -v index.html|cut -d'.' -f1|sort -ur)"
 
 #--------------------------
 # Create the index file
