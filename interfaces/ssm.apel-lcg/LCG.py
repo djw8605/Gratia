@@ -781,7 +781,6 @@ def RunLCGUpdate(params,type):
   """ Performs the update of the APEL database """
   configfile = params["SSMConfig"]
   ssm_home   = params["SSMHome"]
-  ssm_home   
   os.putenv("SSM_HOME",params["SSMHome"])
 
   Logit("---------------------")

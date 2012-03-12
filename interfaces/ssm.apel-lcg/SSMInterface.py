@@ -26,7 +26,7 @@ class SSMInterface:
       raise SSMException("""The SSM configuration file does not exist (%s).""" % config_file)
     self.configFile = config_file
     self.config.read(config_file)
-    self.ssm_master = "%s/ssm/ssm_master.py" % ssm_home
+    self.ssm_master = "%s/ssm_master.py" % ssm_home
     self.outgoing = "%s/outgoing" % self.config.get("messagedb","path")
     self.__validate__() 
 
