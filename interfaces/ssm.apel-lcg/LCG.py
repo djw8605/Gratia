@@ -610,7 +610,7 @@ def GetQuery(resource_grp,normalizationFactor,vos):
 
     query="""\
 SELECT "%(site)s"                  as Site,  
-   VOName                          as VO,
+   VOName                          as "Group",
    "%(month)s"                     as Month,
    "%(year)s"                      as Year,
    IF(DistinguishedName NOT IN (\"\", \"Unknown\"),IF(INSTR(DistinguishedName,\":/\")>0,LEFT(DistinguishedName,INSTR(DistinguishedName,\":/\")-1), DistinguishedName),CommonName) as GlobalUserName, 
@@ -633,7 +633,7 @@ where
   and %(period)s
   and Main.ResourceType = "Batch"
 group by Site,
-         VO,
+         VOName,
          Month,
          Year, 
          GlobalUserName
@@ -800,7 +800,7 @@ def RunLCGUpdate(params,type):
          } )
   try:
     ssm = SSMInterface.SSMInterface(configfile,ssm_home)
-    ssm.send_outgoing(file)
+    ssm.send_file(file)
   except SSMInterface.SSMException,e:
     raise Exception(e)
  
