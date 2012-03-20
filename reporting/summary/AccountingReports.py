@@ -407,6 +407,8 @@ def sendAll(text, filestem = "temp"):
          print "===="+iterOutput+"===="
          print text[iterOutput]
    else:
+      LogToFile("Sending: %(subject)s To: %(names1)s / %(names2)s" % \
+                { "subject" : gEmailSubject, "names1" : gEmailToNames , "names2" : gEmailTo })
       sendEmail( (gEmailToNames, gEmailTo), gEmailSubject, text, None)
 
 def DBConnectString():
@@ -588,11 +590,13 @@ def extractReportingGroupVOs():
 
 
 def GetListOfVOs(filter,voStatus,beginDate,endDate):
+        LogToFile("#######################\n## def GetListOfVOs %s" % voStatus)
         name=""
         bd = str(beginDate).split("-") # begin date list
         ed = str(endDate).split("-") # end date list
         # date specific MyOSG url
         location = "http://myosg.grid.iu.edu/voactivation/xml?datasource=activation&start_type=specific&start_date=" + bd[1] +"%2F" + bd[2] + "%2F" + bd[0] + "&end_type=specific&end_date=" + ed[1] + "%2F" + ed[2] + "%2F" + ed[0] + "&all_vos=on&active_value=1"
+        LogToFile("MyOsg query: %s" % location)
         html = urllib2.urlopen(location).read()
         vos = []
         doc = libxml2.parseDoc(html)
@@ -604,6 +608,7 @@ def GetListOfVOs(filter,voStatus,beginDate,endDate):
            elif resource.name == "LongName" and name.lower() not in gVOsWithReportingGroup:
               vos.append( (name,resource.content))
         doc.freeDoc()
+        LogToFile("Registered %s VOs: %s\n----------" % (voStatus,vos))
         if(voStatus == 'Active'):
             vos = addReportingGroups(vos)
         return vos
@@ -611,6 +616,7 @@ def GetListOfVOs(filter,voStatus,beginDate,endDate):
 def addReportingGroups(vos):
     vos1 = addReportingGroupsHelper(vos)
     vosOnlyInReportingGroups = list(set(gVOsWithReportingGroup) - set(vos1))
+    LogToFile("VOs only in Reporting Groups: %s\n-------" % (vosOnlyInReportingGroups))
     for vo in vosOnlyInReportingGroups:
         vos.append((vo,''))
     return vos
@@ -669,13 +675,13 @@ def GetListOfOSGRegisteredVO(voStatus, beginDate, endDate):
               continue
            if ("/" in description):
                ret.add(description.split("/")[1].lower())
-           elif longname.lower() != "atlas" :
-               ret.add( longname.lower() );
+           elif len(longname.lower()) > 0:
+              ret.add( longname.lower() );
     # And hand add a few 'exceptions!"
     if(voStatus == 'Active'):
-            ret.add("usatlas")
             ret.add("other")
             ret.add("other EGEE")
+    LogToFile("Final Registered %s VOs (has coded additions): %s" % (voStatus,ret))
     return list(ret)
 
 
@@ -1053,6 +1059,7 @@ class DailySiteJobStatusConf(GenericConf):
         
 
     def GetData(self,start,end):
+       LogToFile("#######################\n## DailySiteJobStatusConf")
        return DailySiteJobStatusSummary(start,end,what=self.GroupBy,selection=self.ExtraSelect)
     
   
@@ -1079,6 +1086,7 @@ class DailySiteReportConf(GenericConf):
 
 
         def GetData(self,start,end):
+           LogToFile("#######################\n## DailySiteReportConf")
            return DailySiteData(start,end)      
 
 class DailyVOReportConf(GenericConf):
@@ -1102,6 +1110,7 @@ class DailyVOReportConf(GenericConf):
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
+           LogToFile("#######################\n## DailyVOReportConf")
            return UpdateVOName( DailyVOData(start,end), 0 ,start, end)
 
 class DailySiteVOReportConf(GenericConf):
@@ -1126,6 +1135,7 @@ class DailySiteVOReportConf(GenericConf):
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
+           LogToFile("#######################\n## DailySiteVOReportConf")
            return UpdateVOName(DailySiteVOData(start,end),1,start, end)  
 
 class DailyVOSiteReportConf(GenericConf):
@@ -1150,6 +1160,7 @@ class DailyVOSiteReportConf(GenericConf):
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
+           LogToFile("#######################\n## DailyVOSiteReportConf")
            return UpdateVOName(DailyVOSiteData(start,end),0,start, end)   
 
 class DailySiteVOReportFromDailyConf(GenericConf):
@@ -1178,6 +1189,7 @@ class DailySiteVOReportFromDailyConf(GenericConf):
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
+           LogToFile("#######################\n## DailySiteVOReportFromDailyConf")
            return DailySiteVODataFromDaily(start,end,self.select,self.count)
 
 class DailyVOSiteReportFromDailyConf(GenericConf):
@@ -1206,6 +1218,7 @@ class DailyVOSiteReportFromDailyConf(GenericConf):
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
+           LogToFile("#######################\n## DailyVOSiteReportFromDailyConf")
            return DailyVOSiteDataFromDaily(start,end,self.select,self.count)
 
 def sortedDictValues(adict):
@@ -1631,6 +1644,7 @@ select J.SiteName, sum(J.NJobs), sum(J.WallDuration)
         return RunQueryAndSplit(select)
 
 def RangeSiteVOData(begin, end, with_panda = False):
+    LogToFile("#######################\n## def RangeSiteVOData Panda=%s" % with_panda)
     schema = gDBSchema[mainDB]
     select = """\
 select T.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration)
@@ -1659,6 +1673,7 @@ select J.SiteName, J.VOName, sum(J.NJobs), sum(J.WallDuration)
         return RunQueryAndSplit(select)
     
 def RangeVOSiteData(begin, end, with_panda = False):
+    LogToFile("#######################\n## def RangeVOSiteData Panda=%s" % with_panda)
     schema = gDBSchema[mainDB]
     select = """\
 select J.VOName, T.SiteName, sum(NJobs), sum(J.WallDuration)
@@ -1687,6 +1702,7 @@ select J.VOName, J.SiteName, sum(J.NJobs), sum(J.WallDuration)
         return RunQueryAndSplit(select)
 
 def LongJobsData(begin, end, with_panda = False):
+    LogToFile("#######################\n## def LongJobsData Panda=%s" % with_panda)
     schema = gDBSchema[mainDB]
     
     select = """
@@ -1716,6 +1732,7 @@ order by VO.VOName, SiteName"""
     return RunQueryAndSplit(select)
 
 def UserReportData(begin, end, with_panda = False, selection = ""):
+    LogToFile("#######################\n## def UserReportData Panda=%s" % with_panda)
     select = """
 SELECT VOName, CommonName, sum(NJobs), sum(WallDuration) as Wall
 from VOProbeSummary U where
@@ -1728,6 +1745,7 @@ from VOProbeSummary U where
     return RunQueryAndSplit(select)
     
 def UserSiteReportData(begin, end, with_panda = False, selection = ""):
+    LogToFile("#######################\n## def UserSiteReportData Panda=%s" % with_panda)
     select = """
 SELECT CommonName, VOName, SiteName, sum(NJobs), sum(WallDuration) as Wall
 from VOProbeSummary U, Probe P, Site S where
@@ -1767,6 +1785,7 @@ Deltas are the differences with the previous period."""
         if (not header) :  self.title = ""
 
     def GetData(self,start,end):
+        LogToFile("#######################\n## RangeVOReportConf")
         return UpdateVOName(RangeVOData(start, end, self.with_panda),0,start, end)
 
 class RangeSiteReportConf(GenericConf):
@@ -1796,6 +1815,7 @@ Deltas are the differences with the previous period."""
         self.with_panda = with_panda
 
     def GetData(self, start, end):
+        LogToFile("#######################\n## RangeSiteReportConf")
         return RangeSiteData(start, end, self.with_panda)
 
 class DataTransferReportConf(GenericConf):
@@ -1828,6 +1848,7 @@ class DataTransferReportConf(GenericConf):
         self.with_panda = with_panda
 
     def GetData(self, start, end):
+        LogToFile("#######################\n## DataTransferReportConf")
         return DataTransferData(start, end, self.with_panda)
 
 class RangeSiteVOReportConf(GenericConf):
@@ -1857,6 +1878,7 @@ Deltas are the differences with the previous period."""
         self.with_panda = with_panda
 
     def GetData(self, start,end):
+        LogToFile("#######################\n## RangeSiteVOReportConf")
         return UpdateVOName(RangeSiteVOData(start, end, self.with_panda),1,start, end)  
 
 class RangeVOSiteReportConf(GenericConf):
@@ -1886,6 +1908,7 @@ Deltas are the differences with the previous period."""
         self.with_panda = with_panda
 
     def GetData(self, start,end):
+        LogToFile("#######################\n## RangeVOSiteReportConf")
         return UpdateVOName(RangeVOSiteData(start, end, self.with_panda),0,start, end)   
 
 class RangeUserReportConf(GenericConf):
@@ -1919,6 +1942,7 @@ Deltas are the differences with the previous period."""
             self.ExtraSelect = " and VOName = \""+selectVOName+"\" "
 
     def GetData(self, start,end):
+        LogToFile("#######################\n## RangeUserReportConf")
         l = UpdateVOName(UserReportData(start, end, self.with_panda, self.ExtraSelect),0,start, end)
         r = []
         maxlen = 35
@@ -1989,6 +2013,7 @@ Deltas are the differences with the previous period."""
             self.ExtraSelect = " and VOName = \""+selectVOName+"\" "
 
     def GetData(self, start,end):
+        LogToFile("#######################\n## RangeUserSiteReportConf")
         l = UpdateVOName(UserSiteReportData(start, end, self.with_panda, self.ExtraSelect),1,start, end)
         r = []
         maxlen = 35
@@ -2043,7 +2068,9 @@ Only jobs that last 7 days or longer are counted in this report.\n
         self.with_panda = with_panda
 
     def GetData(self, start,end):
-        return UpdateVOName(LongJobsData(start, end, self.with_panda),1,start, end)      
+        LogToFile("#######################\n## LongJobsConf")
+        ##JGW return UpdateVOName(LongJobsData(start, end, self.with_panda),1,start, end)      
+        return []  ## JGW
 
 class RangeSiteVOEfficiencyConf(GenericConf):
         title = """\
@@ -2077,6 +2104,7 @@ Deltas are the differences with the previous period."""
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
+           LogToFile("#######################\n## RangeSiteVOEfficiencyConf")
            return UpdateVOName(GetSiteVOEfficiency(start,end),1,start, end)
 
 class RangeVOEfficiencyConf(GenericConf):
@@ -2113,6 +2141,7 @@ Deltas are the differences with the previous period."""
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
+           LogToFile("#######################\n## RangeVOEfficiencyConf")
            return UpdateVOName(GetVOEfficiency(start,end),0,start, end)
                       
 class GradedEfficiencyConf(GenericConf):
@@ -2147,6 +2176,7 @@ Efficiency is the ratio of Cpu Duration used over the WallDuration."""
            if (not header) :  self.title = ""
 
         def GetData(self,start,end):
+           LogToFile("#######################\n## GradedEfficiencyConf")
            return UpdateVOName(GetVOEfficiency(start,end),0,start, end)
 
 def SimpleRange(what, range_end = datetime.date.today(),
@@ -2287,13 +2317,11 @@ def GenericRange(what, range_end = datetime.date.today(),
         if what.headers[0] == "VO":
             # "site" is really "VO": hack to harmonize Panda output
             if lkeys[0] != "unknown": lkeys[0] = string.lower(lkeys[0])
-            if lkeys[0] == "atlas": lkeys[0] = "usatlas"
 
         if (len(val)==4) :
             # Nasty hack to harmonize Panda output
             if what.headers[1] == "VO":
                if lkeys[1] != "unknown": lkeys[1] = string.lower(lkeys[1])
-               if lkeys[1] == "atlas": lkeys[1] = "usatlas"
 
         #for iheaders in range(1,len(keys)):
         #   key = key + keys[iheaders] + " "
@@ -2332,13 +2360,11 @@ def GenericRange(what, range_end = datetime.date.today(),
         if what.headers[0] == "VO":
             # "site" is really "VO": hack to harmonize Panda output
             if lkeys[0] != "unknown": lkeys[0] = string.lower(lkeys[0])
-            if lkeys[0] == "atlas": lkeys[0] = "usatlas"
 
         if (len(val)==4) :
             # Nasty hack to harmonize Panda output
             if what.headers[1] == "VO":
                if lkeys[1] != "unknown": lkeys[1] = string.lower(lkeys[1])
-               if lkeys[1] == "atlas": lkeys[1] = "usatlas"
 
 #        for iheaders in range(0,len(keys)):
 #           key = key + keys[iheaders] + " "
@@ -2749,6 +2775,7 @@ order by siteMaxTime) ssub where siteMaxTime < \"""" + DateToString(begin) + """
     return RunQueryAndSplit(select);
 
 def GetListOfReportingSites(begin,end):
+    LogToFile("#######################\n## def GetListOfReportingSites")
     schema = gDBSchema[mainDB] + ".";
 
     select = """\
@@ -2760,9 +2787,11 @@ select distinct SiteName from """+schema+"""VOProbeSummary V,Probe P,Site S wher
             """
     #print "Query = " + select;
 
-    return RunQueryAndSplit(select);
+    result = RunQueryAndSplit(select);
+    return result
 
 def GetListOfDataTransferReportingSites(begin,end):
+    LogToFile("#######################\n## def GetListOfDataTransferReportingSites")
     global gMySQLConnectString, gDBCurrent
     schema = gDBSchema[transferDB] + ".";
     gDBCurrent = transferDB
@@ -2777,6 +2806,7 @@ def GetListOfDataTransferReportingSites(begin,end):
     return result
 
 def GetTotals(begin,end):
+    LogToFile("#######################\n## def GetTotals")
     schema = gDBSchema[mainDB] + ".";
 
     select = """\
@@ -2789,6 +2819,7 @@ select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(W
     return RunQueryAndSplit(select)[0].split('\t');
 
 def GetDataTransferTotals(begin,end):
+    LogToFile("#######################\n## def GetDataTransferTotals")
     global gMySQLConnectString, gDBCurrent
     schema = gDBSchema[transferDB] + ".";
     gDBCurrent = transferDB
@@ -2809,6 +2840,7 @@ def GetDataTransferTotals(begin,end):
     return (njobs,size,avg,dur)
 
 def GetNewUsers(begin,end):
+    LogToFile("#######################\n## def GetNewUsers")
     schema = gDBSchema[mainDB] + ".";
     select = """\
 select CommonName, VO.VOName, MasterSummaryData.ProbeName, SiteName, EndTime, sum(NJobs) from 
@@ -2846,7 +2878,7 @@ def DataTransferSumup(range_end = datetime.date.today(),
                 range_begin = None,
                 output = "text",
                 header = True):
-
+    LogToFile("#######################\n## def DataTransferSumup")
     old_stdout = sys.stdout
     sys.stdout = stdout = StringIO()
     ret = ""
@@ -2993,6 +3025,7 @@ def RangeSummup(range_end = datetime.date.today(),
                 range_begin = None,
                 output = "text",
                 header = True):
+    LogToFile("#######################\n## def RangeSummup")
     ret = ""
 
     br = "\n" # line break
@@ -3018,23 +3051,24 @@ def RangeSummup(range_end = datetime.date.today(),
 #        range_begin = datetime.date(*time.strptime(range_begin, "%Y/%m/%d")[0:3])
     timediff = range_end - range_begin
 
-    regSites = GetListOfOSGSites();
-    regVOs = GetListOfRegisteredVO('Active',range_begin,range_end)
+    LogToFile("#---------------------------------")
+    LogToFile("#--- Site Reporting") 
+    LogToFile("#---------------------------------")
+    exceptionSites = ['AGLT2_CE_2', 'BNL-LCG2', 'BNL_ATLAS_1', 'BNL_ATLAS_2',
+        'FNAL_GPGRID_2', 'USCMS-FNAL-XEN', 'USCMS-FNAL-WC1-CE2',
+        'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG',
+        'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+    regSites      = GetListOfOSGSites();
     disabledSites = GetListOfDisabledOSGSites()
-
-    reportingVOs = GetReportingVOs(range_begin, range_end)
+    LogToFile("Registered Sites: %s\n------------" % regSites)
+    LogToFile("Disabled Sites: %s\n----------" % disabledSites)
+    LogToFile("Exception Sites: %s\n----------" % exceptionSites)
     reportingSitesDate = GetSiteLastReportingDate(range_begin, True)
     pingSites = []
     for data in reportingSitesDate:
         if ( len(data) > 0 ):
            (name,lastreport) = data.split("\t")
            pingSites.append(name)
-
-    exceptionSites = ['AGLT2_CE_2', 'BNL-LCG2', 'BNL_ATLAS_1', 'BNL_ATLAS_2',
-        'FNAL_GPGRID_2', 'USCMS-FNAL-XEN', 'USCMS-FNAL-WC1-CE2',
-        'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG',
-        'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
-    #exceptionSites = ['BNL_ATLAS_1', 'BNL_ATLAS_2', 'USCMS-FNAL-WC1-CE2', 'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG', 'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B']
 
     reportingSites = GetListOfReportingSites(range_begin,range_end)
     allSites = None
@@ -3137,9 +3171,14 @@ def RangeSummup(range_end = datetime.date.today(),
         ret += (br + br + "The disabled sites that are reporting: "+ br + \
             prettyList(reportingDisabled))
 
+    LogToFile("#------------------------------")
+    LogToFile("#--- VO Reporting")
+    LogToFile("#------------------------------")
+    regVOs       = GetListOfRegisteredVO('Active',range_begin,range_end)
     expectedNoActivity = GetListOfRegisteredVO('Disabled',range_begin,range_end)
-    expectedNoActivityAlt = GetListOfRegisteredVO('Enabled', range_begin,
-        range_end)
+    expectedNoActivityAlt = GetListOfRegisteredVO('Enabled', range_begin, range_end)
+
+    reportingVOs = GetReportingVOs(range_begin, range_end)
     if expectedNoActivity and expectedNoActivityAlt:
         expectedNoActivity += expectedNoActivityAlt
     elif expectedNoActivity == None:
@@ -3196,6 +3235,7 @@ def NonReportingSites(
                 when = datetime.date.today(),
                 output = "text",
                 header = True):
+    LogToFile("#######################\n## def NonReportingSites")
 
     old_stdout = sys.stdout
     sys.stdout = stdout = StringIO()
@@ -3315,6 +3355,7 @@ def LongJobs(range_end = datetime.date.today(),
             range_begin = None,
             output = "text",
             header = True):
+    LogToFile("#######################\n## def LongJobs")
 
     old_stdout = sys.stdout
     sys.stdout = stdout = StringIO()
@@ -3435,6 +3476,7 @@ given release up to the current release.
       if (not header) :  self.title = ""
 
    def GetData(self,start,end):
+      LogToFile("#######################\n## SoftwareVersionConf")
       global gMySQLConnectString
       res1 = SoftwareVersionData("gratia",start,end)
 
@@ -3616,6 +3658,7 @@ between %s - %s (midnight UTC - midnight UTC):
          return ( values[0], values[4], values[2], values[3], values[1])
          
    def GetData(self,start,end):
+      LogToFile("#######################\n## NewUsersConf")
       return GetNewUsers(start,end)
 
 def NewUsers(range_end = datetime.date.today(),
@@ -3660,6 +3703,6 @@ def NewUsers(range_end = datetime.date.today(),
 #
 def TESTER():
     print """select S.VOName,sum(Njobs),sum(WallDuration) from 
-(select VC.corrid, VO.VOName from VO, VONameCorrection VC where VC.void = VO.void and VO.VOName in ("usatlas","chen") ) S
+(select VC.corrid, VO.VOName from VO, VONameCorrection VC where VC.void = VO.void and VO.VOName in ("atlas","chen") ) S
 left join (select VOcorrid,sum(njobs) as njobs,sum(WallDuration) as WallDuration from MasterSummaryData M where '2008/11/10' <= EndTime and EndTime <= '2008/11/11' group by VOcorrid ) M on S.corrid = M.VOcorrid
 group by S.VOName"""
