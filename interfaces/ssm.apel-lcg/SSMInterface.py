@@ -65,7 +65,7 @@ This is the "messagedb" section, "path" attribute""" % \
     return False
 
   #-----------------------
-  def send_outgoing(self,file):
+  def send_file(self,file):
     if not os.path.isfile(file):
       raise SSMException("File to be sent does not exist: %s" % file)
     os.system("cp %(file)s %(outgoing)s" % \
@@ -73,11 +73,14 @@ This is the "messagedb" section, "path" attribute""" % \
     if not os.path.isfile(file):
       raise SSMException("""Copy failed. File: %(file)s
 To: %(dir)s""" % { "file" : file, "dir" : self.outgoing })
+    self.send_outgoing()
 
+  #-----------------------
+  def send_outgoing(self):
+    ## print self.show_outgoing()
     cmd = "python %(ssm_master)s %(config)s" % \
        { "ssm_master" : self.ssm_master, "config" : self.configFile }
     p = popen2.Popen3(cmd,True)
-
     maxtime   = 120   # max seconds to wait before giving up and terminating job
     totaltime = 0
     sleep     = 10    # sleep time between checks to see if file was sent
@@ -124,12 +127,18 @@ Usage: %(program)s --config <SSM config file> Actions [-help]
 
   Provides visibility into SSM interface information.
 
+  Note: You must have the SSM_HOME environmental variable set.
+
   --config <SSM config file>
     This is the SSM configuration file used by the interface.
 
   Actions:
     --show-outgoing
         Displays the outgoing SSM messages directory contents.
+    --send-outgoing
+        Sends any outgoing SSM messages directory contents.
+    --send-file FILE
+        Copies the specified FILE to the SSM outgoing directory and sends it.
 """
 
 #----------------
@@ -140,7 +149,7 @@ def main(argv):
 
   action = ""
   type   = ""
-  arglist = [ "help", "config=", "show-outgoing", "send-file=" ]
+  arglist = [ "help", "config=", "show-outgoing", "send-outgoing","send-file=" ]
   try:
     opts, args = getopt.getopt(argv[1:], "", arglist)
     if len(opts) == 0:
@@ -152,6 +161,9 @@ def main(argv):
         usage()
         return 1
       if o in ("--show-outgoing", ):
+        action = o
+        continue
+      if o in ("--send-outgoing", ):
         action = o
         continue
       if o in ("--send-file"):
@@ -167,11 +179,18 @@ def main(argv):
       usage()
       print "ERROR: you need to specify the --config option"
       return 1
-    ssm = SSMInterface(config)
+    try:
+      ssm_home = os.environ["SSM_HOME"]
+    except: 
+      print "ERROR: You must set the SSM_HOME variable"
+      return 1
+    ssm = SSMInterface(config,ssm_home)
     if action == "--show-outgoing":
       print ssm.show_outgoing()
+    elif action == "--send-outgoing":
+      ssm.send_outgoing()
     elif action == "--send-file":
-      ssm.send_outgoing(file)
+      ssm.send_file(file)
     else:
       usage()
       print "ERROR: no action options specified"
