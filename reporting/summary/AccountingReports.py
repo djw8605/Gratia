@@ -2069,8 +2069,7 @@ Only jobs that last 7 days or longer are counted in this report.\n
 
     def GetData(self, start,end):
         LogToFile("#######################\n## LongJobsConf")
-        ##JGW return UpdateVOName(LongJobsData(start, end, self.with_panda),1,start, end)      
-        return []  ## JGW
+        return UpdateVOName(LongJobsData(start, end, self.with_panda),1,start, end)      
 
 class RangeSiteVOEfficiencyConf(GenericConf):
         title = """\
