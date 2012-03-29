@@ -19,7 +19,7 @@ class Rebus:
 
   #############################
   def __init__(self,verbose=False):
-    self.location = "http://wlcg-rebus.cern.ch/apps/topology/all/csv"
+    self.location = "http://gstat-wlcg.cern.ch/apps/topology/all/csv"
     self.accountingNameDict = {}
     self.siteDict           = {}
     self.csvfile            = "Rebus.csv"
