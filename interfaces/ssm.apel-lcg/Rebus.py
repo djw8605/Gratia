@@ -18,13 +18,14 @@ class Rebus:
   """
 
   #############################
-  def __init__(self):
+  def __init__(self,verbose=False):
     self.location = "http://wlcg-rebus.cern.ch/apps/topology/all/csv"
     self.accountingNameDict = {}
     self.siteDict           = {}
     self.csvfile            = "Rebus.csv"
-    self.DEBUG              = False
-    self.rebus              = None  # instances of Rebus retrieval
+    self.verbose            = verbose
+    self.alreadyTried       = False
+    self.rebus              = None  # instance of Rebus retrieval
  
     self.headerDict1 = { "tier"     : "Tier",
                          "acctname" : "Accounting Name",
@@ -35,14 +36,14 @@ class Rebus:
 
   #############################
   def __getRebus__(self):
-    if self.rebus <> None:
-      return  # we already have the data
+    if self.alreadyTried:
+       return   # only want to do this once
+    self.alreadyTried = True
     try:
-      cmd = 'wget -O %s "%s"' % (self.csvfile,self.location)
+      cmd = 'wget -t1 -O %s "%s"' % (self.csvfile,self.location)
       rtn = os.system("%s >/dev/null 2>&1" % cmd)
       if rtn != 0:
-        if self.DEBUG:
-          print os.system(cmd)
+        if self.verbose:
           raise RebusException("ERROR: Problem performing: %s" % cmd)
         # this is so no errors are shown when called from another module
         return  
@@ -52,7 +53,7 @@ class Rebus:
       self.rebus = csv.reader(open(self.csvfile), delimiter=",")
     except:
       self.rebus = None
-      if self.DEBUG:
+      if self.verbose:
         raise RebusException("ERROR: Problem reading csv file: %s" % self.csvfile)
       return
     for line in self.rebus:
@@ -100,8 +101,7 @@ class Rebus:
       
   #############################
   def showAccountingNames(self):
-    self.DEBUG = True
-    self.isAvailable()
+    self.__getRebus__()
     format =  "%(tier)-6s %(acctname)-20s %(site)s" 
     print format % self.headerDict1
     print format % self.headerDict2
@@ -112,8 +112,7 @@ class Rebus:
 
   #############################
   def showSite(self, site = "all"):
-    self.DEBUG = True
-    self.isAvailable()
+    self.__getRebus__()
     format = "%(site)-20s %(acctname)-20s %(tier)s" 
     print format % self.headerDict1
     print format % self.headerDict2
@@ -129,7 +128,7 @@ class Rebus:
   #############################
   def isRegistered(self,site):
     """ Returns Trues if a resource group/site is registered in the WCLG."""
-    self.isAvailable()
+    self.__getRebus__()
     if site in self.siteDict:
       return True
     return False
@@ -140,14 +139,14 @@ class Rebus:
         registered resource group/site.
         If not registered, it will return an empty string.
     """
-    self.isAvailable()
+    self.__getRebus__()
     if self.isRegistered(site):
       return self.siteDict[site]["accountingName"]
     return ""
 
   #############################
   def tier(self,site):
-    self.isAvailable()
+    self.__getRebus__()
     if self.isRegistered(site):
       return self.siteDict[site]["tier"]
     return ""
@@ -206,7 +205,7 @@ def main(argv):
           return 1
         continue
 
-    rebus = Rebus()
+    rebus = Rebus(verbose=True)
     if action == "--show":
       if type == "all":
         rebus.showAccountingNames()
