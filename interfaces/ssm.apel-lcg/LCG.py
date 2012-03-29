@@ -611,16 +611,16 @@ def GetQuery(resource_grp,normalizationFactor,vos):
     query="""\
 SELECT "%(site)s"                  as Site,  
    VOName                          as "Group",
+   min(UNIX_TIMESTAMP(EndTime))    as EarliestEndTime,
+   max(UNIX_TIMESTAMP(EndTime))    as LatestEndTime, 
    "%(month)s"                     as Month,
    "%(year)s"                      as Year,
    IF(DistinguishedName NOT IN (\"\", \"Unknown\"),IF(INSTR(DistinguishedName,\":/\")>0,LEFT(DistinguishedName,INSTR(DistinguishedName,\":/\")-1), DistinguishedName),CommonName) as GlobalUserName, 
-   min(UNIX_TIMESTAMP(EndTime))    as EarliestEndTime,
-   max(UNIX_TIMESTAMP(EndTime))    as LatestEndTime, 
    Round(Sum(WallDuration)/3600)                        as WallDuration,
    Round(Sum(CpuUserDuration+CpuSystemDuration)/3600)   as CpuDuration,
    Round((Sum(WallDuration)/3600) * %(nf)s )            as NormalisedWallDuration,
    Round((Sum(CpuUserDuration+CpuSystemDuration)/3600) * %(nf)s) as NormalisedCpuDuration,
-   Sum(NJobs) as NumberOfJobs
+   Sum(NJobs) as NumberOfJobs 
 from
      Site,
      Probe,
@@ -846,6 +846,7 @@ def CreateVOSummary(results,params,reportableSites):
   Logit("-----------------------------------------------------")
   Logit("-- Creating a resource group, vo summary html page --") 
   Logit("-----------------------------------------------------")
+  currentTime = time.strftime('%m/%d/%y %H:%M:%S',time.localtime())
   metrics = [ "NumberOfJobs",
              "CpuDuration", 
              "WallDuration", 
@@ -877,6 +878,9 @@ def CreateVOSummary(results,params,reportableSites):
   htmlfile.write("""<TH align="center">VO</TH>""")
   for metric in metrics:
     htmlfile.write("""<TH align="center">%s</TH>""" % headers[metric])
+  htmlfile.write("""<TH align="center">Earliest<br>Date</TH>""")
+  htmlfile.write("""<TH align="center">Latest<br>Date</TH>""")
+  htmlfile.write("""<TH align="center">Measurement Date</TH>""")
   htmlfile.write("""<TH align="left">Resources / Gratia Sites</TH>""")
   htmlfile.write("</TR>\n")
 
@@ -893,26 +897,39 @@ def CreateVOSummary(results,params,reportableSites):
     if label[0] == values[0]:  # filtering out column headings
       continue
     if values[0] != resourceGrp or values[1] != vo:
-      if resourceGrp == None:
+      if resourceGrp == None:  # first time
         resourceGrp = values[0]
         vo          = values[1]
+        earliest    = values[2]
+        latest      = values[3]
         nf          = reportableSites[resourceGrp]
         continue
-      else:
-        writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics)
-        writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics)
-        totals = totalsList(metrics)
+      else:  # new resource group / vo .. write the previous one
+        writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics, earliest, latest,currentTime)
+        writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics, earliest, latest, currentTime)
+        #-- new one ---
+        resourceGrp = values[0]
+        vo          = values[1]
+        earliest    = values[2]
+        latest      = values[3]
+        nf          = reportableSites[resourceGrp]
+        totals = totalsList(metrics) # reset totals to zero
+
+    #-- want to find the earliest and latest for resource group and vo
+    if values[2] < earliest:
+      earliest = values[2]
+    if values[3] > latest:
+      latest   = values[3]
+    #-- accumulate totals ---
     idx = 0
-    for val in values:
+    for val in values:  # accumulate totals
       if label[idx] in metrics:
         totals[label[idx]] = totals[label[idx]] + int(val)
-      idx = idx +1
-    resourceGrp = values[0]
-    vo          = values[1]
-    nf          = reportableSites[resourceGrp]
+      idx = idx + 1
 
-  writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics)
-  writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics)
+  #-- write out the last one
+  writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics, earliest, latest,currentTime)
+  writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics, earliest, latest, currentTime)
   htmlfile.write("</TABLE></BODY></HTML>\n")
 
   htmlfile.close()
@@ -927,18 +944,24 @@ def totalsList(metrics):
     totalsDict[metric] = 0 
   return totalsDict
 #--------------------------------
-def writeHtmlLine(file, rg, vo, nf, totals, metrics):
+def writeHtmlLine(file, rg, vo, nf, totals, metrics, earliest, latest, currentTime):
   file.write("""<TR><TD>%s</TD><TD align="center">%s</TD><TD align="center">%s</TD>""" % (rg,nf,vo))
   for metric in metrics:
     file.write("""<TD align="right">"""+str(totals[metric])+"</TD>")
+  file.write("<TD>"+time.strftime("%m/%d/%y", time.gmtime(float(earliest)))+"</TD>")
+  file.write("<TD>"+time.strftime("%m/%d/%y", time.gmtime(float(latest)))+"</TD>")
+  file.write("<TD>"+currentTime+"</TD>")
   file.write("<TD>"+GetSiteClause(rg)+"</TD>")
   file.write("</TR>\n")
 
 #--------------------------------
-def writeSummaryFile(file, rg, vo, nf, totals, metrics):
+def writeSummaryFile(file, rg, vo, nf, totals, metrics, earliest, latest, currentTime):
   line = "%s\t%s\t%s" % (rg,nf,vo)
   for metric in metrics:
     line += "\t" + str(totals[metric])
+  line += "\t" + time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(float(earliest)))
+  line += "\t" + time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(float(latest)))
+  line += "\t" + currentTime
   line += "\t" + GetSiteClause(rg)
   file.write(line + "\n")
   Logit("SUMMARY: " + line)
