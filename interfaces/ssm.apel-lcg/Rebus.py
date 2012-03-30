@@ -23,8 +23,9 @@ class Rebus:
     self.accountingNameDict = {}
     self.siteDict           = {}
     self.csvfile            = "Rebus.csv"
-    self.verbose            = verbose
-    self.alreadyTried       = False
+    self.verbose            = verbose # show errors on command line execution only
+    self.isAccessible       = False # indicates if Rebus was available for this invocation. If not, will use existing csv if it exists.
+    self.alreadyTried       = False # so we only do it once
     self.rebus              = None  # instance of Rebus retrieval
  
     self.headerDict1 = { "tier"     : "Tier",
@@ -40,15 +41,30 @@ class Rebus:
        return   # only want to do this once
     self.alreadyTried = True
     try:
-      cmd = 'wget -t1 -O %s "%s"' % (self.csvfile,self.location)
+      # the wget creates an empty file if it fails. we want to preserve the old one
+      tmp_csv = self.csvfile + ".tmp"
+      cmd = 'wget -t1 -O %s "%s"' % (tmp_csv,self.location)
       rtn = os.system("%s >/dev/null 2>&1" % cmd)
-      if rtn != 0:
-        if self.verbose:
+      if rtn == 0:
+        self.isAccessible = True
+        os.system("mv %s %s" % (tmp_csv, self.csvfile)) # use the new one
+      else:
+        os.system("rm -f %s" % (tmp_csv)) # clean up
+        self.isAccessible = False
+        if self.verbose: 
           raise RebusException("ERROR: Problem performing: %s" % cmd)
-        # this is so no errors are shown when called from another module
-        return  
     except:
       raise
+
+    #-- see if a file exists ----
+    if not os.path.isfile(self.csvfile):
+      if self.verbose:
+        raise RebusException("ERROR: csv file from REBUS not found: %s" % self.csvfile)
+      # this is so no errors are shown when called from another module
+      self.rebus = None
+      return # No data.  New or old
+
+    #-- read the existing csv file ----
     try:
       self.rebus = csv.reader(open(self.csvfile), delimiter=",")
     except:
@@ -58,12 +74,16 @@ class Rebus:
       return
     for line in self.rebus:
       self.__populateDicts__(line)
+
+##################################
+# Could be useful maybe
 #      if line[5] == "OSG":
 #        self.__populateDicts__(line)
 #        continue
 #      if line[1] == "USA":
 #        self.__populateDicts__(line)
 #        continue
+##################################
 
   #############################
   def __populateDicts__(self,line):
@@ -91,6 +111,11 @@ class Rebus:
 #    else:
 #      self.siteDict[site] = tmpDict
     self.siteDict[site] = tmpDict
+      
+  #############################
+  def wasAccessible(self):
+    self.__getRebus__()
+    return self.isAccessible
       
   #############################
   def isAvailable(self):

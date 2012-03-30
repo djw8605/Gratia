@@ -881,6 +881,7 @@ def CreateVOSummary(results,params,reportableSites):
   htmlfile.write("""<TH align="center">Earliest<br>Date</TH>""")
   htmlfile.write("""<TH align="center">Latest<br>Date</TH>""")
   htmlfile.write("""<TH align="center">Measurement Date</TH>""")
+  htmlfile.write("""<TH align="center">EGI<br>Accounting Name</TH>""")
   htmlfile.write("""<TH align="left">Resources / Gratia Sites</TH>""")
   htmlfile.write("</TR>\n")
 
@@ -945,23 +946,27 @@ def totalsList(metrics):
   return totalsDict
 #--------------------------------
 def writeHtmlLine(file, rg, vo, nf, totals, metrics, earliest, latest, currentTime):
+  global gRebus
   file.write("""<TR><TD>%s</TD><TD align="center">%s</TD><TD align="center">%s</TD>""" % (rg,nf,vo))
   for metric in metrics:
     file.write("""<TD align="right">"""+str(totals[metric])+"</TD>")
   file.write("<TD>"+time.strftime("%m/%d/%y", time.gmtime(float(earliest)))+"</TD>")
   file.write("<TD>"+time.strftime("%m/%d/%y", time.gmtime(float(latest)))+"</TD>")
   file.write("<TD>"+currentTime+"</TD>")
+  file.write("<TD>"+gRebus.accountingName(rg)+"</TD>")
   file.write("<TD>"+GetSiteClause(rg)+"</TD>")
   file.write("</TR>\n")
 
 #--------------------------------
 def writeSummaryFile(file, rg, vo, nf, totals, metrics, earliest, latest, currentTime):
+  global gRebus
   line = "%s\t%s\t%s" % (rg,nf,vo)
   for metric in metrics:
     line += "\t" + str(totals[metric])
   line += "\t" + time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(float(earliest)))
   line += "\t" + time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(float(latest)))
   line += "\t" + currentTime
+  line += "\t" + gRebus.accountingName(rg)
   line += "\t" + GetSiteClause(rg)
   file.write(line + "\n")
   Logit("SUMMARY: " + line)
@@ -1083,6 +1088,9 @@ def ProcessUserData(ReportableVOs,ReportableSites):
 def CheckMyOsgInteropFlag(reportableSites):
   """ Checks to see for mismatches between the reportable sites config
       file and MyOsg.  Include in email potential problems.
+      If the Rebus site is not availble and a previous csv does not exist, 
+      we want to terminate since we cannot create the needed files for the 
+      WLCG reporting site.
   """
   Logit("-------------------------------------------------------")
   Logit("---- Checking against MyOsg InteropAccounting flag ----")
@@ -1090,8 +1098,13 @@ def CheckMyOsgInteropFlag(reportableSites):
   Logit("-------------------------------------------------------")
   global gInteropAccounting
   global gRebus
-  if not gRebus.isAvailable():
-    Logwarn("The WLCG REBUS topology is not available so no validations are being performed")
+  if not gRebus.wasAccessible():
+    if gRebus.isAvailable():
+      Logwarn("""The WLCG REBUS topology was not accessible today. We are using a previous days data for validations.""")
+    else:
+      raise Exception("""The WLCG REBUS topology was not accessible today and there is not previous days cvs file to use. 
+We cannot provide the correct data for OSG WCLG reporting. No updates today.""")
+
   myosgRGs = gInteropAccounting.interfacedResourceGroups()
 
   #-- for resource groups we are reporting, see if registered in MyOsg and Rebus
@@ -1328,20 +1341,22 @@ def main(argv=None):
     Logit("LCG SSM update file.... %s" % (GetFileName(gDatabaseParameters["SSMupdates"]  ,"txt")))
     Logit("LCG SSM delete file.... %s" % (GetFileName(gDatabaseParameters["SSMdeletes"],"txt")))
 
-    #--- process deletions ---
-    if gInUpdateMode:
-      RunLCGUpdate(gDatabaseParameters,"delete")
-
     #--- check db availability -------------
     CheckGratiaDBAvailability(gDatabaseParameters)
 
     #--- get all filters -------------
     ReportableSites    = GetSiteFilters(gFilterParameters["SiteFilterFile"])
     ReportableVOs      = GetVOFilters(gFilterParameters["VOFilterFile"])
+
+    #--- Perform Rebus topology checks ---
+    CheckMyOsgInteropFlag(ReportableSites)
+   
+    #--- process deletions ---
+    if gInUpdateMode:
+      RunLCGUpdate(gDatabaseParameters,"delete")
     
     ProcessUserData(ReportableVOs,ReportableSites)
     CheckForUnreportedDays(ReportableVOs,ReportableSites)
-    CheckMyOsgInteropFlag(ReportableSites)
 
     #--- apply the updates to the APEL accounting database ----
     if gInUpdateMode:
