@@ -846,7 +846,7 @@ def CreateVOSummary(results,params,reportableSites):
   Logit("-----------------------------------------------------")
   Logit("-- Creating a resource group, vo summary html page --") 
   Logit("-----------------------------------------------------")
-  currentTime = time.strftime('%m/%d/%y %H:%M:%S',time.localtime())
+  currentTime = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())
   metrics = [ "NumberOfJobs",
              "CpuDuration", 
              "WallDuration", 
@@ -870,7 +870,9 @@ def CreateVOSummary(results,params,reportableSites):
   htmlfile    = open(htmlfilename,"w")
   summaryfile = open(datfilename,"w")
   htmlfile.write("""<HTML><BODY>\n""")
-  htmlfile.write("Last update: " + time.strftime('%Y-%m-%d %H:%M',time.localtime()))
+  htmlfile.write("Last update: " + time.strftime('%Y-%m-%d %H:%M',time.localtime()) + "<BR/>")
+  htmlfile.write("Host: " + commands.getoutput("hostname -f") + "<BR/>")
+  htmlfile.write("User: " +  commands.getoutput("whoami"))
   htmlfile.write("""<TABLE border="1">""")
   htmlfile.write("""<TR>""")
   htmlfile.write("""<TH align="center">Resource Group</TH>""")
@@ -883,6 +885,8 @@ def CreateVOSummary(results,params,reportableSites):
   htmlfile.write("""<TH align="center">Measurement Date</TH>""")
   htmlfile.write("""<TH align="center">EGI<br>Accounting Name</TH>""")
   htmlfile.write("""<TH align="left">Resources / Gratia Sites</TH>""")
+  htmlfile.write("""<TH align="center">Month</TH>""")
+  htmlfile.write("""<TH align="center">Year</TH>""")
   htmlfile.write("</TR>\n")
 
   lines = results.split("\n")
@@ -903,16 +907,20 @@ def CreateVOSummary(results,params,reportableSites):
         vo          = values[1]
         earliest    = values[2]
         latest      = values[3]
+        month       = values[4]
+        year        = values[5]
         nf          = reportableSites[resourceGrp]
         continue
       else:  # new resource group / vo .. write the previous one
-        writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics, earliest, latest,currentTime)
-        writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics, earliest, latest, currentTime)
+        writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics, earliest, latest, currentTime, month, year)
+        writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics, earliest, latest, currentTime, month, year)
         #-- new one ---
         resourceGrp = values[0]
         vo          = values[1]
         earliest    = values[2]
         latest      = values[3]
+        month       = values[4]
+        year        = values[5]
         nf          = reportableSites[resourceGrp]
         totals = totalsList(metrics) # reset totals to zero
 
@@ -929,8 +937,8 @@ def CreateVOSummary(results,params,reportableSites):
       idx = idx + 1
 
   #-- write out the last one
-  writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics, earliest, latest,currentTime)
-  writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics, earliest, latest, currentTime)
+  writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics, earliest, latest, currentTime, month, year)
+  writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics, earliest, latest, currentTime, month, year)
   htmlfile.write("</TABLE></BODY></HTML>\n")
 
   htmlfile.close()
@@ -945,29 +953,33 @@ def totalsList(metrics):
     totalsDict[metric] = 0 
   return totalsDict
 #--------------------------------
-def writeHtmlLine(file, rg, vo, nf, totals, metrics, earliest, latest, currentTime):
+def writeHtmlLine(file, rg, vo, nf, totals, metrics, earliest, latest, currentTime,month,year):
   global gRebus
   file.write("""<TR><TD>%s</TD><TD align="center">%s</TD><TD align="center">%s</TD>""" % (rg,nf,vo))
   for metric in metrics:
-    file.write("""<TD align="right">"""+str(totals[metric])+"</TD>")
-  file.write("<TD>"+time.strftime("%m/%d/%y", time.gmtime(float(earliest)))+"</TD>")
-  file.write("<TD>"+time.strftime("%m/%d/%y", time.gmtime(float(latest)))+"</TD>")
-  file.write("<TD>"+currentTime+"</TD>")
-  file.write("<TD>"+gRebus.accountingName(rg)+"</TD>")
-  file.write("<TD>"+GetSiteClause(rg)+"</TD>")
-  file.write("</TR>\n")
+    file.write("""<TD align="right">""" + str(totals[metric])         + "</TD>")
+  file.write("""<TD>"""  + time.strftime("%Y-%m-%d", time.gmtime(float(earliest))) + "</TD>")
+  file.write("""<TD>"""  + time.strftime("%Y-%m-%d", time.gmtime(float(latest)))   + "</TD>")
+  file.write("""<TD align="center">"""  + currentTime                 + "</TD>")
+  file.write("""<TD>"""                 + gRebus.accountingName(rg)   + "</TD>")
+  file.write("""<TD>"""                 + GetSiteClause(rg)           + "</TD>")
+  file.write("""<TD align="center">"""  + month                       + "</TD>")
+  file.write("""<TD align="center">"""  + year                        + "</TD>")
+  file.write("""</TR>\n""")
 
 #--------------------------------
-def writeSummaryFile(file, rg, vo, nf, totals, metrics, earliest, latest, currentTime):
+def writeSummaryFile(file, rg, vo, nf, totals, metrics, earliest, latest, currentTime,month,year):
   global gRebus
   line = "%s\t%s\t%s" % (rg,nf,vo)
   for metric in metrics:
     line += "\t" + str(totals[metric])
-  line += "\t" + time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(float(earliest)))
-  line += "\t" + time.strftime("%m/%d/%y %H:%M:%S", time.gmtime(float(latest)))
-  line += "\t" + currentTime
-  line += "\t" + gRebus.accountingName(rg)
-  line += "\t" + GetSiteClause(rg)
+  line += "\t"   + time.strftime("%Y-%m-%d", time.gmtime(float(earliest)))
+  line += "\t"   + time.strftime("%Y-%m-%d", time.gmtime(float(latest)))
+  line += "\t"   + currentTime
+  line += "\t"   + gRebus.accountingName(rg)
+  line += "\t"   + GetSiteClause(rg)
+  line += "\t"   + month
+  line += "\t"   + year
   file.write(line + "\n")
   Logit("SUMMARY: " + line)
 
@@ -1054,25 +1066,17 @@ def ProcessEmptyResultsSet(resource_grp,reportableVOs):
   """
   gSitesWithNoData.append(resource_grp)
   output      = ""
-  year        = int(gDateFilter.split("/")[0])
-  month       = int(gDateFilter.split("/")[1])
-  currentTime = calendar.timegm((year, month, 1, 0, 0, 0, 0, 0, 0))
+  year        = gDateFilter.split("/")[0]
+  month       = gDateFilter.split("/")[1]
+  currentTime = calendar.timegm((int(year), int(month), 1, 0, 0, 0, 0, 0, 0))
 
   for vo in reportableVOs.split(","):
-    output += "%(rg)s\t%(vo)s\t%(mos)s\t%(yr)s\t%(dn)s\t%(earliestdate)s\t%(latestdate)s\t%(wall)s\t%(cpu)s\t%(nfwall)s\t%(nfcpu)s\t%(jobs)s\n" % \
-        { "rg"           : resource_grp,
-          "vo"           : vo.strip('"'),
-          "mos"          : month,
-          "yr"           : year,
-          "dn"           : "None",
-          "earliestdate" : currentTime,
-          "latestdate"   : currentTime,
-          "cpu"          : "0",
-          "wall"         : "0",
-          "nfcpu"        : "0",
-          "nfwall"       : "0",
-          "jobs"         : "0",
-        }
+    output += "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % \
+        ( resource_grp, vo.strip('"'),
+          currentTime, currentTime,
+          month, year,
+          "None",
+          "0", "0", "0", "0", "0")
   return output
 
 #-----------------------------------------------
@@ -1371,7 +1375,7 @@ def main(argv=None):
   except Exception, e:
     SendEmailNotificationFailure(e.__str__())
     Logit("Transfer FAILED from Gratia to APEL.")
-    ## traceback.print_exc()
+    ## traceback.print_exc()  
     Logerr(e.__str__())
     Logit("====================================================")
     return 1
