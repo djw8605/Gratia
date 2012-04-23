@@ -991,7 +991,7 @@ def CreateLCGssmUpdates(results,params):
   Logit("-----------------------------------------------------")
   if len(results) == 0:
     raise Exception("No updates to apply")
-  ssmHeaderRec = "APEL-summary-job-message: v0.1\n"
+  ssmHeaderRec = "APEL-summary-job-message: v0.2\n"
   ssmRecordEnd = "%%\n"
   filename  =  GetFileName(params["SSMupdates"]  ,"txt")
   deletions =  GetFileName(params["SSMdeletes"],"txt")
