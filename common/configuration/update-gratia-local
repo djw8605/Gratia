@@ -52,7 +52,7 @@ usage: update-gratia-local [-S <source-prefix>] [-j <jre-home>] [-s]
 
        -d <db-root-pw>
 
-          Configure post-install.sh with this DB root password.
+          Configure post-install with this DB root password.
 
        -v <vdt_location>
 
@@ -480,8 +480,8 @@ done
 #-----------------------
 if [ $vdt_install ];then
 #--- vdt ---
-  #-- need to remove some things from the post-install.sh --
-  post_install=$tomcat_gratia/post-install.sh
+  #-- need to remove some things from the post-install --
+  post_install=$tomcat_gratia/post-install
   cp -p ${post_install} ${post_install}.orig
   cat ${post_install}.orig | awk '{ sub("CMD_PREAMBLE","");sub("CMD_PREFIX","");sub("CMD_SUFFIX","");print $0 }' >${post_install}
 
@@ -491,7 +491,7 @@ if [ $vdt_install ];then
   if [ ! -e ${vdt_tar}.original ];then
     cp ${vdt_tar} ${vdt_tar}.original 
   fi
-  tar zcf ${vdt_tar} gratia/service-configuration.properties gratia/post-install.sh
+  tar zcf ${vdt_tar} gratia/service-configuration.properties gratia/service-authorization.properties gratia/post-install
   cd -  
 
   #-- run the VDT configure scripts --

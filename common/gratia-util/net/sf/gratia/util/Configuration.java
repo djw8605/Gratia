@@ -74,6 +74,41 @@ public class Configuration {
                           p.getProperty("monitor.listener.wait"));
             p.remove("monitor.listener.wait");
         }
+
+        // Database users/passwords are maintained in there own config file
+        // If they exist in the old one, we will igonre them.
+        Properties auth = new Properties();
+        try
+            {
+                auth.load(new FileInputStream(new File(getConfigurationPath() + "/" + "service-authorization.properties")));
+            }
+        catch (Exception e)
+            {
+                Logging.log("Error Loading: " + getConfigurationPath() + "/" + "service-authorization.properties");
+                e.printStackTrace();
+            }
+
+        String attribute = "";
+        attribute = "service.mysql.rootpassword";
+        if (p.containsKey(attribute))    { p.remove(attribute); }
+        if ( auth.containsKey(attribute)) { p.setProperty(attribute, auth.getProperty(attribute)); }
+
+        attribute = "service.mysql.user";
+        if (p.containsKey(attribute))    { p.remove(attribute); };
+        if ( auth.containsKey(attribute)) { p.setProperty(attribute, auth.getProperty(attribute)); }
+
+        attribute = "service.mysql.password";
+        if (p.containsKey(attribute))    { p.remove(attribute); };
+        if ( auth.containsKey(attribute)) { p.setProperty(attribute, auth.getProperty(attribute)); }
+
+        attribute = "service.reporting.user";
+        if (p.containsKey(attribute))    { p.remove(attribute); };
+        if ( auth.containsKey(attribute)) { p.setProperty(attribute, auth.getProperty(attribute)); }
+
+        attribute = "service.reporting.password";
+        if (p.containsKey(attribute))    { p.remove(attribute); }
+        if ( auth.containsKey(attribute)) { p.setProperty(attribute, auth.getProperty(attribute)); }
+
         return p;
     }
 

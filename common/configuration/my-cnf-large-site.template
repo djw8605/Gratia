@@ -1,0 +1,125 @@
+#
+# This is for a large system with memory of 1G-2G where the system runs mainly
+# MySQL.
+#
+# You can copy this file to
+# /etc/my.cnf to set global options,
+# mysql-data-dir/my.cnf to set server-specific options (in this
+# ~/.my.cnf to set user-specific options.
+#
+# In this file, you can use all long options that a program supports.
+# If you want to know which options a program supports, run the program
+# with the "--help" option.
+
+# The following options will be passed to all MySQL clients
+#[client]
+#password	= your_password
+#port            = 3320
+#socket          = /var/lib/mysql/mysql.sock
+
+# Here follows entries for some specific programs
+# The MySQL server
+[mysqld]
+socket          = /var/lib/mysql/mysql.sock
+datadir         = /var/lib/mysql
+old_passwords=1
+port=3306
+key_buffer = 256M
+max_allowed_packet = 16M
+table_cache = 512
+sort_buffer_size = 2M
+read_buffer_size = 2M
+read_rnd_buffer_size = 8M
+myisam_sort_buffer_size = 100M
+thread_cache_size = 8
+query_cache_limit = 2M
+query_cache_size = 32M
+
+# Prefer indexes over table scans.
+max_seeks_for_key = 1000
+
+# Try number of CPU's*2 for thread_concurrency
+thread_concurrency = 2
+max_connections=500
+max_connect_errors=1000
+
+# Uncomment the following line for debugging purposes.
+## log=/var/log/mysqld.log
+log-error=/var/log/mysqld.log
+log-warnings=2
+#log=/var/lib/mysql/query_log.log
+
+# Don't listen on a TCP/IP port at all. This can be a security enhancement,
+# if all processes that need to connect to mysqld run on the same host.
+# All interaction with mysqld must be made via Unix sockets or named pipes.
+# Note that using this option without enabling named pipes on Windows
+# (via the "enable-named-pipe" option) will render mysqld useless!
+# 
+#skip-networking
+
+
+# Point the following paths to different dedicated disks
+# Remember that you have to create the directory first!
+#tmpdir		= /var/lib/mysql/mysql-tmp/		
+#log-update 	= /path-to-dedicated-directory/hostname
+
+# Uncomment the following if you are using InnoDB tables
+# You can increase ibdata1 size but then you will need to 
+# modify mysqld start up script to allow longer timeout time (set to 30 sec by default)
+# this will be needed only during db initialization 
+innodb_data_home_dir = /var/lib/mysql
+innodb_data_file_path = ibdata1:500M;ibdata2:10M:autoextend
+innodb_log_group_home_dir = /var/lib/mysql
+#innodb_log_arch_dir = /var/lib/mysql-tmp/mysql/var/
+
+# You can set .._buffer_pool_size up to 50 - 80 %
+# of RAM but beware of setting memory usage too high
+innodb_buffer_pool_size = 512M
+innodb_additional_mem_pool_size = 20M
+
+# Set .._log_file_size to 25 % of buffer pool size
+innodb_log_file_size = 128M
+innodb_log_files_in_group = 2
+innodb_log_buffer_size = 8M
+innodb_file_per_table
+innodb_flush_log_at_trx_commit = 1
+innodb_lock_wait_timeout = 50
+innodb_thread_concurrency = 2
+# To prevent too large of innodb history list which affects inserts
+innodb_max_purge_lag=50000
+
+expire_logs_days = 75
+sync_binlog=1
+
+[mysqldump]
+quick
+max_allowed_packet = 16M
+
+[mysql]
+no-auto-rehash
+
+[isamchk]
+key_buffer = 256M
+sort_buffer_size = 256M
+read_buffer = 2M
+write_buffer = 2M
+
+[myisamchk]
+key_buffer = 256M
+sort_buffer_size = 256M
+read_buffer = 2M
+write_buffer = 2M
+
+[mysqlhotcopy]
+interactive-timeout
+
+[safe_mysqld]
+err-log=/var/log/mysqld.log
+
+[mysqld_safe]
+log=/var/log/mysqld.log
+err-log=/var/log/mysqld.log
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+
+

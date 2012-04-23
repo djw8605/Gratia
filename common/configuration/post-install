@@ -1,18 +1,12 @@
 #!/bin/bash
-#
 # Create the mysql gratia summary tables, triggers and stored procedures
 # Called automatically by the services.
 #
-script_location=${VDT_LOCATION}/tomcat/v55/gratia/
 
-TMP=${TMPDIR:-/tmp}/post-install.sh.$$
+TMP=${TMPDIR:-/tmp}/post-install.$$
 trap "rm $TMP* 2>/dev/null" EXIT
 
-if grep -e 'org\.hibernate\.dialect\.MySQLInnoDBDialect' \
-   "${script_location}/hibernate.cfg.xml" \
-   >/dev/null 2>&1; then
-  is_innodb=1
-fi
+is_innodb=1
 
 function preprocess_proc() {
     if [[ -z "$is_innodb" ]]; then
@@ -25,6 +19,13 @@ function preprocess_proc() {
         proc="$TPROC"
      fi
 }
+dbhost=`grep ^service.mysql.url /etc/gratia/collector/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $3;}'`
+dbport=`grep ^service.mysql.url /etc/gratia/collector/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $4;}'`
+dbpasswd=`grep ^service.mysql.rootpassword /etc/gratia/collector/service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'`
+if [ "x$dbpasswd" = "x" ] || [ $dbpasswd = "service.mysql.rootpassword" ]
+then
+    dbpasswd=" "
+fi
 
 # This would be so much easier if we could guarantee a "drop trigger if
 # exists" syntax.
@@ -112,14 +113,14 @@ while [[ -n "$1" ]]; do
   shift
   case $action in
       summary)
-#        proc="${script_location}build-summary-tables.sql"
+#        proc="/usr/share/gratia/sql/build-summary-tables.sql"
         set -- "$@" summary-view
         # build-summary-tables.sql removed.
         echo "argument \"summary\" obsolete -- ignored" 1>&2
         continue
         ;;
       stored)
-        #proc="${script_location}build-stored-procedures.sql"
+        #proc="/usr/share/gratia/sql/build-stored-procedures.sql"
         set -- "$@" stored-extra-3 stored-1 stored-2 stored-3 stored-4 stored-5
         if [[ `hostname -f` == *.fnal.gov ]]; then
           set -- "$@" proc-edit-permission
@@ -128,90 +129,99 @@ while [[ -n "$1" ]]; do
         ;;
       stored-1)
         # Create trace table and common functions for the reports stored prcedures        
-        proc="${script_location}reportsGeneral.sql"
+        proc="/usr/share/gratia/sql/reportsGeneral.sql"
         ;;
       stored-2)
         # Reports stored procedure
-        proc="${script_location}reports.sql"
+        proc="/usr/share/gratia/sql/reports.sql"
         ;;
       stored-3)
         # Ranked Reports stored procedure
-        proc="${script_location}reportsRanked.sql"
+        proc="/usr/share/gratia/sql/reportsRanked.sql"
         ;;
       stored-4)
         # PSACCT Reports stored procedure
-        proc="${script_location}reportsPSacct.sql"
+        proc="/usr/share/gratia/sql/reportsPSacct.sql"
         ;;
       stored-5)
         # PSACCT Reports stored procedure
-        proc="${script_location}build-osgdaily-stored-procedures.sql"
+        proc="/usr/share/gratia/sql/build-osgdaily-stored-procedures.sql"
         ;;
       stored-extra-1)
         # Hand-tweaked procedure (temporary)
-        #proc="${script_location}WeeklyUsageByVORanked.sql"
+        #proc="/usr/share/gratia/sql/WeeklyUsageByVORanked.sql"
         # WeeklyUsageByVORanked.sql removed.
         echo "stored procedure \"WeeklyUsageByVORanked.sql\" obsolete -- ignored" 1>&2
         continue
         ;;
       stored-extra-2)
         # Hand-tweaked procedure (temporary)
-        #proc="${script_location}SiteUsageCountByVO.sql"
+        #proc="/usr/share/gratia/sqlSiteUsageCountByVO.sql"
         # SiteUsageCountByVO.sql removed.
         echo "stored procedure \"SiteUsageCountByVO.sql\" obsolete -- ignored" 1>&2
         continue
         ;;
       stored-extra-3)
         # Hand-tweaked procedure (temporary)
-        proc="${script_location}dCacheSimple.sql"
+        proc="/usr/share/gratia/sql/dCacheSimple.sql"
         ;;
       static-reports)
         # For CSV static reports
-        #proc="${script_location}static-report-procedures.sql"
+        #proc="/usr/share/gratia/sql/static-report-procedures.sql"
         # static-report-procedures.sql removed.
         echo "stored procedure \"static-report-procedures.sql\" obsolete -- ignored" 1>&2
         continue
         ;;
       trigger)
-        proc="${script_location}build-trigger.sql"
+        proc="/usr/share/gratia/sql/build-trigger.sql"
         set -- "$@" summary-procedures services-summary-procedures tablestatistics-summary-procedures backlogstatistics-summary-procedures
         ;;
       summary-procedures)
-        proc="${script_location}summary-procedures.sql"
+        proc="/usr/share/gratia/sql/summary-procedures.sql"
         ;;
       services-summary-procedures)
-        proc="${script_location}services-summary-procedures.sql"
+        proc="/usr/share/gratia/sql/services-summary-procedures.sql"
         ;;
       tablestatistics-summary-procedures)
-        proc="${script_location}tablestatistics-summary-procedures.sql"
+        proc="/usr/share/gratia/sql/tablestatistics-summary-procedures.sql"
         ;;
       backlogstatistics-summary-procedures)
-        proc="${script_location}backlogstatistics-summary-procedures.sql"
+        proc="/usr/share/gratia/sql/backlogstatistics-summary-procedures.sql"
         ;;
       ps)
-#        proc="${script_location}build-ps-node-summary-table.sql"
+#        proc="/usr/share/gratia/sql/build-ps-node-summary-table.sql"
         echo "argument \"ps\" obsolete -- ignored" 1>&2
         continue;
         ;;
       summary[-_]view)
-        proc="${script_location}build-summary-view.sql"
+        proc="/usr/share/gratia/sql/build-summary-view.sql"
         ;;
       countTrigger*)
         prepareCountTrigger $action
         ;;
       proc-edit-permission)
-        proc="${script_location}proc-edit-permission.sql"
+        proc="/usr/share/gratia/sql/proc-edit-permission.sql"
         ;;
       *)
         echo "Unrecognized action \"$action\"" 1>&2
         exit 1
   esac
 
-  CMD_PREAMBLE
+  tmpfile=/tmp/.post_install.$$   # very temporary passwd file
   if [[ -r "${proc}" ]]; then
-    printf "post-install.sh: loading $proc ... "
+    printf "post-install: loading $proc ... "
     preprocess_proc
-   cat ${proc} | CMD_PREFIX ${VDT_LOCATION}/mysql5/bin/mysql -B --unbuffered --user=root --password=ROOTPASS --host=localhost --port=PORT gratia CMD_SUFFIX
-    status=$?
+    #--- create temporary password file ---
+    cat >$tmpfile <<EOF
+[client]
+password="$dbpasswd"
+EOF
+    chmod 600 $tmpfile
+    #--- do it -----
+   cat ${proc} | mysql --defaults-extra-file=$tmpfile -B --unbuffered --user=root  --host=$dbhost --port=$dbport gratia
+   status=$?
+    #--- remove temporary password file ---
+    rm -f $tmpfile
   else
     echo "$proc is not readable!" 1>&2
     status=1

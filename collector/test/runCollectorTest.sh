@@ -334,7 +334,8 @@ EOF
 
    ssh -l root ${webhost}  cd ${source}/common/configuration\; \
      ./update-gratia-local -s -S ${source} -d ${pass} -i ${filename} ${schema_name} \; \
-     chown ${USER} ${tomcatpwd}/gratia/service-configuration.properties
+     chown ${USER} ${tomcatpwd}/gratia/service-configuration.properties \
+     chown ${USER} ${tomcatpwd}/gratia/service-authorization.properties 
 
    scp ../../target/gratia-testtimeout.war root@${webhost}:${tomcatpwd}/webapps
    scp ../../target/gratia-testbacklog.war root@${webhost}:${tomcatpwd}/webapps

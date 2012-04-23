@@ -684,8 +684,8 @@ sub configure_apel_directory {
 
   sub configure_post_install {
     my ($instance_name, $config_name, $collector_config) = @_;
-    my $post_file = "$options{prefix}/tomcat-${instance_name}/gratia/post-install.sh";
-    my $new_post = temporary_filename("post-install.sh");
+    my $post_file = "$options{prefix}/tomcat-${instance_name}/gratia/post-install";
+    my $new_post = temporary_filename("post-install");
     $options{"db-root"} = "" unless exists $options{"db-root"};
     open(ORIG_POST, "<$post_file") or die "Unable to open $post_file for reading";
     open(NEW_POST, ">$new_post") or die "Unable to open $new_post for writing";

@@ -1,0 +1,46 @@
+# This is the main options (config) file for the OSG instance of MySQL 5.  It is
+# written automatically during installation and any subsequent updates.  Changes
+# to this file will be lost in an update.  All database-connection options are
+# defined here.
+
+[mysqld]
+datadir = /var/lib/mysql
+socket =  /var/lib/mysql/mysql.sock
+user = mysql
+port = 3306
+
+log_bin = /var/lib/mysql/mysql-bin
+log =     /var/log/mysqld.log
+log_bin_trust_function_creators = 1
+expire_logs_days = 7
+sync_binlog=1
+
+innodb_file_per_table
+innodb_data_home_dir = /var/lib/mysql
+innodb_data_file_path = ibdata1:500M;ibdata2:10M:autoextend
+innodb_log_group_home_dir = /var/lib/mysql
+innodb_flush_log_at_trx_commit = 1
+innodb_buffer_pool_size = 256M
+innodb_additional_mem_pool_size = 20M
+innodb_log_file_size = 64M
+innodb_log_files_in_group = 2
+innodb_log_buffer_size = 8M
+innodb_lock_wait_timeout = 50
+innodb_thread_concurrency = 2
+# To prevent too large of innodb history list which affects inserts
+innodb_max_purge_lag=50000
+
+
+
+# Uncomment the following line for debugging purposes.
+#log-warnings=2
+
+# Default to using old password format for compatibility with mysql 3.x
+# clients (those using the mysqlclient10 compatibility package).
+old_passwords=1
+
+# Disabling symbolic-links is recommended to prevent assorted security risks;
+# to do so, uncomment this line:
+# symbolic-links=0
+
+

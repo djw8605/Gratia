@@ -37,7 +37,12 @@
     <li>DBURL to point <span class="GramE">the what ever mysql database you are going to use. The form of the url is 
 	<br><em>jdbc:mysql://HOSTNAME:&lt;mysqlport&gt;/&lt;schema name&gt;. </em>
 	<br> Look at the entries in configuration-psg3 to get an example.</li>
-    <li>DBUSER must be set to an appropriate user name on the database with table create priveledges.</li>
+  </ul>
+<ul type="disc">
+  <li>Modify $CATALINA_HOME/gratia/service-authorization.properties:</li>
+</ul>
+  <ul type="circle">
+    <li>DBUSER must be set to an appropriate user name on the database with table create priveleges.</li>
     <li>DBPASSWORD must be set.</li>
   </ul>
   <p>Modify $CATALINA_HOME/conf/server.xml. Specifically, you must define at least 1 open socket 
