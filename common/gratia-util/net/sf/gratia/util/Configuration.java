@@ -9,28 +9,15 @@ import java.io.*;
 
 public class Configuration {
 
-    public static String getCatalinaHome()
-    {
-        return System.getProperty("catalina.home");
-    }
-
     public static String getConfigurationPath()
     {
-        String path = System.getProperty("catalina.home");
-        if (path == null) {
-           path = ".";
-        }
-        path = path + "/gratia";
+        String path = "/etc/gratia/collector";
         return path;
     }
 
     public static String getHibernateConfigurationPath()
     {
-        String path = System.getProperty("catalina.home");
-        if (path == null) {
-           path = ".";
-        }
-        path = path + "/gratia/hibernate";
+        String path = "/usr/share/gratia/hibernate";
         return path;
     }
 

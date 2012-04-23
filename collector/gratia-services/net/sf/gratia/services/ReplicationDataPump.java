@@ -69,7 +69,7 @@ public class ReplicationDataPump extends Thread {
                            chunksize + ")");
          }
       }
-      replicatePath = System.getProperties().getProperty("catalina.home") +  "/gratia/data/replicate";
+      replicatePath = "/var/lib/gratia/data/replicate";
       File dir = new File(replicatePath);
       if (!dir.exists()) {
          dir.mkdir();

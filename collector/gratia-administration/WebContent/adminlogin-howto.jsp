@@ -161,7 +161,7 @@ script that has been provided that will update this file based on the OSG
 edg-mkgridmap.conf template at:</p>
 
 <pre>
-http://software.grid.iu.edu/pacman/tarballs/vo-version/edg-mkgridmap.osg
+http://vdt.cs.wisc.edu/repos/3.0/el5/production/x86_64/vo-client-edgmkgridmap-X-X.osg.noarch.rpm
 </pre>
 
 <p>The format for the <i>voms-servers</i> file is a 
@@ -169,7 +169,7 @@ simple <i>VO</i>=<i>VOMS_URL</i> format.</p>
 
 <p>The script that has been provided is:</p>
 <pre>
-TOMCAT_LOCATION/gratia/voms-server.sh
+/usr/share/gratia/voms-server.sh
 </pre>
 
 <p>This can be run manually or as a cron process. Running it as a cron process 
@@ -179,17 +179,6 @@ is automatic.</p>
 <p><font color="blue">In this release, the script does not create a perfect list 
 of voms server urls.  It is close.  You will probably have to tweek it for some VO's.
 We hope to resolve this in the very near future.</font></p>
-
-<p>In a VDT installation of Gratia services, then the cron process has 
-already been registered for <i>vdt-control</i> use.  However, it has <u>not</u>
-been <i>enabled</i>.  This was done as we weren't sure how you would configure the
-login process and did not need unnecessary processes running. So to <i>enable</i>
-for a VDT installation:</p>
-<pre>
-source VDT_LOCATION/setup.sh
-vdt-control --enable gratia-voms-servers
-vdt-control --on     gratia-voms-servers
-</pre>
 
 <p>In a non-VDT installation of Gratia services, you will have to set the <i>root</i> cron up 
 manually as:</p>

@@ -259,7 +259,7 @@ public class BacklogByProbes extends HttpServlet {
       
       // Execute command
       final String fgProcessQueueLengthQuery = "select Queue from CollectorStatus order by Queue";
-      final String topdir = System.getProperties().getProperty("catalina.home");
+      final String topdir = "/var/lib";
 
       StringBuffer buffer = new StringBuffer();
       

@@ -24,10 +24,10 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 
 		try
 		{
-			File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+			File checkFile = new java.io.File("/var/log/gratia-service" + timeStampFile);
 			if (checkFile.exists())
 			{
-				BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+				BufferedWriter out = new BufferedWriter(new FileWriter("/var/log/gratia-service" + timeStampFile, true));
 				out.write(", afterFactory = ," + timeStamp);
 				out.flush();
 				out.close();
@@ -41,13 +41,14 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 	public void afterRender(IReportContext rc) {
 		// Get current time
 		long timeStamp = System.currentTimeMillis();
+		String logFile="/var/log/gratia-service";
 
 		try
 		{
-			File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+			File checkFile = new java.io.File(logFile + timeStampFile);
 			if (checkFile.exists())
 			{
-				BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+				BufferedWriter out = new BufferedWriter(new FileWriter(logFile + timeStampFile, true));
 				out.write(", afterRender = ," + timeStamp + "\n");
 				out.flush();
 				out.close();
@@ -129,10 +130,10 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 					rc.setParameterValue("ReportURL", outReportURL);
 				}
 			}
-			File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+			File checkFile = new java.io.File("/var/log/gratia-service" + timeStampFile);
 			if (checkFile.exists())
 			{
-				BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+				BufferedWriter out = new BufferedWriter(new FileWriter("/var/log/gratia-service" + timeStampFile, true));
 				out.write(", beforeFactory = ," + timeStamp);
 				out.flush();
 				out.close();
@@ -149,10 +150,10 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 
 		try
 		{
-			File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+			File checkFile = new java.io.File("/var/log/gratia-service" + timeStampFile);
 			if (checkFile.exists())
 			{
-				BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+				BufferedWriter out = new BufferedWriter(new FileWriter("/var/log/gratia-service" + timeStampFile, true));
 				out.write(", beforeRender = ," + timeStamp);
 				out.flush();
 				out.close();
@@ -224,21 +225,21 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 
 				if (reportingConfig.getLogging())
 				{
-					File checkFolder = new java.io.File(System.getProperty("catalina.home") + timeStampFolder);
+					File checkFolder = new java.io.File("/var/log/gratia-service" + timeStampFolder);
 					if (!checkFolder.exists())
 						checkFolder.mkdirs();
 					checkFolder = null;
-					BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+					BufferedWriter out = new BufferedWriter(new FileWriter("/var/log/gratia-service" + timeStampFile, true));
 					out.write(", initializing: " + reportName + " = ," + timeStamp);
 					out.flush();
 					out.close();
 				}
 				else
 				{
-					File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+					File checkFile = new java.io.File("/var/log/gratia-service" + timeStampFile);
 					if (checkFile.exists())
 					{
-						File dest = new java.io.File (System.getProperty("catalina.home") + timeStampFile + userKey);
+						File dest = new java.io.File ("/var/log/gratia-service" + timeStampFile + userKey);
 						checkFile.renameTo(dest);
 					}
 				}
@@ -254,10 +255,10 @@ public class GratiaBirtReportEH extends ReportEventAdapter {
 			}
 			else
 			{
-				File checkFile = new java.io.File(System.getProperty("catalina.home") + timeStampFile);
+				File checkFile = new java.io.File("/var/log/gratia-service" + timeStampFile);
 				if (checkFile.exists())
 				{
-					BufferedWriter out = new BufferedWriter(new FileWriter(System.getProperty("catalina.home") + timeStampFile, true));
+					BufferedWriter out = new BufferedWriter(new FileWriter("/var/log/gratia-service" + timeStampFile, true));
 					out.write(", initialize = ," + timeStamp);
 					out.flush();
 					out.close();

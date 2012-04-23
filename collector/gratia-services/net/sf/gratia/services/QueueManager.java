@@ -452,7 +452,7 @@ public class QueueManager
       if (fgQueues == null) {
          initializeImpl();
       }
-      String configurationPath = System.getProperty("catalina.home") + "/gratia";
+      String configurationPath = "/var/lib/gratia-service";
       if (fgQueues == null || fgQueues.length != nthreads) {
          fgQueues = new Queue[nthreads];
          for (int i = 0; i < nthreads; i++) {
@@ -502,8 +502,7 @@ public class QueueManager
    {
       // Return the directory object where the servlets should stage their input.
       if (fgStageDir == null) {
-         fgStageDir = new java.io.File(System.getProperties().getProperty("catalina.home")
-                                       + "/gratia/data/stage");
+         fgStageDir = new java.io.File("/var/lib/gratia-service/data/stage");
       }
       return fgStageDir;
    }

@@ -731,7 +731,8 @@ public class CollectorService implements ServletContextListener {
    }
 
    public void loadSelfGeneratedCerts() {
-      String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
+      //String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
+      String keystore =  "/var/lib/gratia-service/keystore";
       keystore = keystore.replaceAll("\\\\", "/");
       String command1[] =
       {"keytool",
@@ -767,8 +768,10 @@ public class CollectorService implements ServletContextListener {
    }
    
    public void loadVDTCerts() {
-      String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
-      String configurationPath = System.getProperty("catalina.home") + "/gratia/";
+      //String keystore = System.getProperty("catalina.home") + "/gratia/keystore";
+      String keystore = "/var/lib/gratia-service/keystore";
+      //String configurationPath = System.getProperty("catalina.home") + "/gratia/";
+      String configurationPath =  "/var/lib/gratia-service/";
       keystore = keystore.replaceAll("\\\\", "/");
       String command1[] =
       {

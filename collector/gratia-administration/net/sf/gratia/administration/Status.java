@@ -532,7 +532,7 @@ public class Status extends HttpServlet {
          catch (Exception e) { // Ignore if we don't support exceptions
          }
          int maxthreads = Integer.parseInt(props.getProperty("service.recordProcessor.threads"));
-         String path = System.getProperties().getProperty("catalina.home");
+         String path = "/var/lib/gratia-service/data";
          path = xp.replaceAll(path,"\\","/");
 
          ////////////////////////////////////

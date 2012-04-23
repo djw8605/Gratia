@@ -28,7 +28,7 @@ public class Logging {
         screenFormat.setTimeZone(TimeZone.getDefault());
         Properties p = net.sf.gratia.util.Configuration.getProperties();
 
-        String path = p.getProperty("service." + logDomain + ".logfile" , "/logs/gratia-" + logDomain + ".log");
+        String path = p.getProperty("service." + logDomain + ".logfile" , "/gratia-" + logDomain + ".log");
         String maxSize = p.getProperty("service." + logDomain + ".maxlog" , "10000000");
         String useConsole = p.getProperty("service." + logDomain + ".console", "0");
         String level = p.getProperty("service." + logDomain + ".level" , "INFO");
@@ -63,6 +63,7 @@ public class Logging {
                 // Use log4j
 
                 // Fix path from old style;
+/*
                 if (path.contains("%g")) {
                     String newPath = System.getProperty("catalina.home") + (path.startsWith("/")?"":"/") + path;
                     newPath = newPath.replaceFirst("-?%g", "");
@@ -78,7 +79,8 @@ public class Logging {
                     logToScreen("Use log4j-style path: "+newPath);
                     path = newPath;
                 }
-
+*/
+		path = "/var/log/gratia-service/" + path;
                 Layout layout =
                     new PatternLayout("%d %c{2}(%t) [%p]: %m%n");
 
@@ -129,7 +131,7 @@ public class Logging {
                 logToScreen("using legacy logger path");
             
                 try {
-                    FileHandler fh = new FileHandler(Configuration.getCatalinaHome() + path, limit, numLogFiles);
+                    FileHandler fh = new FileHandler("/var/log/gratia-service" + path, limit, numLogFiles);
                     fh.setFormatter(new SimpleFormatter());
                     // Add to logger
                     oldLogger = Logger.getLogger("gratia");
@@ -138,7 +140,7 @@ public class Logging {
                 }
                 catch (Exception e) {
                     logToScreen("caught exception initializing logging to " +
-                                Configuration.getCatalinaHome() + path + ": " + e);
+                                "/var/log/gratia-service" + path + ": " + e);
                     logToScreen("activating Console logging for this stream");
                     useConsole = "1";
                 }

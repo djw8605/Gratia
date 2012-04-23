@@ -48,8 +48,8 @@ function displayReport(link) {
 
 		// Add a time stamp to the log file
 
-		String timeStampFile = System.getProperty("catalina.home") + "/gratia-logs/gratiaReportingLog.csv";
-		String timeStampFolder = System.getProperty("catalina.home") + "/gratia-logs/";
+		String timeStampFile = "/var/log/gratia-service/gratia-logs/gratiaReportingLog.csv";
+		String timeStampFolder = "/var/log/gratia-service/gratia-logs/";
 
 		try
 		{

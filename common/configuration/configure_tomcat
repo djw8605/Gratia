@@ -1,0 +1,112 @@
+#!/bin/bash
+################################################################
+# John Weigand (3/5/12)
+#
+# Gratia Collector Tomcat configuration.
+################################################################
+function logit {
+  echo "$1"
+}
+#---------------
+function logerr {
+  logit "ERROR: $1";exit 1
+}
+#---------------
+function verify_root {
+  if [ "`id -u`" != "0" ];then
+    logerr "You must be root to execute this."
+  fi
+}
+#---------------
+function runit {
+  local cmd="$1"
+  logit "... executing: $cmd"
+  $cmd;rtn=$?
+  if [ "$rtn" != "0" ];then
+    logerr "process failed: $cmd"
+  fi
+}
+#---------------
+function configuring_tomcat {
+  logit "--- Configuring Tomcat and server.xml ---"
+  script="/var/lib/trustmanager-tomcat/configure.sh"
+  if [ ! -x "$script" ];then
+    logerr "Configuration file does not exist or is not executable: $script"
+  fi
+  runit "/var/lib/trustmanager-tomcat/configure.sh"
+  logit
+}
+#---------------
+function update_tomcat5_conf {
+  logit "--- Updating tomcat5.conf ---"
+  cfg=/usr/share/tomcat5/conf/tomcat5.conf
+  if [ ! -f $cfg ];then
+    logerr "tomcat config file does not exist: $cfg"
+  fi
+  runit "cp -p $cfg ${cfg}.${BACKUP_DATE}"
+  cat >>$cfg <<EOF
+JAVA_OPTS=' -server -Xmx1024M -XX:MaxPermSize=256m -Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator -Dcom.sun.management.jmxremote'
+EOF
+  logit
+}
+#----------------
+function update_server_xml {
+  logit "--- Updating server.xml ---"
+  server_xml=/usr/share/tomcat5/conf/server.xml
+  logit "Replacing Tomcat server.xml file: $server_xml"
+  runit "cp -p $server_xml ${server_xml}.${BACKUP_DATE}"
+  runit "cp -p $SERVER_XML_TEMPLATE $server_xml"
+  runit "chmod 644         $server_xml"
+  runit "chown tomcat.root $server_xml"
+  logit
+}
+#---------------
+function link_log4j {
+  logit "--- Creating log4j links ---"
+  dest=/usr/share/java/log4j.jar
+  if [ ! -f "$dest" ];then
+    logerr "log4j file does not exist: $dest"
+  fi
+  webapps=/usr/share/tomcat5/webapps
+  gratia_apps="`ls $webapps`"
+  for app in $gratia_apps
+  do
+    dir=$webapps/$app/WEB-INF/lib
+    if [ ! -d "$dir" ];then
+      logerr "Gratia webapps directory does not exist: $dir"
+    fi
+    link=$dir/log4j.jar
+    if [ -f "$link" ];then
+      logerr "Link or file already exists: $link"
+    fi
+    runit "ln -s $dest $link"
+    logit "`ls -l $link`"
+    logit
+  done       
+  logit
+}
+#-------------------
+function usage {
+  echo "
+Usage: $PGM 
+
+Configures tomcat for a Gratia Collector RPM instance:
+1. runs /var/lib/trustmanager-tomcat/configure.sh
+2. sets up a log4j links to all Gratia webapps
+3. appends to the tomcat5.conf a new JAVA_OPTS 
+4. creates a new server.xml from a template 
+"
+}
+#### MAIN ############################################################
+PGM=`basename $0`
+BACKUP_DATE=`date +'%Y%m%d-%H%M'`
+SERVER_XML_TEMPLATE=/usr/share/gratia/server.xml.template
+
+logit "====== Configuring Tomcat for gratia ===="
+verify_root
+configuring_tomcat
+link_log4j
+update_tomcat5_conf
+update_server_xml
+logit "====== Completed Tomcat configuration for Gatia ==="
+exit 0

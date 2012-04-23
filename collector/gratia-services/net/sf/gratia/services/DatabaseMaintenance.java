@@ -508,9 +508,7 @@ public class DatabaseMaintenance {
 
    private int CallPostInstall(String action) {
       Logging.fine("DatabaseMaintenance: calling post-install script for action \"" + action + "\"");
-      String post_install = System.getProperty("catalina.home");
-      post_install = XP.replaceAll(post_install, "\\", "" + File.separatorChar);
-      post_install = post_install + File.separatorChar + "gratia" + File.separatorChar + "post-install.sh";
+      String post_install = "/usr/share/gratia/post-install"; 
       String chmod_cmd[] = {"chmod", "700", post_install};
       Execute.execute(chmod_cmd); // Mark executable just in case.
       String post_cmd[] = {post_install, action};

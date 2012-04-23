@@ -232,12 +232,12 @@ public class CertificateHandler
 	public String checkVOMSFile ()
 	{
 
-		File vomsFile = new File(_configPath + _vomsServerFile);
+		File vomsFile = new File("/var/lib/gratia-service/" + _vomsServerFile);
 		String msgS = "<hr><p class='txterror'>";
 		String msgE = "</p><hr>";
 		String msg1 = msgS + "File of VOMS servers ";
 		String msg3 = "<br>Please contact your administrator to check your installation.<br>Additional administrative services are not available until this is resolved." + msgE;
-		String msg2 = "<em>" + _configPath + _vomsServerFile + "</em>" ;
+		String msg2 = "<em>" + "/var/lib/gratia-service/" + _vomsServerFile + "</em>" ;
 		String msg4 = msgS + "No FQAN's or DN's have been specified " + msg3;
 
 		boolean f = false;
@@ -283,7 +283,7 @@ public class CertificateHandler
 				return msg;
 
 			// Read voms-servers file: the file resides in the tomcat/gratia area
-			String fileStatus = loadVOServers(_configPath + _vomsServerFile);
+			String fileStatus = loadVOServers("/var/lib/gratia-service/" + _vomsServerFile);
 			if (fileStatus.length() > 1 )
 				return fileStatus;
 

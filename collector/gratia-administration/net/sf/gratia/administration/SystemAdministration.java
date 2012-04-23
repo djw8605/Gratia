@@ -440,7 +440,7 @@ public class SystemAdministration extends HttpServlet {
       public void getDirectories() {
          int i = 0;
          Vector vector = new Vector();
-         String path = System.getProperties().getProperty("catalina.home") + "/gratia/data";
+         String path = "/var/lib/gratia-service/data";
          path = path.replaceAll("\\\\","/");
          Logging.debug("RecoveryService: Path: " + path);
          String temp[] = XP.getDirectoryList(path);

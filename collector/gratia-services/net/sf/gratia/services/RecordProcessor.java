@@ -122,11 +122,7 @@ public class RecordProcessor extends Thread {
          Logging.warning(fIdentity + ": ERROR! Serious problems starting recordProcessor");
          Logging.debug(fIdentity + "Exception detail: ", e);
       }
-      fHistoryPath = System.getProperties().getProperty("catalina.home");
-      if (fHistoryPath == null) {
-         fHistoryPath = ".";
-      }
-      fHistoryPath = fHistoryPath + "/gratia/data/";
+      fHistoryPath = "/var/lib/gratia/data/";
 
       fQuarantineDir = new File(fHistoryPath + 
                                "quarantine");
