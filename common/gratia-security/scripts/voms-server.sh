@@ -1,4 +1,5 @@
 #!/bin/bash
+#set -x
 ###########################################################################
 # John Weigand (5/3/2008)
 #
@@ -8,7 +9,7 @@
 # by the reporting login process when it is implemented.
 #
 # It downloads the OSG edg-mkgridmap.conf file, parses it and replaces the
-# existing one in the ./gratia directory of tomcat.
+# existing one in the /var/lib/gratia-service directory.
 #
 # If the script fails on a given night, it is not critical.
 #
@@ -16,13 +17,7 @@
 #
 ##########################################################################
 function usage {
-   echo "Usage: $PGM -t TOMCAT_LOCATION <-s EDG_MKGRIDMAP> <-h> <-e> [<vo> ...]
-
-    -t - the top level tomcat location specifying where the
-         TOMCAT_LOCATION/gratia directory is located.
- 
-    -s - location of the edg-mkgridmap.conf to be used.
-         Default: $osgVOMS
+   echo "Usage: $PGM  <-h> <-e> [<vo> ...]
 
     -e - creates an empty file with only comments to insure consistent 
          comments.
@@ -60,18 +55,19 @@ function add_vo_line {
   }' $tmpVOMS  |sort -u >>$outfile
 }
 #### MAIN ################################################################
-PGM=$(basename $0)
-
-osgVOMS=http://software.grid.iu.edu/pacman/tarballs/vo-version/edg-mkgridmap.osg
-tmpVOMS=`mktemp ${TMPDIR:-/tmp}/voms-server.sh.XXXXXXXXXX`
-if [[ -z "$tmpVOMS" ]]; then
-  logerr "Error getting temporary file"
+gratiaVOMS=voms-servers
+tmpFile=`grep service.voms.connections /etc/gratia/collector/service-configuration.properties |grep -v "^#"|cut -d'=' -f2`
+if [ "$?" != "0" ];then
+  logerr "service.voms.connections are not defined /etc/gratia/collector/service-configuration.properties"
+fi
+if [ x"$tmpFile" != "x" ];then
+	gratiaVOMS=$tmpFile
 fi
 
-trap "[[ -n \"$tmpVOMS\" ]] && rm \"$tmpVOMS\" 2>/dev/null" EXIT
 
-gratiaVOMS=voms-servers
-TOMCAT_LOCATION=""
+
+tmpVOMS=/etc/edg-mkgridmap.conf
+gratiaLocation=/var/lib/gratia-service
 help=n
 empty=n
 
@@ -81,29 +77,31 @@ empty=n
 #fi
 
 #---- validate command line ----
-while getopts t:s:he a
+while getopts he a
 do
   case $a in
-    t ) TOMCAT_LOCATION=$OPTARG;;
-    s ) osgVOMS=$OPTARG;;
     h ) help=y;;
     e ) empty=y;;
     * ) usage;logerr "Invalid command line argument($a)";;
   esac
 done
-shift `expr $OPTIND - 1`
-
 if [ "$help" = "y" ];then
   usage;exit 1
 fi
+yum update vo-client-edgmkgridmap -y >/dev/null 2>&1
+if [ "$?" != "0" ];then
+  logerr "Gratia cron ($PGM) failed to update vo-client-edgmkgridmap
 
-if [ -z "$TOMCAT_LOCATION" ];then
-  logerr "The -t TOMCAT_LOCATION is a required argument"
+... updates not applied.
+"
 fi
 
-gratiaLocation=$TOMCAT_LOCATION/gratia
+if [ ! -f $tmpVOMS ];then
+  logerr "The $tmpVOMS does not exist on this machine"
+fi
+
 if [ ! -d $gratiaLocation ];then
-  logerr "The -t TOMCAT_LOCATION specified does not exist for gratia:
+  logerr "The /var/lib/gratia-service specified does not exist for gratia:
   $gratiaLocation
 "
 fi
@@ -116,16 +114,6 @@ if [ ! -w $gratiaLocation ];then
 fi
 
 
-
-#--- retrieve the edg-mkgridmap.conf file ---
-wget -O $tmpVOMS $osgVOMS >/dev/null 2>&1
-if [ "$?" != "0" ];then
-  logerr "Gratia cron ($PGM) failed in wget to:
-$osgVOMS
-
-... updates not applied.
-"
-fi
 
 #--- create the voms-servers file ----
 outfile=$gratiaLocation/$gratiaVOMS
@@ -157,7 +145,6 @@ chmod 644 $outfile
 if [ "$empty" = "y" ];then
   exit 0
 fi
-
 if [[ -n "$*" ]]; then
   for wanted_vo in "$@"; do
     add_vo_line "$wanted_vo"
@@ -165,5 +152,6 @@ if [[ -n "$*" ]]; then
 else
   add_vo_line
 fi
+
 
 exit 0
