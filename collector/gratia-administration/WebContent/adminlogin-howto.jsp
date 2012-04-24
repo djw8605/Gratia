@@ -40,7 +40,7 @@
   </p>
 
 <p>The properties for the administration login can be found in the
-<i>TOMCAT_LOCATION/gratia/service-configuration.properties</i> file set as
+<i>/etc/gratia/collector/service-configuration.properties</i> file set as
 follows: 
 <pre>
 # service.admin.DN.0=ALLOW ALL
@@ -127,7 +127,7 @@ a subgroup, if desired.</font></p>
 web service for the VO identified by the top level group in the FQAN. In the 1st
 example, it would be <i>cms</i>.
 This is where the <i>service.voms.connections</i> property comes it to play.  It identifies the file located in 
-<i>TOMCAT_LOCATION/gratia</i> that contains a list of the VOMS web service urls for each
+<i>/etc/gratia/collector</i> that contains a list of the VOMS web service urls for each
 VO.</p>
 <p>The actual steps that the user will see are:</p>
 <ol>
@@ -183,7 +183,7 @@ We hope to resolve this in the very near future.</font></p>
 <p>In a non-VDT installation of Gratia services, you will have to set the <i>root</i> cron up 
 manually as:</p>
 <pre>
-42 1 * * * TOMCAT_LOCATION/gratia/voms-server.sh -t TOMCAT_LOCATION >/dev/null 2>&1
+42 1 * * * /usr/share/gratia/voms-server.sh  >/dev/null 2>&1
 </pre>
 
   

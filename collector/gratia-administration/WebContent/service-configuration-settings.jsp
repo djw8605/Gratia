@@ -229,10 +229,10 @@ td.example
     </tr>
     <tr >
       <td valign="top" class="property">service.voms.connections</td>
-      <td valign="top" class="explanation">File located in TOMCAT_LOCATION/gratia containing the voms URL(s) for any
+      <td valign="top" class="explanation">File located in /var/lib/gratia-service/ containing the voms URL(s) for any
             service.admin.FQAN attributes that are active.</td>
       <td valign="top" class="example">Not set.<br/>Example: <tt>voms-servers</tt><br>File can be updated
-            using <tt>TOMCAT_LOCATION/gratia/<br/>voms-server.sh</tt></td>
+            using <tt>/usr/share/gratia/<br/>voms-server.sh</tt></td>
     </tr>
     <tr >
       <td valign="top" class="property">service.admin.FQAN.<em>n</em></td>
