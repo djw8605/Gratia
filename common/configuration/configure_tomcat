@@ -27,6 +27,17 @@ function runit {
   fi
 }
 #---------------
+function find_tomcat_version {
+  [ ! -z "$TOMCAT_VERSION" ] && return  # already have it
+  if [ -r "/etc/tomcat5/tomcat5.conf" ];then
+    export TOMCAT_VERSION=tomcat5    
+  elif [ -r "/etc/tomcat6/tomcat6.conf" ];then
+    export TOMCAT_VERSION=tomcat6    
+  else
+    logerr "Unable to determine tomcat version"
+  fi
+}
+#---------------
 function configuring_tomcat {
   logit "--- Configuring Tomcat and server.xml ---"
   script="/var/lib/trustmanager-tomcat/configure.sh"
@@ -37,9 +48,10 @@ function configuring_tomcat {
   logit
 }
 #---------------
-function update_tomcat5_conf {
-  logit "--- Updating tomcat5.conf ---"
-  cfg=/usr/share/tomcat5/conf/tomcat5.conf
+function update_tomcat_conf {
+  find_tomcat_version 
+  logit "--- Updating ${TOMCAT_VERSION}.conf ---"
+  cfg=/usr/share/${TOMCAT_VERSION}/conf/${TOMCAT_VERSION}.conf
   if [ ! -f $cfg ];then
     logerr "tomcat config file does not exist: $cfg"
   fi
@@ -51,8 +63,9 @@ EOF
 }
 #----------------
 function update_server_xml {
+  find_tomcat_version 
   logit "--- Updating server.xml ---"
-  server_xml=/usr/share/tomcat5/conf/server.xml
+  server_xml=/usr/share/${TOMCAT_VERSION}/conf/server.xml
   logit "Replacing Tomcat server.xml file: $server_xml"
   runit "cp -p $server_xml ${server_xml}.${BACKUP_DATE}"
   runit "cp -p $SERVER_XML_TEMPLATE $server_xml"
@@ -62,12 +75,13 @@ function update_server_xml {
 }
 #---------------
 function link_log4j {
+  find_tomcat_version 
   logit "--- Creating log4j links ---"
   dest=/usr/share/java/log4j.jar
   if [ ! -f "$dest" ];then
     logerr "log4j file does not exist: $dest"
   fi
-  webapps=/usr/share/tomcat5/webapps
+  webapps=/usr/share/${TOMCAT_VERSION}/webapps
   gratia_apps="`ls $webapps`"
   for app in $gratia_apps
   do
@@ -93,7 +107,7 @@ Usage: $PGM
 Configures tomcat for a Gratia Collector RPM instance:
 1. runs /var/lib/trustmanager-tomcat/configure.sh
 2. sets up a log4j links to all Gratia webapps
-3. appends to the tomcat5.conf a new JAVA_OPTS 
+3. appends to the tomcat5/6.conf a new JAVA_OPTS 
 4. creates a new server.xml from a template 
 "
 }
@@ -106,7 +120,7 @@ logit "====== Configuring Tomcat for gratia ===="
 verify_root
 configuring_tomcat
 link_log4j
-update_tomcat5_conf
+update_tomcat_conf
 update_server_xml
 logit "====== Completed Tomcat configuration for Gatia ==="
 exit 0
