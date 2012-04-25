@@ -93,7 +93,11 @@ function link_log4j {
     if [ -f "$link" ];then
       logerr "Link or file already exists: $link"
     fi
-    runit "ln -s $dest $link"
+    case "$TOMCAT_VERSION" in 
+      "tomcat5" )  runit "ln -s $dest $link" ;;
+      "tomcat6" )  runit "cp    $dest $link" ;;
+        * ) logerr "This version of tomcat is not supported: $TOMCAT_VERSION" ;; 
+    esac
     logit "`ls -l $link`"
     logit
   done       
