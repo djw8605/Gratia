@@ -44,7 +44,6 @@ function verify_mysql_installed {
 function validate_mysql_config {
   verify_mysql_installed
   echo "... validating MySql port being used"
-  MYSQL_CONFIG=/home/weigand/tmp/my.cnf
   mysql_cnf_port="`egrep -v '^#' $MYSQL_CONFIG | grep port | sed -e's/=/ /' | awk '{print $2}' | sort -u `"
   [ "x$mysql_cnf_port" = "x" ] && mysql_cnf_port=$DEFAULT_MYSQL_PORT
   if [ "$DBPORT" != "$mysql_cnf_port" ];then
