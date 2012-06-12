@@ -149,7 +149,7 @@ README--Gratia-APEL-interface file as there is too much to explain here.
 #-----------------------------------------------
 def SendEmailNotificationFailure(error):
   """ Sends a failure  email notification to the EmailNotice attribute""" 
-  subject  = "Test SSM Gratia transfer to APEL (WLCG) for %s - FAILED" % gDateFilter
+  subject  = "SSM Gratia transfer to APEL (WLCG) for %s - FAILED" % gDateFilter
   message  = "ERROR: " + error
   SendEmailNotification(subject,message)
 #-----------------------------------------------
@@ -157,7 +157,7 @@ def SendEmailNotificationSuccess():
   """ Sends a successful email notification to the EmailNotice attribute""" 
   global gVoOutput
   global gSitesMissingData
-  subject  = "Test SSM Gratia transfer to APEL (WLCG) for %s - SUCCESS" % gDateFilter
+  subject  = "SSM Gratia transfer to APEL (WLCG) for %s - SUCCESS" % gDateFilter
 
   contents = ""
   if len(gSitesMissingData) == 0:
@@ -178,7 +178,7 @@ def SendEmailNotificationWarnings():
     Logit("No warning conditions detected.")
     return
   Logit("Warning conditions have been detected.")
-  subject  = "Test SSM Gratia transfer to APEL (WLCG) for %s - WARNINGS/ADVISORY" % gDateFilter
+  subject  = "SSM Gratia transfer to APEL (WLCG) for %s - WARNINGS/ADVISORY" % gDateFilter
   contents = """
 The interface from Gratia to the APEL (WLCG) database was successful.
 
