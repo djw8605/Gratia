@@ -1,0 +1,198 @@
+-- ============================================================
+--    Deletes Probe table entries
+-- ============================================================
+DELETE FROM Probe WHERE probeid = 1749;
+-- ============================================================
+--    Deletes ProbeDetails_Meta
+--    Deletes ProbeDetails
+--    Deletes ProbeDetails_Origin
+--    Deletes ProbeDetails_Xml
+--    Deletes ProbeSoftware
+--    Deletes Software
+-- ============================================================
+DELETE FROM Software            WHERE dbid = 13796448;	DELETE FROM ProbeSoftware       WHERE dbid = 13796448;	DELETE FROM ProbeDetails_Xml    WHERE dbid = 13796448;	DELETE FROM ProbeDetails_Origin WHERE dbid = 13796448;	DELETE FROM ProbeDetails        WHERE dbid = 13796448;	DELETE FROM ProbeDetails_Meta   WHERE dbid = 13796448;
+=-- ===========================================================
+--    Deletes StorageElementRecord_Meta
+--    Deletes StorageElementRecord_Origin
+--    Deletes StorageElementRecord
+-- ============================================================
+-- ============================================================
+--    Deletes StorageElement_Meta
+--    Deletes StorageElement_Origin
+--    Deletes StorageElement
+-- ============================================================
+-- ===========================================================
+--    Deletes Subcluster_Meta
+--    Deletes Subcluster_Origin
+--    Deletes Subcluster
+-- ============================================================
+-- ===========================================================
+--    Deletes ComputeElementRecord_Meta
+--    Deletes ComputeElementRecord_Origin
+--    Deletes ComputeElementRecord
+-- ============================================================
+-- ===========================================================
+--    Deletes ComputeElement_Meta
+--    Deletes ComputeElement_Origin
+--    Deletes ComputeElement
+-- ============================================================
+-- ============================================================
+--    Deletes MasterSummaryData
+-- ============================================================
+DELETE FROM MasterSummaryData   WHERE ProbeName = 3483526;
+DELETE FROM MasterSummaryData   WHERE ProbeName = 3483527;
+DELETE FROM MasterSummaryData   WHERE ProbeName = 3483528;
+DELETE FROM MasterSummaryData   WHERE ProbeName = 3483529;
+DELETE FROM MasterSummaryData   WHERE ProbeName = 3483530;
+DELETE FROM MasterSummaryData   WHERE ProbeName = 3483531;
+DELETE FROM MasterSummaryData   WHERE ProbeName = 3483532;
+DELETE FROM MasterSummaryData   WHERE ProbeName = 3483533;
+DELETE FROM MasterSummaryData   WHERE ProbeName = 3483534;
+DELETE FROM MasterSummaryData   WHERE ProbeName = 3483535;
+-- ============================================================
+--    Deletes NodeSummary
+-- ============================================================
+-- ============================================================
+--    Deletes MasterTransferSummary
+-- ============================================================
+-- ============================================================
+--    Deletes MasterServiceSummary
+-- ============================================================
+-- ============================================================
+--    Deletes MasterServiceSummaryHourly
+-- ============================================================
+-- ============================================================
+--    Deletes Replication
+-- ============================================================
+-- ============================================================
+--    Deletes Probe table entries
+-- ============================================================
+DELETE FROM Probe WHERE probeid = 1749;
+-- ============================================================
+--    Deletes ProbeDetails_Meta
+--    Deletes ProbeDetails
+--    Deletes ProbeDetails_Origin
+--    Deletes ProbeDetails_Xml
+--    Deletes ProbeSoftware
+--    Deletes Software
+-- ============================================================
+DELETE FROM Software            WHERE dbid = 13796448;	DELETE FROM ProbeSoftware       WHERE dbid = 13796448;	DELETE FROM ProbeDetails_Xml    WHERE dbid = 13796448;	DELETE FROM ProbeDetails_Origin WHERE dbid = 13796448;	DELETE FROM ProbeDetails        WHERE dbid = 13796448;	DELETE FROM ProbeDetails_Meta   WHERE dbid = 13796448;
+-- ===========================================================
+--    Deletes StorageElementRecord_Meta
+--    Deletes StorageElementRecord_Origin
+--    Deletes StorageElementRecord
+-- ============================================================
+-- ============================================================
+--    Deletes StorageElement_Meta
+--    Deletes StorageElement_Origin
+--    Deletes StorageElement
+-- ============================================================
+-- ===========================================================
+--    Deletes Subcluster_Meta
+--    Deletes Subcluster_Origin
+--    Deletes Subcluster
+-- ============================================================
+-- ===========================================================
+--    Deletes ComputeElementRecord_Meta
+--    Deletes ComputeElementRecord_Origin
+--    Deletes ComputeElementRecord
+-- ============================================================
+-- ===========================================================
+--    Deletes ComputeElement_Meta
+--    Deletes ComputeElement_Origin
+--    Deletes ComputeElement
+-- ============================================================
+-- ============================================================
+--    Deletes MasterSummaryData
+-- ============================================================
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483526;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483527;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483528;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483529;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483530;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483531;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483532;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483533;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483534;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483535;
+-- ============================================================
+--    Deletes NodeSummary
+-- ============================================================
+-- ============================================================
+--    Deletes MasterTransferSummary
+-- ============================================================
+-- ============================================================
+--    Deletes MasterServiceSummary
+-- ============================================================
+-- ============================================================
+--    Deletes MasterServiceSummaryHourly
+-- ============================================================
+-- ============================================================
+--    Deletes Replication
+-- ============================================================
+-- ============================================================
+--    Deletes Probe table entries
+-- ============================================================
+DELETE FROM Probe WHERE probeid = 1749;
+-- ============================================================
+--    Deletes ProbeDetails_Meta
+--    Deletes ProbeDetails
+--    Deletes ProbeDetails_Origin
+--    Deletes ProbeDetails_Xml
+--    Deletes ProbeSoftware
+--    Deletes Software
+-- ============================================================
+DELETE FROM Software            WHERE dbid = 13796448;	DELETE FROM ProbeSoftware       WHERE dbid = 13796448;	DELETE FROM ProbeDetails_Xml    WHERE dbid = 13796448;	DELETE FROM ProbeDetails_Origin WHERE dbid = 13796448;	DELETE FROM ProbeDetails        WHERE dbid = 13796448;	DELETE FROM ProbeDetails_Meta   WHERE dbid = 13796448;
+-- ===========================================================
+--    Deletes StorageElementRecord_Meta
+--    Deletes StorageElementRecord_Origin
+--    Deletes StorageElementRecord
+-- ============================================================
+-- ============================================================
+--    Deletes StorageElement_Meta
+--    Deletes StorageElement_Origin
+--    Deletes StorageElement
+-- ============================================================
+-- ===========================================================
+--    Deletes Subcluster_Meta
+--    Deletes Subcluster_Origin
+--    Deletes Subcluster
+-- ============================================================
+-- ===========================================================
+--    Deletes ComputeElementRecord_Meta
+--    Deletes ComputeElementRecord_Origin
+--    Deletes ComputeElementRecord
+-- ============================================================
+-- ===========================================================
+--    Deletes ComputeElement_Meta
+--    Deletes ComputeElement_Origin
+--    Deletes ComputeElement
+-- ============================================================
+-- ============================================================
+--    Deletes MasterSummaryData
+-- ============================================================
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483526;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483527;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483528;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483529;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483530;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483531;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483532;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483533;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483534;
+DELETE FROM MasterSummaryData   WHERE SummaryID = 3483535;
+-- ============================================================
+--    Deletes NodeSummary
+-- ============================================================
+-- ============================================================
+--    Deletes MasterTransferSummary
+-- ============================================================
+-- ============================================================
+--    Deletes MasterServiceSummary
+-- ============================================================
+-- ============================================================
+--    Deletes MasterServiceSummaryHourly
+-- ============================================================
+-- ============================================================
+--    Deletes Replication
+-- ============================================================

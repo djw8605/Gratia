@@ -1,0 +1,15 @@
+Wed Jun 20 11:51:09 CDT 2012
+
+mysql --table --verbose --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia_osg_transfer
+
+=========================================================
+Site tables being analized
+=========================================================
+========================================================
+  Query - Sites not used in the Probe table.
+========================================================
+--------------
+SELECT * from Site 
+WHERE siteid NOT IN (SELECT distinct(siteid) FROM Probe)
+--------------
+

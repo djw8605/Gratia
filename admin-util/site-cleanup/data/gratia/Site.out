@@ -1,0 +1,64 @@
+Wed Jun 20 11:51:07 CDT 2012
+
+mysql --table --verbose --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+
+=========================================================
+Site tables being analized
+=========================================================
+========================================================
+  Query - Sites not used in the Probe table.
+========================================================
+--------------
+SELECT * from Site 
+WHERE siteid NOT IN (SELECT distinct(siteid) FROM Probe)
+--------------
+
++--------+--------------------------+
+| siteid | SiteName                 |
++--------+--------------------------+
+|    158 | abitibi.sbgrid.org       | 
+|      1 | BNL                      | 
+|     89 | BNL_LOCAL                | 
+|     85 | BNL_OSG                  | 
+|     65 | BNL_PANDA                | 
+|      6 | CDF Grid Cluster         | 
+|    210 | CIGI-CNIC                | 
+|    240 | CIT_CMS_T2B              | 
+|     44 | cluster04.syr.edu        | 
+|     10 | Cmslcgce                 | 
+|      7 | Cmsosgce                 | 
+|    149 | condor1.oscer.ou.edu     | 
+|    150 | condor2.oscer.ou.edu     | 
+|    243 | GPN-HUSKER               | 
+|    207 | GRASE-ALBANY-NYS         | 
+|    109 | IU_ATLAS_Tier2           | 
+|    198 | julius.rcac.purdue.edu   | 
+|    187 | JUST_FOR_FUN             | 
+|    253 | KISTI-NSDC               | 
+|    283 | LLNL                     | 
+|    188 | MITCMS                   | 
+|    179 | NCSA                     | 
+|    118 | NYSGRID-CORNELL-NYS1     | 
+|     90 | OSG-LIGO-MIT             | 
+|    209 | OSG-UJ                   | 
+|    153 | pdsfgrid4.nersc.gov      | 
+|     15 | Purdue-ITaP              | 
+|    300 | Red                      | 
+|    203 | RENCI_Engagement         | 
+|    168 | ruhex-osgce              | 
+|    183 | T3_US_COLORADO           | 
+|    248 | T3_US_Vanderbilt         | 
+|    127 | tier2-02.ochep.ou.edu    | 
+|    119 | tp-grid1.ci.uchicago.edu | 
+|    101 | UCSDT2-B                 | 
+|    110 | uct2-grid6.uchicago.edu  | 
+|    152 | UIUC-HEP                 | 
+|    144 | UNI-P OSG Resources      | 
+|     13 | Unknown                  | 
+|    139 | UNM-HPC                  | 
+|     24 | USCMS Tier 2 OSG Site    | 
+|     88 | USCMS-FNAL-WC1-CE2       | 
+|    138 | USCMS-FNAL-WC1-CE3       | 
+|    137 | USCMS-FNAL-WC1-CE4       | 
+|     46 | UTA-DPCC                 | 
++--------+--------------------------+

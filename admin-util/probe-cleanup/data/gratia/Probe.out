@@ -1,0 +1,243 @@
+Wed Jun 20 14:42:56 CDT 2012
+
+mysql --table --verbose --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+
+=========================================================
+Probe being analized
+=========================================================
+--------------
+set @probename="pbs-lsf:brian-test.unl.edu"
+--------------
+
+============================================================
+   Query - Total Probe table entries
+============================================================
+--------------
+SELECT count(*) from Probe where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        1 | 
++----------+
+--------------
+SELECT        * from Probe where ProbeName = @probename
+--------------
+
++---------+--------+----------------------------+--------+---------------------+------------------------+----------+----------+--------+----------+-------------+--------------+
+| probeid | siteid | probename                  | active | currenttime         | CurrentTimeDescription | reporthh | reportmm | status | nRecords | nDuplicates | nConnections |
++---------+--------+----------------------------+--------+---------------------+------------------------+----------+----------+--------+----------+-------------+--------------+
+|    1749 |     39 | pbs-lsf:brian-test.unl.edu |      1 | 2012-06-04 14:45:31 | NULL                   |        0 |        0 | alive  |        0 |           0 |            0 | 
++---------+--------+----------------------------+--------+---------------------+------------------------+----------+----------+--------+----------+-------------+--------------+
+============================================================
+   Query - Total ProbeDetails_Meta table entries
+============================================================
+--------------
+SELECT count(*) from ProbeDetails_Meta where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        1 | 
++----------+
+--------------
+SELECT        * from ProbeDetails_Meta where ProbeName = @probename
+--------------
+
++----------+---------------------------+---------------------+-----------------------+----------------------------+----------------------+---------+--------------+---------------------+------+---------------------+----------------------------------+
+| dbid     | recordId                  | CreateTime          | CreateTimeDescription | ProbeName                  | ProbeNameDescription | probeid | SiteName     | SiteNameDescription | Grid | ServerDate          | md5                              |
++----------+---------------------------+---------------------+-----------------------+----------------------------+----------------------+---------+--------------+---------------------+------+---------------------+----------------------------------+
+| 13796448 | brian-test.unl.edu:6778.0 | 2012-06-04 14:45:05 | NULL                  | pbs-lsf:brian-test.unl.edu | NULL                 |    1749 | Generic site | NULL                | OSG  | 2012-06-04 14:45:26 | 0E3F779AC1BF45232A06DAF38B3893CB | 
++----------+---------------------------+---------------------+-----------------------+----------------------------+----------------------+---------+--------------+---------------------+------+---------------------+----------------------------------+
+============================================================
+   Query - Total StorageElement table entries
+============================================================
+--------------
+SELECT count(*) from StorageElement where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT        * from StorageElement where ProbeName = @probename
+--------------
+
+============================================================
+   Query - Total StorageElementRecord table entries
+============================================================
+--------------
+SELECT count(*) from StorageElementRecord where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT        * from StorageElementRecord where ProbeName = @probename
+--------------
+
+============================================================
+   Query - Total Subcluster table entries
+============================================================
+--------------
+SELECT count(*) from Subcluster where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT        * from Subcluster where ProbeName = @probename
+--------------
+
+============================================================
+   Query - Total ComputeElement table entries
+============================================================
+--------------
+SELECT count(*) from ComputeElement where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT        * from ComputeElement where ProbeName = @probename
+--------------
+
+============================================================
+   Query - Total ComputeElementRecord table entries
+============================================================
+--------------
+SELECT count(*) from ComputeElementRecord where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT        * from ComputeElementRecord where ProbeName = @probename
+--------------
+
+============================================================
+   Query - Total MasterSummaryData table entries
+============================================================
+--------------
+SELECT count(*) from MasterSummaryData where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|       10 | 
++----------+
+--------------
+SELECT        * from MasterSummaryData where ProbeName = @probename
+--------------
+
++---------------------+----------+----------------------------+----------------------------+--------------+-----------------+---------------------+-------+--------------+-----------------+-------------------+-----------+------+-------+---------------------------------------------------------+
+| EndTime             | VOcorrid | ProbeName                  | CommonName                 | ResourceType | HostDescription | ApplicationExitCode | Njobs | WallDuration | CpuUserDuration | CpuSystemDuration | SummaryID | Grid | Cores | DistinguishedName                                       |
++---------------------+----------+----------------------------+----------------------------+--------------+-----------------+---------------------+-------+--------------+-----------------+-------------------+-----------+------+-------+---------------------------------------------------------+
+| 2012-06-04 00:00:00 |       40 | pbs-lsf:brian-test.unl.edu | Unknown                    | Batch        | executing host  | 0                   |     9 |          600 |               0 |                 0 |   3483526 | OSG  |     1 |                                                         | 
+| 2012-06-03 00:00:00 |       40 | pbs-lsf:brian-test.unl.edu | Unknown                    | Batch        | executing host  | 0                   |     1 |          300 |               0 |                 0 |   3483527 | OSG  |     1 |                                                         | 
+| 2012-06-01 00:00:00 |       40 | pbs-lsf:brian-test.unl.edu | Unknown                    | Batch        | executing host  | 0                   |     1 |            0 |               0 |                 0 |   3483528 | OSG  |     1 |                                                         | 
+| 2012-06-02 00:00:00 |       40 | pbs-lsf:brian-test.unl.edu | Unknown                    | Batch        | executing host  | 126                 |     4 |            0 |               0 |                 0 |   3483529 | OSG  |     1 |                                                         | 
+| 2012-06-02 00:00:00 |       40 | pbs-lsf:brian-test.unl.edu | Unknown                    | Batch        | executing host  | 0                   |     7 |          302 |               0 |                 0 |   3483530 | OSG  |     1 |                                                         | 
+| 2012-06-02 00:00:00 |       40 | pbs-lsf:brian-test.unl.edu | Unknown                    | Batch        | executing host  | 143                 |     2 |          187 |               0 |                 0 |   3483531 | OSG  |     1 |                                                         | 
+| 2012-06-02 00:00:00 |       40 | pbs-lsf:brian-test.unl.edu | Unknown                    | Batch        | executing host  | 271                 |     1 |          419 |               0 |                 0 |   3483532 | OSG  |     1 |                                                         | 
+| 2012-06-04 00:00:00 |        8 | pbs-lsf:brian-test.unl.edu | /CN=Brian Bockelman 504307 | Batch        | executing host  | 0                   |     3 |          900 |               0 |                 0 |   3483533 | OSG  |     1 | /DC=org/DC=doegrids/OU=People/CN=Brian Bockelman 504307 | 
+| 2012-05-31 00:00:00 |       40 | pbs-lsf:brian-test.unl.edu | Unknown                    | Batch        | executing host  | 0                   |    98 |          521 |               0 |                 0 |   3483534 | OSG  |     1 |                                                         | 
+| 2012-05-31 00:00:00 |       40 | pbs-lsf:brian-test.unl.edu | Unknown                    | Batch        | executing host  | 271                 |     1 |            0 |               0 |                 0 |   3483535 | OSG  |     1 |                                                         | 
++---------------------+----------+----------------------------+----------------------------+--------------+-----------------+---------------------+-------+--------------+-----------------+-------------------+-----------+------+-------+---------------------------------------------------------+
+============================================================
+   Query - Total NodeSummary table entries
+============================================================
+--------------
+SELECT count(*) from NodeSummary where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT        * from NodeSummary where ProbeName = @probename
+--------------
+
+============================================================
+   Query - Total MasterTransferSummary table entries
+============================================================
+--------------
+SELECT count(*) from MasterTransferSummary where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT        * from MasterTransferSummary where ProbeName = @probename
+--------------
+
+============================================================
+   Query - Total MasterServiceSummary table entries
+============================================================
+--------------
+SELECT count(*) from MasterServiceSummary where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT        * from MasterServiceSummary where ProbeName = @probename
+--------------
+
+============================================================
+   Query - Total MasterServiceSummaryHourly table entries
+============================================================
+--------------
+SELECT count(*) from MasterServiceSummaryHourly where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT        * from MasterServiceSummaryHourly where ProbeName = @probename
+--------------
+
+============================================================
+   Query - Total Replication table entries
+============================================================
+--------------
+SELECT count(*) from Replication where ProbeName = @probename
+--------------
+
++----------+
+| count(*) |
++----------+
+|        0 | 
++----------+
+--------------
+SELECT        * from Replication where ProbeName = @probename
+--------------
+
