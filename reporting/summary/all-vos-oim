@@ -78,7 +78,7 @@ if ($options->{"compare-period"}) {
 }
 
 if (not scalar @ARGV) {
-  push @ARGV, "$script_top_dir/all-vos.dat";
+  push @ARGV, "/etc/gratia/gratia-reporting/all-vos.dat";
 }
 
 # Parse reporting data from all sources

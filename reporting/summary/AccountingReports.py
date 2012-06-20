@@ -151,7 +151,7 @@ def UseArgs(argv):
     weekly = False
     daily = False
     
-    configFiles = "gratiareports.conf"
+    configFiles = "/etc/gratia/gratia-reporting/gratiareports.conf"
     
     if argv is None:
         argv = sys.argv[1:]
@@ -290,7 +290,7 @@ def ProbeWhere():
 
 def CommonWhere():
     global gProbeName, gBegin, gEnd
-    return " VOName != \"unknown\" and \"" \
+    return " VOName != \"Unknown\" and \"" \
         + DateToString(gBegin) +"\"<=EndTime and EndTime<\"" + DateToString(gEnd) + "\"" \
         + ProbeWhere()
 
@@ -311,7 +311,7 @@ def LogToFile(message):
     filename = "none"
 
     try:
-        filename = time.strftime("%Y-%m-%d") + ".log"
+        filename = "/var/log/gratia-reporting/"+time.strftime("%Y-%m-%d") + ".log"
         #filename = os.path.join(Config.get_LogFolder(),filename)
 
         if os.path.exists(filename) and not os.access(filename,os.W_OK):
@@ -726,8 +726,9 @@ def DailySiteData(begin,end):
         
         select = " SELECT Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
-                + " where VOName != \"unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and ResourceType=\"Batch\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by Probe.siteid "
         return RunQueryAndSplit(select)
@@ -737,8 +738,9 @@ def DailyVOData(begin,end):
             
         select = " SELECT J.VOName, Sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
-                + " where VOName != \"unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and ResourceType=\"Batch\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName "
         return RunQueryAndSplit(select)
@@ -748,8 +750,9 @@ def DailySiteVOData(begin,end):
         
         select = " SELECT Site.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
-                + " where VOName != \"unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and ResourceType=\"Batch\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName, Probe.siteid order by Site.SiteName "
         return RunQueryAndSplit(select)
@@ -759,8 +762,9 @@ def DailyVOSiteData(begin,end):
         
         select = " SELECT J.VOName, Site.SiteName, sum(NJobs), sum(J.WallDuration) " \
                 + " from "+schema+".Site, "+schema+".Probe, "+schema+".VOProbeSummary J " \
-                + " where VOName != \"unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " and ResourceType=\"Batch\"" \
                 + " and J.ProbeName not like \"psacct:%\" " \
                 + " group by J.VOName, Probe.siteid order by J.VOName, Site.SiteName "
         return RunQueryAndSplit(select)
@@ -774,7 +778,7 @@ def DailySiteVODataFromDaily(begin,end,select,count):
         
         select = " SELECT M.ReportedSiteName, J.VOName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," + schema +".JobUsageRecord_Meta M " \
-                + " where VOName != \"unknown\" and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " where VOName != \"Unknown\" and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and M.dbid = J.dbid " \
                 + " and ProbeName " + select + "\"daily:goc\" " \
                 + " group by J.VOName, M.ReportedSiteName order by M.ReportedSiteName, J.VOName "
@@ -792,7 +796,7 @@ def DailyVOSiteDataFromDaily(begin,end,select,count):
         select = " SELECT J.VOName, M.ReportedSiteName, "+count+", sum(J.WallDuration) " \
                 + " from "+schema+".JobUsageRecord J," \
                 + schema + ".JobUsagRecord_Meta M " \
-                + " where VOName != \"unknown\" and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
+                + " where VOName != \"Unknown\" and \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + " and M.dbid = J.dbid " \
                 + " and ProbeName " + select + "\"daily:goc\" " \
                 + " group by J.VOName, M.ReportedSiteName order by J.VOName, M.ReportedSiteName "
@@ -809,7 +813,7 @@ def DailySiteJobStatusSummary(begin,end,selection = "", count = "", what = "Site
                 + "   where \"" + DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + "   and ResourceType = \"Batch\" " \
                 + "  ) J, VONameCorrection, VO " \
-                + " where VO.VOName != \"unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VO.VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and " + VONameCorrectionSummaryJoin("J") \
                 + selection \
                 + " group by " + what + ",J.ApplicationExitCode " \
@@ -827,7 +831,7 @@ def DailySiteJobStatus(begin,end,selection = "", count = "", what = "Site.SiteNa
                 + "   and \"" + DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + "   and ResourceType = \"Batch\" " \
                 + "  ) J, VONameCorrection, VO " \
-                + " where VO.VOName != \"unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VO.VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and " + VONameCorrectionJoin("J") \
                 + selection \
                 + " group by " + what + ",J.Status " \
@@ -844,7 +848,7 @@ def DailySiteJobStatusCondor(begin,end,selection = "", count = "", what = "Site.
                 + "   and \"" + DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\"" \
                 + "   and ResourceType = \"Batch\" " \
                 + "  ) J, VONameCorrection, VO " \
-                + " where VO.VOName != \"unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
+                + " where VO.VOName != \"Unknown\" and Probe.siteid = Site.siteid and J.ProbeName = Probe.probename" \
                 + " and J.dbid = R.dbid and R.Description = \"ExitCode\" " \
                 + " and " + VONameCorrectionJoin("J") \
                 + selection \
@@ -869,14 +873,14 @@ def CMSProdData(begin,end):
 
 def GetSiteVOEfficiency(begin,end):
     schema = gDBSchema[mainDB] + ".";
-    #select = "select SiteName, lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by Site.SiteName, lcase(VO.VOName),Cores"
-    select = "select SiteName, lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by Site.SiteName, lcase(VO.VOName),Cores order by Site.SiteName, lcase(VO.VOName), Cores"
+    #select = "select SiteName, lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"Unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by Site.SiteName, lcase(VO.VOName),Cores"
+    select = "select SiteName, lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"Unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by Site.SiteName, lcase(VO.VOName),Cores order by Site.SiteName, lcase(VO.VOName), Cores"
     return RunQueryAndSplit(select);    
 
 def GetVOEfficiency(begin,end):
     schema = gDBSchema[mainDB] + ".";
-    #select = "select lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by lcase(VO.VOName),Cores"
-    select = "select lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by lcase(VO.VOName),Cores order by lcase(VO.VOName),Cores"
+    #select = "select lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"Unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by lcase(VO.VOName),Cores"
+    select = "select lcase(VO.VOName), sum(Njobs),sum(WallDuration),round(sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration),2) as CpuToWall, Cores, round(sum(CpuUserDuration+CpuSystemDuration)/(sum(WallDuration)*Cores),2)*100 as eff from " + schema + "MasterSummaryData MSD, " + schema + "Site, " + schema + "Probe, VONameCorrection VC, VO where VO.VOName != \"Unknown\" and VO.VOName != \"other\" and VO.VOName != \"other EGEE\" and Probe.siteid = Site.siteid and MSD.ProbeName = Probe.probename and MSD.VOcorrid = VC.corrid and VC.VOid = VO.VOid and EndTime >= \"" + DateToString(begin) + "\" and EndTime < \"" + DateToString(end) + "\" group by lcase(VO.VOName),Cores order by lcase(VO.VOName),Cores"
     return RunQueryAndSplit(select);    
 
 def PrintHeader():
@@ -1568,9 +1572,10 @@ def RangeVOData(begin, end, with_panda = False):
     select = """\
 select J.VOName, sum(J.NJobs), sum(J.WallDuration)
   from """ + schema + """.VOProbeSummary J
-  where VOName != \"unknown\" and 
+  where VOName != \"Unknown\" and 
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
+    J.ResourceType=\"Batch\" and
     J.ProbeName not like \"psacct:%\"
     group by J.VOName
     order by VOName;"""
@@ -1622,22 +1627,24 @@ def RangeSiteData(begin, end, with_panda = False):
     select = """\
 select T.SiteName, sum(J.NJobs), sum(J.WallDuration)
   from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
-  where VOName != \"unknown\" and 
+  where VOName != \"Unknown\" and 
     P.siteid = T.siteid and
     J.ProbeName = P.probename and
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
+    J.ResourceType=\"Batch\" and
     J.ProbeName not like \"psacct:%\"
     group by P.siteid;"""
     if with_panda:
         panda_select = """\
 select J.SiteName, sum(J.NJobs), sum(J.WallDuration)
   from """ + gDBSchema[dailyDB] + """.JobUsageRecord_Report J
-  where VOName != \"unknown\" and 
+  where VOName != \"Unknown\" and 
     J.ProbeName != \"daily:goc\" and
     J.SiteName not in (select GT.SiteName from """ + gDBSchema[mainDB] + """.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
-    J.EndTime < \"""" + DateTimeToString(end) + """\"
+    J.EndTime < \"""" + DateTimeToString(end) + """\" and
+    J.ResourceType=\"Batch\" 
     group by J.SiteName;"""
         return RunQueryAndSplit(select) + RunQueryAndSplit(panda_select)
     else:
@@ -1649,11 +1656,12 @@ def RangeSiteVOData(begin, end, with_panda = False):
     select = """\
 select T.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration)
   from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
-  where VOName != \"unknown\" and 
+  where VOName != \"Unknown\" and 
     P.siteid = T.siteid and
     J.ProbeName = P.probename and
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
+    J.ResourceType=\"Batch\" and
     J.ProbeName not like \"psacct:%\"
     group by T.SiteName,J.VOName
     order by T.SiteName,J.VOName;"""
@@ -1661,11 +1669,12 @@ select T.SiteName, J.VOName, sum(NJobs), sum(J.WallDuration)
         panda_select = """\
 select J.SiteName, J.VOName, sum(J.NJobs), sum(J.WallDuration)
   from """ + gDBSchema[dailyDB] + """.JobUsageRecord_Report J
-  where VOName != \"unknown\" and 
+  where VOName != \"Unknown\" and 
     J.ProbeName != \"daily:goc\" and
     J.ReportedSiteName not in (select GT.SiteName from """ + gDBSchema[mainDB] + """.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
-    J.EndTime < \"""" + DateTimeToString(end) + """\"
+    J.EndTime < \"""" + DateTimeToString(end) + """\" and
+    J.ResourceType=\"Batch\" 
     group by J.ReportedSiteName, J.VOName
     order by J.ReportedSiteName, J.VOName;"""
         return RunQueryAndSplit(select) + RunQueryAndSplit(panda_select)
@@ -1678,11 +1687,12 @@ def RangeVOSiteData(begin, end, with_panda = False):
     select = """\
 select J.VOName, T.SiteName, sum(NJobs), sum(J.WallDuration)
   from """ + schema + ".Site T, " + schema + ".Probe P, " + schema + """.VOProbeSummary J
-  where VOName != \"unknown\" and 
+  where VOName != \"Unknown\" and 
     P.siteid = T.siteid and
     J.ProbeName = P.probename and
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
+    J.ResourceType=\"Batch\" and 
     J.ProbeName not like \"psacct:%\"
     group by T.SiteName,J.VOName
     order by J.VOName,T.SiteName;"""
@@ -1690,11 +1700,12 @@ select J.VOName, T.SiteName, sum(NJobs), sum(J.WallDuration)
         panda_select = """\
 select J.VOName, J.SiteName, sum(J.NJobs), sum(J.WallDuration)
   from """ + gDBSchema[dailyDB] + """.JobUsageRecord_Report J
-  where VOName != \"unknown\" and 
+  where VOName != \"Unknown\" and 
     J.ProbeName != \"daily:goc\" and
     J.SiteName not in (select GT.SiteName from """ + gDBSchema[mainDB] + """.Site GT) and
     J.EndTime >= \"""" + DateTimeToString(begin) + """\" and
-    J.EndTime < \"""" + DateTimeToString(end) + """\"
+    J.EndTime < \"""" + DateTimeToString(end) + """\" and
+    J.ResourceType=\"Batch\" 
     group by J.SiteName, J.VOName
     order by J.VOName, J.SiteName;"""
         return RunQueryAndSplit(select) + RunQueryAndSplit(panda_select)
@@ -1712,6 +1723,7 @@ Cpu,VOName,ReportableVOName,EndTime from JobUsageRecord J
 where
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
+    J.ResourceType=\"Batch\" and
     WallDuration > 3600*24*7
 ) as sub,
 JobUsageRecord_Meta M, VONameCorrection, VO, Probe, Site
@@ -1738,7 +1750,7 @@ SELECT VOName, CommonName, sum(NJobs), sum(WallDuration) as Wall
 from VOProbeSummary U where
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\"
-    and CommonName != \"unknown\"
+    and CommonName != \"Unknown\"
     """ + selection + """
     group by CommonName, VOName
 """
@@ -1752,7 +1764,7 @@ from VOProbeSummary U, Probe P, Site S where
     EndTime >= \"""" + DateTimeToString(begin) + """\" and
     EndTime < \"""" + DateTimeToString(end) + """\" and
     U.ProbeName = P.ProbeName and P.siteid = S.siteid 
-    and CommonName != \"unknown\"
+    and CommonName != \"Unknown\"
     """ + selection + """
     group by CommonName, SiteName, VOName
 """
@@ -1948,7 +1960,7 @@ Deltas are the differences with the previous period."""
         maxlen = 35
         for x in l:
             (vo,user,njobs,wall) = x.split('\t')
-            if ( vo != "unknown" and vo != "other" and vo != "other EGEE"):
+            if ( vo != "Unknown" and vo != "other" and vo != "other EGEE"):
                pos = user.find("/CN=cron/");
                if ( pos >= 0) : user = user[pos+8:maxlen+pos+8]
                pat1 = re.compile("/CN=[0-9]*/");
@@ -2019,7 +2031,7 @@ Deltas are the differences with the previous period."""
         maxlen = 35
         for x in l:
             (user,vo,site,njobs,wall) = x.split('\t')
-            if ( vo != "unknown" and vo != "other" and vo != "other EGEE"):
+            if ( vo != "Unknown" and vo != "other" and vo != "other EGEE"):
                pos = user.find("/CN=cron/");
                if ( pos >= 0) : user = user[pos+8:maxlen+pos+8]
                pat1 = re.compile("/CN=[0-9]*/");
@@ -2315,12 +2327,12 @@ def GenericRange(what, range_end = datetime.date.today(),
 
         if what.headers[0] == "VO":
             # "site" is really "VO": hack to harmonize Panda output
-            if lkeys[0] != "unknown": lkeys[0] = string.lower(lkeys[0])
+            if lkeys[0] != "Unknown": lkeys[0] = string.lower(lkeys[0])
 
         if (len(val)==4) :
             # Nasty hack to harmonize Panda output
             if what.headers[1] == "VO":
-               if lkeys[1] != "unknown": lkeys[1] = string.lower(lkeys[1])
+               if lkeys[1] != "Unknown": lkeys[1] = string.lower(lkeys[1])
 
         #for iheaders in range(1,len(keys)):
         #   key = key + keys[iheaders] + " "
@@ -2358,12 +2370,12 @@ def GenericRange(what, range_end = datetime.date.today(),
 
         if what.headers[0] == "VO":
             # "site" is really "VO": hack to harmonize Panda output
-            if lkeys[0] != "unknown": lkeys[0] = string.lower(lkeys[0])
+            if lkeys[0] != "Unknown": lkeys[0] = string.lower(lkeys[0])
 
         if (len(val)==4) :
             # Nasty hack to harmonize Panda output
             if what.headers[1] == "VO":
-               if lkeys[1] != "unknown": lkeys[1] = string.lower(lkeys[1])
+               if lkeys[1] != "Unknown": lkeys[1] = string.lower(lkeys[1])
 
 #        for iheaders in range(0,len(keys)):
 #           key = key + keys[iheaders] + " "
@@ -2738,9 +2750,10 @@ def GetReportingVOs(begin,end):
     schema = gDBSchema[mainDB] + ".";
 
     select = """\
-select distinct VOName from """+schema+"""VOProbeSummary V where VOName != \"unknown\" and 
+select distinct VOName from """+schema+"""VOProbeSummary V where VOName != \"Unknown\" and 
             EndTime >= \"""" + DateToString(begin) + """\" and
-            EndTime < \"""" + DateToString(end) + """\"
+            EndTime < \"""" + DateToString(end) + """\" and
+	    ResourceType=\"Batch\"
             order by VOName
             """
     #print "Query = " + select;
@@ -2751,7 +2764,7 @@ def GetLastReportingVOs(when):
     schema = gDBSchema[mainDB] + ".";
 
     select = """\
-select distinct VOName from """+schema+"""VOProbeSummary V where VOName != \"unknown\" and 
+select distinct VOName from """+schema+"""VOProbeSummary V where VOName != \"Unknown\" and ResourceType=\"Batch\" and
             EndTime >= \"""" + DateToString(when) + """\" 
             order by VOName
             """
@@ -2778,9 +2791,10 @@ def GetListOfReportingSites(begin,end):
     schema = gDBSchema[mainDB] + ".";
 
     select = """\
-select distinct SiteName from """+schema+"""VOProbeSummary V,Probe P,Site S where VOName != \"unknown\" and 
+select distinct SiteName from """+schema+"""VOProbeSummary V,Probe P,Site S where VOName != \"Unknown\" and 
             EndTime >= \"""" + DateToString(begin) + """\" and
-            EndTime < \"""" + DateToString(end) + """\"
+            EndTime < \"""" + DateToString(end) + """\" and
+	    ResourceType = \"Batch\"
             and V.ProbeName = P.ProbeName and P.siteid = S.siteid
             order by SiteName
             """
@@ -2809,9 +2823,10 @@ def GetTotals(begin,end):
     schema = gDBSchema[mainDB] + ".";
 
     select = """\
-select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) from """+schema+"""VOProbeSummary where VOName != \"unknown\" and 
+select sum(Njobs),sum(WallDuration),sum(CpuUserDuration+CpuSystemDuration)/sum(WallDuration) from """+schema+"""VOProbeSummary where VOName != \"Unknown\" and 
             EndTime >= \"""" + DateToString(begin) + """\" and
-            EndTime < \"""" + DateToString(end) + """\"
+            EndTime < \"""" + DateToString(end) + """\" and
+	    ResourceType = \"Batch\"
             """
     #print "Query = " + select;
 
@@ -3514,7 +3529,7 @@ def SoftwareVersion(range_end = datetime.date.today(),
                  "1.84":"v0.34.[1-8]","1.85":"v0.34.[9-10]","1.86":"v0.36","1.90":"v0.38.4","1.91":"v1.00.1",
                  "1.93":"v1.00.3","1.95":"v1.00.5","1.100":"v1.02.01",
                  "3002":"v1.04.1","3266":"v1.04.3","3316":"v1.04.4c"},
-     "condor_meter.pl" : { "$""Revision: 1.29 $  (tag unknown)":"v0.99", "$""Revision: 1.31 $  (tag unknown)":"v1.00.3+", 
+     "condor_meter.pl" : { "$""Revision: 1.29 $  (tag Unknown)":"v0.99", "$""Revision: 1.31 $  (tag Unknown)":"v1.00.3+", 
                            "$""Revision: 1.32 $  (tag 1.02.1-5)":"v1.02.1", "$""Revision: 3277 $  (tag 1.04.3c-1)":"v1.04.3",
                            "$""Revision: 3277 $  (tag 1.04.4d-1)":"v1.04.4d" },
      "pbs-lsf.py" : { "1.7 (tag )":"v1.00.1+", "1.8 (tag )":"v1.00.x", "1.9 (tag 1.02.1-5)":"v1.02.1", "3002 (tag 1.04.3c-1)":"v1.04.3",

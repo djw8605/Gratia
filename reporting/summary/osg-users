@@ -152,7 +152,7 @@ pod2usage(-verbose => 1) if exists $options{help};
 # Full man page (requires working pod2man)
 pod2usage(-verbose => 2) if exists $options{man};
 
-$options{"data-source"} = ["$script_top_dir/user-reports.dat"]
+$options{"data-source"} = ["/etc/gratia/gratia-reporting/user-reports.dat"]
   unless $options{"data-source"};
 
 my $reporting_data =
@@ -687,7 +687,7 @@ sub old_report(\@$$) {
   if (scalar @$email_addresses) {
     print "Mailing output to: \n";
     print join(", ", @$email_addresses), "\n\n";
-    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$output_filename" -s "OSG metrics for VO $vo by $timeperiod" %s&,
+    my $cmd = sprintf(qq&mutt -F "/etc/gratia/gratia-reporting/muttrc" -a "$output_filename" -s "OSG metrics for VO $vo by $timeperiod" %s&,
                       join(" ", map { qq/"$_"/ } @$email_addresses));
     open(MUTT, "|$cmd") or die "Unable to open mail command for input";
     print MUTT <<EOF;
@@ -951,7 +951,7 @@ $text
 <html>
 EOF
     close(OUT);
-    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$html_filename" -s "OSG metrics for VO $vo for $timeperiod $current_date to $current_date_end" %s&,
+    my $cmd = sprintf(qq&mutt -F "/etc/gratia/gratia-reporting/muttrc" -a "$html_filename" -s "OSG metrics for VO $vo for $timeperiod $current_date to $current_date_end" %s&,
                       join(" ", map { qq/"$_"/ } @$email_addresses));
 
     open(MUTT, "|$cmd") or die "Unable to open mail command for input";
@@ -1351,7 +1351,7 @@ EOF
             "for $options{\"site-name\"}->[0] ";
     }
 
-    my $cmd = sprintf(qq&mutt -F "$script_top_dir/muttrc" -a "$html_filename" -s "OSG site metrics report ${subject_sites}for $timeperiod $current_date to $current_date_end" %s&,
+    my $cmd = sprintf(qq&mutt -F "/etc/gratia/gratia-reporting/muttrc" -a "$html_filename" -s "OSG site metrics report ${subject_sites}for $timeperiod $current_date to $current_date_end" %s&,
                       join(" ", map { qq/"$_"/ } @$email_addresses));
 
     open(MUTT, "|$cmd") or die "Unable to open mail command for input";

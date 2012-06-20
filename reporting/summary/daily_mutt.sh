@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-WEBLOC="http://gratia-osg-prod-reports.opensciencegrid.org/gratia-reporting"
-SUM_WEBLOC="http://gratia-osg-daily-reports.opensciencegrid.org/gratia-reporting"
-VOREPORT_CONFIG="voreports.debug.config"
 ExtraArgs="--daily"
 
 while test "x$1" != "x"; do
@@ -29,6 +26,11 @@ while test "x$1" != "x"; do
    fi
 done
 
+if [ "x$gridOption"  == "x" ]
+then
+	gridOption="--grid=OSG"
+fi
+
 [ -z $RECIPIENT ] && RECIPIENT=`python getConfigInfo.py|grep "1to"|cut -d' ' -f2-` && [ `echo $RECIPIENT|wc -w` -gt 1 ] && echo $RECIPIENT && exit 1
 [ -z $RECIPIENT ] && echo -e -n "Warning!!! No recipient email has been provided either from command line or in the config file. The reports will be printed to the screen.\\nContinue? (y/n): " && read input && [ $input != "y" ] && echo exiting... && exit 0
 
@@ -44,7 +46,7 @@ BOTH_STATUS_MAIL_MSG="Job Success Rate by Site and VO for $when (from the job le
 VO_MAIL_MSG="Gratia Summary for $when for VO: "
 
 # Transfer the file now
-WORK_DIR=workdir.${RANDOM}
+WORK_DIR=/var/lib/gratia/tmp/workdir.${RANDOM}
 #REPORTTXT=${WORK_DIR}/report.txt
 #REPORTCSV=${WORK_DIR}/report.csv
 #SUM_REPORTTXT=${WORK_DIR}/summary_report.txt

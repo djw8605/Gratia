@@ -1,7 +1,5 @@
 #!/bin/bash
 
-WEBLOC="http://gratia-osg-prod-reports.opensciencegrid.org/gratia-reporting"
-SUM_WEBLOC="http://gratia-osg-daily-reports.opensciencegrid.org/gratia-reporting"
 
 ExtraHeader=""
 ExtraArgs=--daily
@@ -67,6 +65,7 @@ LONGJOBS_MAIL_MSG="${ExtraHeader}Report of jobs longer than 7 days for $when"
 USER_MAIL_MSG="${ExtraHeader}Report by user for $when"
 
 # Transfer the file now
+export TMPDIR=/var/lib/gratia/tmp
 WORK_DIR=`mktemp -d "${TMPDIR:-/tmp}/range_mutt.workdir.XXXXXXXXXX"`
 if [ "$debug" != "yes" ]; then 
   trap "[[ -d \"$WORK_DIR\" ]] && rm -rf \"$WORK_DIR\" 2>/dev/null" EXIT
@@ -92,8 +91,6 @@ function sendtohtml {
         to=${to/ /,}
     fi
 
-    #echo "See $WEBLOC for more information" > $txtfile
-    #echo "For more information see: <a href=$WEBLOC>$WEBLOC</a>" > $htmlfile
     if [ "$dryrun" != "yes" ]; then 
        $cmd "--subject=$subject" --emailto=$to --output=all $gridOption $rep_args
     else

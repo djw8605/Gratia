@@ -89,7 +89,7 @@ smtphost =
 
 [report]
 
-installDir = 
+installDir =  /usr/share/gratia-reporting
 ; Absolute path to the reports installation directory. This value needs to be set.
 
 cron = %(enable)s

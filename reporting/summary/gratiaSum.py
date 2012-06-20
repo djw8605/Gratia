@@ -1,6 +1,7 @@
 #!/bin/env python
 
-import Gratia, string, time, sys
+import gratia.common.Gratia as Gratia
+import string, time, sys
 import AccountingReports
 from AccountingReports import FromCondor,UseArgs,gOutput,gBegin
 import sys
