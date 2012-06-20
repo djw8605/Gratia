@@ -10,7 +10,7 @@ CREATE VIEW `ProbeSummary` AS
          MSD.ProbeName AS ProbeName,
          MSD.ResourceType AS ResourceType,
          MSD.Njobs AS Njobs,
-         MSD.WallDuration AS WallDuration,
+         IF(MSD.Cores > 0,(MSD.WallDuration * MSD.Cores),MSD.WallDuration) as WallDuration,
          MSD.CpuUserDuration AS CpuUserDuration,
          MSD.CpuSystemDuration AS CpuSystemDuration,
          MSD.Grid AS Grid
@@ -30,7 +30,7 @@ CREATE VIEW `UserProbeSummary` AS
          MSD.ProbeName AS ProbeName,
          MSD.ResourceType AS ResourceType,
          MSD.Njobs AS Njobs,
-         MSD.WallDuration AS WallDuration,
+         IF(MSD.Cores > 0,(MSD.WallDuration * MSD.Cores),MSD.WallDuration) as WallDuration,
          MSD.CpuUserDuration AS CpuUserDuration,
          MSD.CpuSystemDuration AS CpuSystemDuration,
          MSD.Grid AS Grid
@@ -51,7 +51,7 @@ CREATE VIEW `VOProbeSummary` AS
          MSD.DistinguishedName as DistinguishedName,
          MSD.ResourceType AS ResourceType,
          MSD.Njobs AS Njobs,
-         MSD.WallDuration AS WallDuration,
+         IF(MSD.Cores > 0,(MSD.WallDuration * MSD.Cores),MSD.WallDuration) as WallDuration,
          MSD.CpuUserDuration AS CpuUserDuration,
          MSD.CpuSystemDuration AS CpuSystemDuration,
          MSD.Grid AS Grid
@@ -72,7 +72,7 @@ CREATE VIEW `HostDescriptionProbeSummary` AS
          MSD.ProbeName AS ProbeName,
          MSD.ResourceType AS ResourceType,
          MSD.Njobs AS Njobs,
-         MSD.WallDuration AS WallDuration,
+         IF(MSD.Cores > 0,(MSD.WallDuration * MSD.Cores),MSD.WallDuration) as WallDuration,
          MSD.CpuUserDuration AS CpuUserDuration,
          MSD.CpuSystemDuration AS CpuSystemDuration,
          MSD.Grid AS Grid

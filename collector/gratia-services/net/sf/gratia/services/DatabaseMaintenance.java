@@ -31,9 +31,9 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 90;
+   static final int gratiaDatabaseVersion = 91;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
-   static final int latestDBVersionRequiringSummaryViewLoad = 82;
+   static final int latestDBVersionRequiringSummaryViewLoad = 91;
    static final int latestDBVersionRequiringSummaryTriggerLoad = 90;
    static final int latestDBVersionRequiringTableStatisticsRefresh = 87;
    static boolean dbUseJobUsageSiteName = false;
@@ -49,6 +49,7 @@ public class DatabaseMaintenance {
       String password = p.getProperty("service.mysql.password");
 
       try {
+         Logging.info("DatabaseMaintenance: initialized"); 
          Class.forName(driver);
          connection = (java.sql.Connection) DriverManager.getConnection(url, user, password);
       } catch (Exception e) {
@@ -60,6 +61,7 @@ public class DatabaseMaintenance {
       RationalizePropsTable();
 
       ReadLiveVersion();
+      Logging.info("DatabaseMaintenance: current database version(" + liveVersion + ") intended database version(" + gratiaDatabaseVersion + ")"); 
 
    }
 
@@ -507,7 +509,7 @@ public class DatabaseMaintenance {
    }
 
    private int CallPostInstall(String action) {
-      Logging.fine("DatabaseMaintenance: calling post-install script for action \"" + action + "\"");
+      Logging.fine("DatabaseMaintenance: Calling post-install script for action \"" + action + "\"");
       String post_install = "/usr/share/gratia/post-install"; 
       String chmod_cmd[] = {"chmod", "700", post_install};
       Execute.execute(chmod_cmd); // Mark executable just in case.
@@ -779,6 +781,10 @@ public class DatabaseMaintenance {
    }
 
    private boolean checkAndUpgradeDbAuxiliaryItems() {
+      int result = 1;
+      int wanted = 1;
+      int ver = 1;
+      Logging.info("DatabaseMaintenance: checkAndUpgradeDbAuxiliaryItems started");
       if (readIntegerDBProperty("gratia.database.version") != gratiaDatabaseVersion) {
          Logging.log(LogLevel.SEVERE,
                "INTERNAL ERROR: DatabaseMainentance::checkAndUpgradeDbAuxiliaryItems" +
@@ -787,66 +793,42 @@ public class DatabaseMaintenance {
       }
 
       // First check summary tables
-      int ver = readIntegerDBProperty("gratia.database.summaryViewVersion");
-      if (ver < latestDBVersionRequiringSummaryViewLoad) {
-         int result = CallPostInstall("summary-view");
-         if (result > -1) {
-            UpdateDbProperty("gratia.database.summaryViewVersion", gratiaDatabaseVersion);
-            Logging.log("Summary view updated successfully");
-         } else {
-            Logging.warning("FAIL: summary view NOT updated");
-            return false;
-         }
-      }
+      result = checkAndUpdateProperty("summary-view","gratia.database.summaryViewVersion",latestDBVersionRequiringSummaryViewLoad);
+      if ( result == 0 ) {
+          return false;
+      } 
 
-      // Next check trigger
-      int wanted = readIntegerDBProperty("gratia.database.wantSummaryTrigger");
-      Logging.log("gratia.database.wantSummaryTrigger = " + wanted);
+      // First trigger 
+      wanted = readIntegerDBProperty("gratia.database.wantSummaryTrigger");
+      Logging.info("DatabaseMainentance: gratia.database.wantSummaryTrigger = " + wanted);
       if (1 == wanted) {
-         ver = readIntegerDBProperty("gratia.database.summaryTriggerVersion");
-         Logging.debug("Read gratia.database.summaryTriggerVersion " + ver);
-         if (ver < latestDBVersionRequiringSummaryTriggerLoad) {
-            Logging.debug("Calling post install for trigger load");
-            int result = CallPostInstall("trigger");
-            if (result > -1) {
-               UpdateDbProperty("gratia.database.summaryTriggerVersion", gratiaDatabaseVersion);
-               Logging.log("Summary trigger updated successfully");
-            } else {
-               Logging.warning("FAIL: summary trigger NOT updated");
-               return false;
-            }
-         }
+          result  = checkAndUpdateProperty("trigger","gratia.database.summaryTriggerVersion",latestDBVersionRequiringSummaryTriggerLoad);
+          if ( result == 0 ) {
+             return false;
+         } 
       }
 
       // Check stored procedures
       wanted = readIntegerDBProperty("gratia.database.wantStoredProcedures");
-      Logging.log("gratia.database.wantStoredProcedures = " + wanted);
+      Logging.info("DatabaseMainentance: gratia.database.wantStoredProcedures = " + wanted);
       if (1 == wanted) {
-         ver = readIntegerDBProperty("gratia.database.storedProcedureVersion");
-         if (ver < latestDBVersionRequiringStoredProcedureLoad) {
-            int result = CallPostInstall("stored");
-            if (result > -1) {
-               UpdateDbProperty("gratia.database.storedProcedureVersion",
-                                gratiaDatabaseVersion);
-               Logging.log("Stored procedures updated successfully");
-            } else {
-               Logging.warning("FAIL: stored procedures NOT updated");
-               return false;
-            }
-         }
+          result  = checkAndUpdateProperty("stored","gratia.database.storedProcedureVersion",latestDBVersionRequiringStoredProcedureLoad);
+          if ( result == 0 ) {
+             return false;
+         } 
       }
 
       // Check TableStatistics
       {
          ver = readIntegerDBProperty("gratia.database.TableStatisticsVersion");
+         Logging.info("DatabaseMainentance: gratia.database.TableStatisticsVersion = " + ver);
          if (ver < latestDBVersionRequiringTableStatisticsRefresh  || !TableExist("TableStatistics")) {
-            int result = RefreshTableStatistics();
+            result = RefreshTableStatistics();
             if (result > -1) {
-               UpdateDbProperty("gratia.database.TableStatisticsVersion",
-                                gratiaDatabaseVersion);
-               Logging.log("Table statistics updated successfully");
+               UpdateDbProperty("gratia.database.TableStatisticsVersion", gratiaDatabaseVersion);
+               Logging.info("DatabaseMainentance: Table statistics updated successfully to version " + gratiaDatabaseVersion);
             } else {
-               Logging.warning("FAIL: table statistics NOT updated");
+               Logging.warning("DatabaseMainentance: FAILED, table statistics NOT updated");
                return false;
             }
          }
@@ -855,14 +837,14 @@ public class DatabaseMaintenance {
       // Check TableStatistics History
       {
          ver = readIntegerDBProperty("gratia.database.TableStatisticsHistoryVersion");
+         Logging.info("DatabaseMainentance: gratia.database.TableStatisticsHistoryVersion = " + ver);
          if (ver < 0 || !TableExist("TableStatisticsSnapshots")) {
-            int result = UpdateTableStatisticsHistory(ver);
+            result = UpdateTableStatisticsHistory(ver);
             if (result > -1) {
-               UpdateDbProperty("gratia.database.TableStatisticsHistoryVersion",
-                                gratiaDatabaseVersion);
-               Logging.log("Table statistics history updated successfully");
+               UpdateDbProperty("gratia.database.TableStatisticsHistoryVersion", gratiaDatabaseVersion);
+               Logging.info("DatabaseMainentance: Table statistics history updated successfully to version " + gratiaDatabaseVersion);
             } else {
-               Logging.warning("FAIL: table statistics history NOT updated properly");
+               Logging.warning("DatabaseMainentance: FAILED, table statistics history NOT updated properly");
                return false;
             }
          }
@@ -872,26 +854,52 @@ public class DatabaseMaintenance {
       // Check BacklogStatistics History
       {
          ver = readIntegerDBProperty("gratia.database.BacklogStatisticsHistoryVersion");
+         Logging.info("DatabaseMainentance: gratia.database.BacklogStatisticsHistoryVersion = " + ver);
          if (ver < 0 || !TableExist("BacklogStatistics") || !TableExist("BacklogStatisticsSnapshots")) {
-            int result = CreateBacklogTables(ver);
+            result = CreateBacklogTables(ver);
             if (result > -1) {
-               UpdateDbProperty("gratia.database.BacklogStatisticsHistoryVersion",
-                                gratiaDatabaseVersion);
-               Logging.log("Backlog statistics history updated successfully");
+               UpdateDbProperty("gratia.database.BacklogStatisticsHistoryVersion", gratiaDatabaseVersion);
+               Logging.info("DatabaseMainentance: Backlog statistics history updated successfully to version " + gratiaDatabaseVersion);
             } else {
-               Logging.warning("FAIL: backlog statistics history NOT updated properly");
+               Logging.warning("DatabaseMainentance: FAILED backlog statistics history NOT updated properly");
                return false;
             }
          }
          
       }
+      Logging.info("DatabaseMaintenance: checkAndUpgradeDbAuxiliaryItems complete");
       return true;
    }
+   
+   private int checkAndUpdateProperty(String type,String property,int latest) {
+      int current = readIntegerDBProperty(property);
+      Logging.info("DatabaseMaintenance: Checking " + type + " - current(" + current + ") latest(" + latest + ")");
+      if ( current < latest ) {
+         int result = CallPostInstall(type);
+         if (result > -1) {
+            UpdateDbProperty(property, latest);
+            Logging.info("DatabaseMaintenance: " + type + " updated successfully to version " + latest);
+         } else {
+            Logging.warning("DatabaseMaintenance: update FAILED - " + type + " NOT updated");
+            return 0;
+         }
+      }
+      return 1;
+   }  //end of checkAndUpdateProperty  
+  
 
    public boolean Upgrade() {
       PropertyDefaults(); // Make sure we have the values in SystemProplist
       int oldvers = liveVersion;
+      Logging.info("DatabaseMaintenance: starting Upgrade check - current version: " + liveVersion + " supported version: " + gratiaDatabaseVersion);
 
+      // if schema versions are up-to-date, just check auxilary items.
+      if ( liveVersion == gratiaDatabaseVersion ) {
+          Logging.info("DatabaseMaintenance: no schema updates required.");
+          return checkAndUpgradeDbAuxiliaryItems();
+      }
+
+      // check to see if this is an initial install
       if (oldvers == 0) {
          Statement statement;
          ResultSet resultSet;
@@ -916,15 +924,10 @@ public class DatabaseMaintenance {
             Logging.warning("Command: Error: " + check + " : " + e);
          }
 
-         Logging.info("Gratia database now at version " + gratiaDatabaseVersion);
-
+         Logging.info("DatabaseMaintenance: Gratia database now at version " + gratiaDatabaseVersion);
          return checkAndUpgradeDbAuxiliaryItems();
-
       } else {
          // Do the necessary upgrades if any
-
-         Logging.info("Gratia database at version " + oldvers);
-
 
          int current = oldvers;
 
@@ -1307,15 +1310,24 @@ public class DatabaseMaintenance {
                                bigintUpgrader.getStackTrace(e));
                 }
          }
+
+         // update the database
          schemaOnlyLowerBound = 86;
-         schemaOnlyUpperBound = 90;
+         schemaOnlyUpperBound = gratiaDatabaseVersion;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
-            // Stored procedures, trigger procedures.
-            Logging.fine("Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
-            current = schemaOnlyUpperBound;
-            UpdateDbVersion(current);
+           UpdateDbVersion(gratiaDatabaseVersion);
+           Logging.fine("DatabaseMaintenance: Gratia database upgraded from " + current + " to " + liveVersion);
+           current = schemaOnlyUpperBound;
          }
-         return ((current == gratiaDatabaseVersion) && checkAndUpgradeDbAuxiliaryItems());
+
+         if ( current != gratiaDatabaseVersion  ) {
+           Logging.log(LogLevel.SEVERE,"DatabaseMaintenance: FAILED to update database from " + current + " to " + gratiaDatabaseVersion);
+           return false;
+         }
+
+         // Stored procedures, trigger procedures.
+         Logging.info("DatabaseMaintenance: Gratia database now at version " + gratiaDatabaseVersion);
+         return checkAndUpgradeDbAuxiliaryItems();
       }
    }
 
