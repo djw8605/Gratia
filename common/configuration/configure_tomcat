@@ -104,6 +104,25 @@ function link_log4j {
   logit
 }
 #-------------------
+# this is only needed for 
+# tomcat6
+function link_gratia_util {
+  find_tomcat_version
+  if [ "$TOMCAT_VERSION" == "tomcat6" ]; then
+  	logit "--- Creating gratia-util links ---"
+	dest=/usr/share/tomcat6/webapps/gratia-services/WEB-INF/lib/gratia-util.jar
+  	link=/usr/share/tomcat6/lib/gratia-util.jar
+  	if [ ! -f "$dest" ];then
+    		logerr "gratia-util file does not exist: $dest"
+  	fi
+    	if [ -f "$link" ];then
+      		logerr "Link or file already exists: $link"
+   	fi
+       	runit "ln -s $dest $link" 
+    	logit "`ls -l $link`"
+   fi
+}
+#-------------------
 function usage {
   echo "
 Usage: $PGM 
@@ -111,8 +130,9 @@ Usage: $PGM
 Configures tomcat for a Gratia Collector RPM instance:
 1. runs /var/lib/trustmanager-tomcat/configure.sh
 2. sets up a log4j links to all Gratia webapps
-3. appends to the tomcat5/6.conf a new JAVA_OPTS 
-4. creates a new server.xml from a template 
+3. creates gratia-util.jar link in lib for tomcat6
+4. appends to the tomcat5/6.conf a new JAVA_OPTS 
+5. creates a new server.xml from a template 
 "
 }
 #### MAIN ############################################################
@@ -124,7 +144,8 @@ logit "====== Configuring Tomcat for gratia ===="
 verify_root
 configuring_tomcat
 link_log4j
+link_gratia_util
 update_tomcat_conf
 update_server_xml
-logit "====== Completed Tomcat configuration for Gatia ==="
+logit "====== Completed Tomcat configuration for Gratia ==="
 exit 0
