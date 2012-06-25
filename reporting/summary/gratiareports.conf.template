@@ -148,6 +148,6 @@ schema=
 ; configuration file.
 
 [local]
-grid_name=HCC
-active_sites=Merritt, Prairiefire, Red, Firefly
-active_vos = cms, dzero, gpn, ligo, engage
+;grid_name=HCC
+;active_sites=Merritt, Prairiefire, Red, Firefly
+;active_vos = cms, dzero, gpn, ligo, engage
