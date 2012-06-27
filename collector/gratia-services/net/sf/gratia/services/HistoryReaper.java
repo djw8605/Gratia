@@ -159,7 +159,7 @@ public class HistoryReaper implements Runnable {
         int i = 0;
         Vector history = new Vector();
         Vector old = new Vector();
-        String path = "/var/lib/gratia/data";
+        String path = "/var/lib/gratia-service/data";
         path = XP.replaceAll(path, "\\", "/");
         Logging.log("HistoryReaper: Path: " + path);
         String temp[] = XP.getDirectoryList(path);

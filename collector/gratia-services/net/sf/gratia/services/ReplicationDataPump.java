@@ -69,7 +69,7 @@ public class ReplicationDataPump extends Thread {
                            chunksize + ")");
          }
       }
-      replicatePath = "/var/lib/gratia/data/replicate";
+      replicatePath = "/var/lib/gratia-service/data/replicate";
       File dir = new File(replicatePath);
       if (!dir.exists()) {
          dir.mkdir();
