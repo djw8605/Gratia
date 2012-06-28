@@ -74,53 +74,44 @@ function update_server_xml {
   logit
 }
 #---------------
-function link_log4j {
+function handle_logging {
   find_tomcat_version 
-  logit "--- Creating log4j links ---"
-  dest=/usr/share/java/log4j.jar
-  if [ ! -f "$dest" ];then
-    logerr "log4j file does not exist: $dest"
-  fi
-  webapps=/usr/share/${TOMCAT_VERSION}/webapps
-  gratia_apps="`ls $webapps`"
-  for app in $gratia_apps
-  do
-    dir=$webapps/$app/WEB-INF/lib
-    if [ ! -d "$dir" ];then
-      logerr "Gratia webapps directory does not exist: $dir"
-    fi
-    link=$dir/log4j.jar
-    if [ -f "$link" ];then
-      logerr "Link or file already exists: $link"
-    fi
-    case "$TOMCAT_VERSION" in 
-      "tomcat5" )  runit "ln -s $dest $link" ;;
-      "tomcat6" )  runit "cp    $dest $link" ;;
+  case "$TOMCAT_VERSION" in 
+      "tomcat5" )  
+	logit "--- addining gratia classes to common/classes ---"
+        runit "cd /usr/share/tomcat5/common/classes"
+        runit "jar xvf /usr/share/tomcat5/webapps/gratia-services/WEB-INF/lib/gratia-util.jar net/sf/gratia/util/TidiedDailyRollingFileAppender\$DatedFileFilter.class  net/sf/gratia/util/TidiedDailyRollingFileAppender.class"
+        runit "cd -"
+
+        logit "`ls -l /usr/share/tomcat5/common/classes/net/sf/gratia/util/`"
+        logit "--- addining log4j.jar to common/lib"
+        link=/usr/share/tomcat5/common/lib/log4j.jar
+        runit "ln -s /usr/share/java/log4j.jar $link"
+        logit "`ls -l $link`"
+	;;
+      "tomcat6" )  
+	logit "--- Creating gratia-util links ---"
+        dest=/usr/share/tomcat6/webapps/gratia-services/WEB-INF/lib/gratia-util.jar
+        link=/usr/share/tomcat6/lib/gratia-util.jar
+        if [ ! -f "$dest" ];then
+                logerr "gratia-util file does not exist: $dest"
+        fi
+        if [ -f "$link" ];then
+                logerr "Link or file already exists: $link"
+        fi
+        runit "ln -s $dest $link"
+        logit "`ls -l $link`"
+        logit "--- Creating links to /usr/share/java/slf4j/---"
+        link=/usr/share/tomcat6/lib/slf4j-log4j12.jar
+        runit "ln -s /usr/share/java/slf4j/log4j12.jar $link"
+        logit "`ls -l $link`"
+        link=/usr/share/tomcat6/lib/slf4j-api.jar
+        runit "ln -s /usr/share/java/slf4j/api.jar $link"
+        logit "`ls -l $link`"
+	 ;;
         * ) logerr "This version of tomcat is not supported: $TOMCAT_VERSION" ;; 
     esac
-    logit "`ls -l $link`"
     logit
-  done       
-  logit
-}
-#-------------------
-# this is only needed for 
-# tomcat6
-function link_gratia_util {
-  find_tomcat_version
-  if [ "$TOMCAT_VERSION" == "tomcat6" ]; then
-  	logit "--- Creating gratia-util links ---"
-	dest=/usr/share/tomcat6/webapps/gratia-services/WEB-INF/lib/gratia-util.jar
-  	link=/usr/share/tomcat6/lib/gratia-util.jar
-  	if [ ! -f "$dest" ];then
-    		logerr "gratia-util file does not exist: $dest"
-  	fi
-    	if [ -f "$link" ];then
-      		logerr "Link or file already exists: $link"
-   	fi
-       	runit "ln -s $dest $link" 
-    	logit "`ls -l $link`"
-   fi
 }
 #-------------------
 function usage {
@@ -129,10 +120,9 @@ Usage: $PGM
 
 Configures tomcat for a Gratia Collector RPM instance:
 1. runs /var/lib/trustmanager-tomcat/configure.sh
-2. sets up a log4j links to all Gratia webapps
-3. creates gratia-util.jar link in lib for tomcat6
-4. appends to the tomcat5/6.conf a new JAVA_OPTS 
-5. creates a new server.xml from a template 
+2. sets up log jars
+3. appends to the tomcat5/6.conf a new JAVA_OPTS 
+4. creates a new server.xml from a template 
 "
 }
 #### MAIN ############################################################
@@ -143,9 +133,8 @@ SERVER_XML_TEMPLATE=/usr/share/gratia/server.xml.template
 logit "====== Configuring Tomcat for gratia ===="
 verify_root
 configuring_tomcat
-link_log4j
-link_gratia_util
+handle_logging
 update_tomcat_conf
 update_server_xml
-logit "====== Completed Tomcat configuration for Gratia ==="
+logit "====== Completed Tomcat configuration for Gatia ==="
 exit 0

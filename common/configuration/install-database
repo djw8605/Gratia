@@ -2,21 +2,27 @@
 ########################################################################
 # Note: This should be executed by root before tomcat is started.
 #       The MySql instance needs to be running.
-#
-# Performs the following on the MySql instance for a Gratia Service
-# 1. Verifies MySql is installed
-# 2. Verifies that the port specified in the Gratia configuration file
-#    matches that set in the MySql /etc/my.cnf file.
-#    Note: this not comprehensive is they really have different ports
-#          for mysqld and the clients.
-# 3. Checks to see if an existing MySql instance has the root password
-#    set and verifies against the Gratia authorization properties file
-# 4. If root password is not set and the Gratia Authorization specifies
-#    it, root passowrd will be set.
-# 5. Creates the mysql gratia database
-# 6. Sets privileges for Gratia users
-#
 ########################################################################
+function usage {
+echo "
+Usage: ${PGM}
+
+Performs the following on the MySql instance for a Gratia Service
+  1. Verifies MySql is installed
+  2. Verifies the mysqld daemon is running  
+  3. Verifies that the port specified in the Gratia configuration file
+     matches that set in the MySql /etc/my.cnf file.
+     Note: this not comprehensive if they really have different ports
+           for mysqld and the clients.
+  4. Checks to see if an existing MySql instance has the root password
+     set and verifies against the Gratia authorization properties file.
+     If root password is not set and the Gratia Authorization specifies
+     it, root passowrd will be set.
+  5. Creates the mysql gratia database
+  6. Sets privileges for Gratia users
+"
+########################################################################
+}
 #-------------------------------
 function ask_continue {
   while :
@@ -32,11 +38,16 @@ function ask_continue {
 }
 #-------------------------------
 function verify_mysql_installed {
-  if [ ! -e "$MYSQL_CONFIG" ]
-  then
+  echo "... validating MySql is installed"
+  if [ ! -e "$MYSQL_CONFIG" ];then
     echo "ERROR: Could not complete Gratia configuration"
     echo "Cannot find $MYSQL_CONFIG"
     echo "You must install and configure MySQL 5 before configuring Gratia."
+    exit 1
+  fi
+  if [ ! -e "/etc/init.d/mysqld" ];then
+    echo "ERROR: Could not find initd service: /etc/init.d/mysqld"
+    echo "Did you install of MySql work correctly?"
     exit 1
   fi
 }
@@ -47,7 +58,7 @@ function validate_mysql_config {
   mysql_cnf_port="`egrep -v '^#' $MYSQL_CONFIG | grep port | sed -e's/=/ /' | awk '{print $2}' | sort -u `"
   [ "x$mysql_cnf_port" = "x" ] && mysql_cnf_port=$DEFAULT_MYSQL_PORT
   if [ "$DBPORT" != "$mysql_cnf_port" ];then
-    echo "ERROR: The MySql port specified in the Gratia configuration file does"
+    echo "ERROR: The MySql port specified in the Gratia configuration file does not"
     echo "match the port specified in the mysql configuration file."
     echo "  File: $CONFIGURATIONS"
     echo "  Attribute: `grep ^service.mysql.url $CONFIGURATIONS`"
@@ -57,6 +68,18 @@ function validate_mysql_config {
     exit 1
   fi
   echo "... port: $DBPORT"
+}
+#-------------------------------
+function verify_mysql_running {
+  echo "... verifying mysqld daemon is running"
+  cmd="service mysqld status"
+  echo "$cmd"
+  $cmd;rtn=$?
+  if [ "$rtn" != "0" ];then
+    echo "ERROR: The MySql mysqld daemon does not appear to be running"
+    echo "You will need it running to complete this installation."
+    exit 1
+  fi
 }
 #-------------------------------
 function check_if_root_passwd_set {
@@ -166,6 +189,10 @@ TMPSQL=/tmp/.${PGM}.sql.$$     # very temporary sql file
 MYSQL_CONFIG=/etc/my.cnf
 DEFAULT_MYSQL_PORT=3306
 
+case $1 in
+ "?" | "-?" | "-h" | "-help" | "--help" ) usage;exit 1;;
+  * ) ;;
+esac
 
 echo "
 Creating Gratia database based on the properties you updated in these files:
@@ -173,6 +200,7 @@ Creating Gratia database based on the properties you updated in these files:
   $AUTHORIZATIONS"
 
 verify_mysql_installed 
+verify_mysql_running 
 get_mysql_attributes
 validate_mysql_config
 check_if_root_passwd_set  # ROOT_SET=1 - password set / ROOT_SET=0 - pswd not set
