@@ -26,7 +26,31 @@ Customer service
 
 ====================================================================
 
-The source file for the various versions are:
-    * Gratia database ERD v030 source (dez): gratia-v030.dez
-    * Gratia database ERD v028 source (dez): gratia-v028.dez 
+Source files are in svn: 
+  gratia/docs/erd/gratia-[version].dez
+
+Images are not being maintained in svn.  Just in the twiki doc.
+
+====================================================================
+Using the erd diagrammer:
+
+1. open it: "C:\Program Files\Datanamic\DeZign for Databases V4\dezign4.exe"
+2. File --> Open project
+3. select the .dez file to edit
+4. Edit it.
+5. 2 copies are saved: 
+   - one with a change box in the lower left 
+   - one without the change box (for show and tell purposes)
+
+When done, you want to create a displayable image.  I have found that a
+.png format works ok.
+1. File --> export as image
+2. uncheck all 3 items (shadows, white background and Selected objects ony)
+3. select OK
+4. select the directory you want to save them in 
+5. In the "Save As" window, select .png in the "save as type" pulldown
+6. Use the same name as the .dez, except now it is a .png file
+7. exit out
+
+Then upload the .png to the Accounting twiki.
 
