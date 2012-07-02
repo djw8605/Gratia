@@ -45,6 +45,24 @@ function configuring_tomcat {
     logerr "Configuration file does not exist or is not executable: $script"
   fi
   runit "/var/lib/trustmanager-tomcat/configure.sh"
+  find_tomcat_version
+  case "$TOMCAT_VERSION" in
+      "tomcat5" )
+        dest=/usr/share/java/log4j.jar
+	link=/usr/share/tomcat5/common/lib/log4j.jar
+        if [ ! -f $link ]
+	then  
+        	logit "--- adding log4j.jar to /usr/share/tomcat5/common/lib ---"
+        	runit "ln -s $dest $link"
+        	logit "`ls -l $link`"
+	fi
+        ;;
+      "tomcat6" )
+         ;;
+        * ) logerr "This version of tomcat is not supported: $TOMCAT_VERSION" ;;
+    esac
+                                                                                                                            77,9          73%
+
   logit
 }
 #---------------

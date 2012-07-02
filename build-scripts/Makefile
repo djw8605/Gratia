@@ -60,6 +60,10 @@ server_lib_jars = glite-security-trustmanager \
                   bcprov-
 SERVER_LIBS = $(foreach d, $(server_lib_jars), $(wildcard $(commonLib)/$(d)*.jar)) $(target)/gratiaSecurity.jar
 
+slf4j_lib_jars= slf4j-api \
+		slf4j-log4j12
+SLF4J_LIBS = $(foreach d, $(slf4j_lib_jars), $(wildcard $(commonLib)/$(d)*.jar))
+
 common_lib_jars = log4j- \
                   commons-logging-1
 COMMON_LIBS = $(foreach d, $(common_lib_jars), $(wildcard $(commonLib)/$(d)*.jar))
@@ -426,6 +430,25 @@ $(target)/gratia-util.jar: ${util}/net/sf/gratia/util/*.java
 
 util: $(target)/gratia-util.jar
 	# --- Target: util COMPLETED at $(shell date) ---
+#------------------------------------------------------------------
+$(target)/cleanup_slf4j_lib: $(configuration)/cleanup_template
+        # ------------------------------
+        # --- Target: cleanup_slf4j_lib
+        # ------------------------------
+	sed -e 's/%%%FILES%%%/$(foreach d, $(slf4j_lib_jars), $(d)*.jar)/' $(^) > $(@)
+	chmod a+x $(@)
+
+
+slf4j_lib: $(target)/cleanup_slf4j_lib
+        # ------------------------------
+        # --- Target: slf4j_lib     ---
+        # ------------------------------
+	rm -f -r tarball; \
+	mkdir tarball; \
+	cp -v $(SLF4J_LIBS) tarball/; \
+	tar -cvf $(target)/slf4j_lib.tar -C tarball .; \
+	rm -f -r tarball
+	# --- Target: slf4j_lib COMPLETED at $(shell date) ---
 
 #------------------------------------------------------------------
 security: $(target)/gratiaSecurity.jar
@@ -684,7 +707,7 @@ common_classes: util
 	# --- Target: common_classes COMPLETED at $(shell date) ---
 
 #-------------------------------------------------------------
-gratia: clean util services servlets registration administration soap reporting reports common_lib server_lib common_classes
+gratia: clean util services servlets registration administration soap reporting reports common_lib server_lib common_classes slf4j_lib
 	# ------------------------------
 	# --- Target: gratia         ---
 	# ------------------------------
