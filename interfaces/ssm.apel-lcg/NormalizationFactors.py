@@ -650,7 +650,7 @@ def main(argv):
       return 1
     for o, a in opts:
       if o in ("--help"):
-        usage()
+        usage(arglist)
         return 1
       if o in ("--debug"):
         gDEBUG = True
