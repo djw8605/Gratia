@@ -1,1 +1,1 @@
-42 1 * * * /usr/share/gratia/voms-server.sh  >/dev/null 2>&1
+42 1 * * * root /usr/share/gratia/voms-server.sh  >/dev/null 2>&1
