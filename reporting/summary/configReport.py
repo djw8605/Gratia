@@ -110,13 +110,13 @@ def cronString():
     print "ALERT!!! In another terminal window, please edit " +  "/etc/gratia/gratia-reporting/user-reports.dat" + "\n and set/change the VO names, site names and recipient emails for the perl reports (all-vos-oim & all-sites-oim) to the ones of your choice. \n\nWhen done type \"yes\" to continue.\n" 
     while userInput.strip() != "yes":
         userInput = raw_input("Are you done editing the report recipient emails in /etc/gratia/gratia-reporting/user-reports.dat? (Type yes to continue): ")
-    ret =  "00 07 * * * " + cdStr + "sh daily_mutt.sh; # " + gCronPattern + "\n"
-    ret +=  "00 07 * * 1 " + cdStr + "sh range_mutt.sh  # " + gCronPattern + "\n"
-    ret += "01 07 * * 1 " + cdStr + " perl all-vos-oim --production -D /etc/gratia/gratia-reporting/user-reports.dat > /dev/null #" + gCronPattern + "\n"
-    ret += "01 07 * * 1 " + cdStr + " perl all-sites-oim --production -D /etc/gratia/gratia-reporting/user-reports.dat > /dev/null #" + gCronPattern + "\n"
-    ret += "02 07 1 * * " + cdStr + " perl all-vos-oim --production -M -D /etc/gratia/gratia-reporting/user-reports.dat > /dev/null #" + gCronPattern + "\n"
-    ret += "02 07 1 * * " + cdStr + " perl all-sites-oim --production -M -D /etc/gratia/gratia-reporting/user-reports.dat > /dev/null #" + gCronPattern + "\n"
-    ret += "03 07 1 1 * " + cdStr + " perl all-vos-oim --production -Y -D /etc/gratia/gratia-reporting/user-reports.dat > /dev/null #" + gCronPattern + "\n"
+    ret =  "00 07 * * * root " + cdStr + "sh daily_mutt.sh; # " + gCronPattern + "\n"
+    ret +=  "00 07 * * 1 root " + cdStr + "sh range_mutt.sh  # " + gCronPattern + "\n"
+    ret += "01 07 * * 1 root " + cdStr + " perl all-vos-oim --production -D /etc/gratia/gratia-reporting/user-reports.dat > /dev/null #" + gCronPattern + "\n"
+    ret += "01 07 * * 1 root " + cdStr + " perl all-sites-oim --production -D /etc/gratia/gratia-reporting/user-reports.dat > /dev/null #" + gCronPattern + "\n"
+    ret += "02 07 1 * * root " + cdStr + " perl all-vos-oim --production -M -D /etc/gratia/gratia-reporting/user-reports.dat > /dev/null #" + gCronPattern + "\n"
+    ret += "02 07 1 * *  root " + cdStr + " perl all-sites-oim --production -M -D /etc/gratia/gratia-reporting/user-reports.dat > /dev/null #" + gCronPattern + "\n"
+    ret += "03 07 1 1 *  root " + cdStr + " perl all-vos-oim --production -Y -D /etc/gratia/gratia-reporting/user-reports.dat > /dev/null #" + gCronPattern + "\n"
     return ret
 
 # Convert string values ("True", "False") defined in the config file to equivalent boolean values (True, False)
