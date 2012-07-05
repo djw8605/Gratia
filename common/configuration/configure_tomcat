@@ -61,8 +61,6 @@ function configuring_tomcat {
          ;;
         * ) logerr "This version of tomcat is not supported: $TOMCAT_VERSION" ;;
     esac
-                                                                                                                            77,9          73%
-
   logit
 }
 #---------------
