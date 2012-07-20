@@ -546,7 +546,7 @@ public class Status extends HttpServlet {
 
          keySet = new TreeSet(tableInfo.keySet());
          int nTables = tableInfo.size();
-         Logging.warning("Number of tables: "+nTables);
+         Logging.debug("Number of tables: "+nTables);
          String nTablesFullGroupString = "";
          for (int i = 0; i < nTables; ++i) {
             nTablesFullGroupString += "$0";
