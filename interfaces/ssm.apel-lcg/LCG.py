@@ -961,7 +961,10 @@ def writeHtmlLine(file, rg, vo, nf, totals, metrics, earliest, latest, currentTi
   file.write("""<TD>"""  + time.strftime("%Y-%m-%d", time.gmtime(float(earliest))) + "</TD>")
   file.write("""<TD>"""  + time.strftime("%Y-%m-%d", time.gmtime(float(latest)))   + "</TD>")
   file.write("""<TD align="center">"""  + currentTime                 + "</TD>")
-  file.write("""<TD>"""                 + gRebus.accountingName(rg)   + "</TD>")
+  if gRebus.isRegistered(rg):
+    file.write("""<TD>"""                 + gRebus.accountingName(rg)   + "</TD>")
+  else:
+    file.write("""<TD><font color="red"><b>Not Registered</b></font></TD>""")
   file.write("""<TD>"""                 + GetSiteClause(rg)           + "</TD>")
   file.write("""<TD align="center">"""  + month                       + "</TD>")
   file.write("""<TD align="center">"""  + year                        + "</TD>")
