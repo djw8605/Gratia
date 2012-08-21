@@ -20,6 +20,7 @@ public class TransferSummary extends Record {
     private long RecordId;
     private DateElement StartTime;
     private IntegerElement VOcorrid;
+    private IntegerElement ProjectNameCorrid;
     private StringElement ProbeName;
     private StringElement RemoteSite;
     private StringElement Protocol;
@@ -158,6 +159,15 @@ public class TransferSummary extends Record {
 
     public void setVOcorrid(IntegerElement VOcorrid) {
         this.VOcorrid = VOcorrid;
+    }
+    
+    // ProjectNameCorrid
+    public IntegerElement getProjectNameCorrid() {
+        return ProjectNameCorrid;
+    }
+
+    public void setProjectNameCorrid(IntegerElement ProjectNameCorrid) {
+        this.ProjectNameCorrid = ProjectNameCorrid;
     }
     
     // ProbeName

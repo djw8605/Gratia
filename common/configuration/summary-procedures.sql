@@ -28,6 +28,7 @@ AJUR:BEGIN
   DECLARE n_rowDate DATETIME;
   DECLARE n_Grid VARCHAR(255);
   DECLARE n_Cores BIGINT(20);
+  DECLARE n_ProjectNameCorrid BIGINT(20);
 
   -- Storage only
   DECLARE n_DN VARCHAR(255);
@@ -83,7 +84,8 @@ AJUR:BEGIN
             DATE(J.StartTime),
             DATE(J.EndTime)),
          IFNULL(M.Grid, ''),
-         IFNULL(J.Processors, 1)
+         IFNULL(J.Processors, 1),
+         PNC.ProjectNameCorrid
   INTO n_ProbeName,
        n_CommonName,
        n_DistinguishedName,
@@ -101,13 +103,18 @@ AJUR:BEGIN
        n_EndTime,
        n_rowdate,
        n_Grid,
-       n_Cores
+       n_Cores,
+       n_ProjectNameCorrid
   FROM JobUsageRecord J
        JOIN JobUsageRecord_Meta M ON (J.dbid = M.dbid)
        JOIN VONameCorrection VC ON
         ((J.VOName = BINARY VC.VOName) AND
          (((J.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL))
           OR (BINARY J.ReportableVOName = BINARY VC.ReportableVOName)))
+       JOIN ProjectNameCorrection PNC ON
+         ((J.ProjectName = BINARY PNC.ProjectName) OR
+         (((J.ProjectName IS NULL) AND (PNC.ProjectName IS NULL))
+          OR (BINARY J.ProjectName = BINARY PNC.ProjectName)))
        LEFT JOIN Resource EC ON
         ((J.dbid = EC.dbid) AND
          (EC.description = 'ExitCode'))
@@ -132,6 +139,12 @@ AJUR:BEGIN
   IF n_VOcorrid IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null VOcorrid');
+     LEAVE AJUR;
+  END IF;
+
+  IF n_ProjectNameCorrid IS NULL THEN
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null ProjectNameCorrid');
      LEAVE AJUR;
   END IF;
 
@@ -182,7 +195,7 @@ AJUR:BEGIN
     INSERT INTO MasterTransferSummary(StartTime, VOcorrid, ProbeName, Grid,
                                       CommonName, DistinguishedName, Protocol, RemoteSite, Status,
                                       IsNew, Njobs, TransferSize, StorageUnit,
-                                      TransferDuration)
+                                      TransferDuration,ProjectNameCorrid)
     VALUES(n_rowDate,
            n_VOcorrid,
            n_ProbeName,
@@ -196,7 +209,8 @@ AJUR:BEGIN
            n_Njobs,
            n_TransferSize,
            n_StorageUnit,
-           n_TransferDuration)
+           n_TransferDuration,
+           n_ProjectNameCorrid)
     ON DUPLICATE KEY UPDATE
      Njobs = Njobs + VALUES(Njobs),
      TransferSize = TransferSize + VALUES(TransferSize),
@@ -235,7 +249,7 @@ AJUR:BEGIN
                                 DistinguishedName, ResourceType, HostDescription,
                                 ApplicationExitCode, Njobs, WallDuration,
                                 CpuUserDuration, CpuSystemDuration,
-                                Grid, Cores)
+                                Grid, Cores, ProjectNameCorrid)
   VALUES(DATE(n_EndTime),
          n_VOcorrid,
          n_ProbeName,
@@ -249,7 +263,8 @@ AJUR:BEGIN
          n_CpuUserDuration,
          n_CpuSystemDuration,
          n_Grid,
-         n_Cores)
+         n_Cores,
+         n_ProjectNameCorrid)
   ON DUPLICATE KEY UPDATE
    Njobs = Njobs + VALUES(Njobs),
    WallDuration = WallDuration + VALUES(WallDuration),
@@ -324,6 +339,7 @@ DJUR:BEGIN
   DECLARE n_rowDate DATE;
   DECLARE n_Grid VARCHAR(255);
   DECLARE n_Cores BIGINT(20);
+  DECLARE n_ProjectNameCorrid BIGINT(20);
 
   -- Storage only
   DECLARE n_DN VARCHAR(255);
@@ -377,7 +393,8 @@ DJUR:BEGIN
          IF(ResourceType = 'Batch', DATE(J.EndTime),
             DATE(J.StartTime)),
          M.Grid,
-         IFNULL(J.Processors, 1)
+         IFNULL(J.Processors, 1),
+         PNC.ProjectNameCorrid
   INTO n_ProbeName,
        n_CommonName,
        n_DistinguishedName,
@@ -395,13 +412,16 @@ DJUR:BEGIN
        n_EndTime,
        n_rowDate,
        n_Grid,
-       n_Cores
+       n_Cores,
+       n_ProjectNameCorrid
   FROM JobUsageRecord J
        JOIN JobUsageRecord_Meta M ON (J.dbid = M.dbid)
        JOIN VONameCorrection VC ON
         ((J.VOName = BINARY VC.VOName) AND
          (((J.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL))
           OR (BINARY J.ReportableVOName = BINARY VC.ReportableVOName)))
+       JOIN ProjectNameCorrection PNC ON
+         (J.ProjectName = BINARY PNC.ProjectName)
        LEFT JOIN Resource EC ON
         ((J.dbid = EC.dbid) AND
          (EC.description = 'ExitCode'))
@@ -432,6 +452,12 @@ DJUR:BEGIN
   IF n_VOcorrid IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null VOcorrid');
+     LEAVE DJUR;
+  END IF;
+
+  IF n_ProjectNameCorrid IS NULL THEN
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null ProjectNameCorrid');
      LEAVE DJUR;
   END IF;
 
@@ -484,7 +510,8 @@ DJUR:BEGIN
       AND RemoteSite = n_RemoteSite
       AND Status = n_Status
       AND IsNew = n_IsNew
-      AND StorageUnit = n_StorageUnit;
+      AND StorageUnit = n_StorageUnit
+      AND ProjectNameCorrid = n_ProjectNameCorrid;
 
     -- Clean up emptied rows
     DELETE FROM MasterTransferSummary
@@ -497,6 +524,7 @@ DJUR:BEGIN
         AND Status = n_Status
         AND IsNew = n_IsNew
         AND StorageUnit = n_StorageUnit
+        AND ProjectNameCorrid = n_ProjectNameCorrid
         AND Njobs <= 0;
 
     LEAVE DJUR; -- Done
@@ -541,7 +569,8 @@ DJUR:BEGIN
     AND HostDescription = n_HostDescription
     AND ApplicationExitCode = n_ApplicationExitCode
     AND Grid = n_Grid
-    AND Cores = n_Cores;
+    AND Cores = n_Cores
+    AND ProjectNameCorrid = n_ProjectNameCorrid;
 
   -- Clean up emptied rows
   DELETE FROM MasterSummaryData
@@ -555,6 +584,7 @@ DJUR:BEGIN
     AND ApplicationExitCode = n_ApplicationExitCode
     AND Grid = n_Grid
     AND Cores = n_Cores
+    AND ProjectNameCorrid = n_ProjectNameCorrid
     AND Njobs <= 0;
 
   -- NodeSumary

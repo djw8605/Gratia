@@ -29,12 +29,14 @@ CREATE VIEW `UserProbeSummary` AS
          MSD.DistinguishedName as DistinguishedName,
          MSD.ProbeName AS ProbeName,
          MSD.ResourceType AS ResourceType,
+         PNC.ReportableProjectName AS ReportableProjectName,
+         MSD.Grid AS Grid,
          MSD.Njobs AS Njobs,
          IF(MSD.Cores > 0,(MSD.WallDuration * MSD.Cores),MSD.WallDuration) as WallDuration,
          MSD.CpuUserDuration AS CpuUserDuration,
-         MSD.CpuSystemDuration AS CpuSystemDuration,
-         MSD.Grid AS Grid
-  FROM MasterSummaryData MSD;
+         MSD.CpuSystemDuration AS CpuSystemDuration
+  FROM MasterSummaryData MSD
+       JOIN ProjectNameCorrection PNC ON (MSD.ProjectNameCorrid = PNC.ProjectNameCorrid);
 
 -- ----------------------------------
 -- VOProbeSummary
@@ -50,14 +52,16 @@ CREATE VIEW `VOProbeSummary` AS
          MSD.CommonName AS CommonName,
          MSD.DistinguishedName as DistinguishedName,
          MSD.ResourceType AS ResourceType,
+         MSD.Grid AS Grid,
+         PNC.ReportableProjectName AS ReportableProjectName,
          MSD.Njobs AS Njobs,
          IF(MSD.Cores > 0,(MSD.WallDuration * MSD.Cores),MSD.WallDuration) as WallDuration,
          MSD.CpuUserDuration AS CpuUserDuration,
-         MSD.CpuSystemDuration AS CpuSystemDuration,
-         MSD.Grid AS Grid
+         MSD.CpuSystemDuration AS CpuSystemDuration
   FROM MasterSummaryData MSD
         JOIN VONameCorrection VC ON (MSD.VOcorrid = VC.corrid)
-        JOIN VO ON (VC.VOid = VO.VOid);
+        JOIN VO ON (VC.VOid = VO.VOid)
+        JOIN ProjectNameCorrection PNC ON (MSD.ProjectNameCorrid = PNC.ProjectNameCorrid);
 
 -- ----------------------------------
 -- HostDescriptionProbeSummary

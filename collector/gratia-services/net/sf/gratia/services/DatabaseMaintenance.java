@@ -31,10 +31,10 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 91;
+   static final int gratiaDatabaseVersion = 92;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
-   static final int latestDBVersionRequiringSummaryViewLoad = 91;
-   static final int latestDBVersionRequiringSummaryTriggerLoad = 90;
+   static final int latestDBVersionRequiringSummaryViewLoad = 92;
+   static final int latestDBVersionRequiringSummaryTriggerLoad = 92;
    static final int latestDBVersionRequiringTableStatisticsRefresh = 87;
    static boolean dbUseJobUsageSiteName = false;
    java.sql.Connection connection;
@@ -440,14 +440,19 @@ public class DatabaseMaintenance {
       AddIndex("MasterSummaryData", false, "index05", "ResourceType");
       AddIndex("MasterSummaryData", false, "index06", "HostDescription");
       AddIndex("MasterSummaryData", false, "index07", "ApplicationExitCode");
-      AddIndex("MasterSummaryData", true, "index12",
+      DropIndex("MasterSummaryData",       "index08");
+      DropIndex("MasterSummaryData",       "index09");
+      DropIndex("MasterSummaryData",       "index10");
+      AddIndex("MasterSummaryData", false, "index11", "DistinguishedName");
+      DropIndex("MasterSummaryData",       "index12");
+      AddIndex("MasterSummaryData", false, "index13", "Cores");
+      AddIndex("MasterSummaryData", false, "index14", "Grid");
+      AddIndex("MasterSummaryData", false, "index15", "ProjectNameCorrid");
+      AddIndex("MasterSummaryData", true,  "index17",
             "EndTime, VOcorrid, ProbeName, " +
             "CommonName, DistinguishedName, ResourceType, " +
-            "HostDescription, ApplicationExitCode, Grid, Cores");
-      AddIndex("MasterSummaryData", false, "index11", "DistinguishedName");
-      DropIndex("MasterSummaryData", "index08");
-      DropIndex("MasterSummaryData", "index09");
-      DropIndex("MasterSummaryData", "index10");
+            "HostDescription, ApplicationExitCode, Grid, " +
+            "Cores, ProjectNameCorrid");
 
       // Indexes for MasterTransferSummary
       AddIndex("MasterTransferSummary", false, "index01", "StartTime");
@@ -459,10 +464,16 @@ public class DatabaseMaintenance {
       AddIndex("MasterTransferSummary", false, "index07", "Status");
       AddIndex("MasterTransferSummary", false, "index08", "IsNew");
       AddIndex("MasterTransferSummary", false, "index09", "StorageUnit");
-      AddIndex("MasterTransferSummary", true, "index10",
+      DropIndex("MasterTransferSummary",       "index10");
+      AddIndex("MasterTransferSummary", false, "index11", "DistinguishedName");
+      AddIndex("MasterTransferSummary", false, "index12", "Grid");
+      AddIndex("MasterTransferSummary", false, "index13", "ProjectNameCorrid");
+      AddIndex("MasterTransferSummary", true, "index14",
             "StartTime, VOcorrid, ProbeName, " +
-            "CommonName, Protocol, RemoteSite, Status, IsNew, StorageUnit");
-      
+            "CommonName, Protocol, RemoteSite, " +
+            "Status, IsNew, StorageUnit, " +
+            "Grid, DistinguishedName, ProjectNameCorrid");
+
       // Indexes for MasterServiceSummary
       AddIndex("MasterServiceSummary", false, "index01", "Timestamp");
       AddIndex("MasterServiceSummary", false, "index02", "CEUniqueID");
@@ -605,6 +616,8 @@ public class DatabaseMaintenance {
                column = "JobUsageRecord_Meta.dbid";
             } else if (column.equals("VOName") || column.equals("ReportableVOName") || column.equals("VOcorrid")) {
                continue; // Skip these columns
+            } else if (column.equals("ProjectName")) {
+               continue; // Skip these columns
             }
             if (result.length() > 0) {
                result = result + ",";
@@ -680,8 +693,9 @@ public class DatabaseMaintenance {
       Execute("DROP VIEW IF EXISTS JobUsageRecord_Report");
       Execute("CREATE VIEW JobUsageRecord_Report as select " + GetJobUsageRecordColumnsForReportView() +
             ", JobUsageRecord_Meta.ProbeName, JobUsageRecord_Meta.ReportedSiteName, Site.SiteName, VO.VOName" +
-            ", JobUsageRecord_Meta.ServerDate" +
-            " from JobUsageRecord_Meta, Site, Probe, JobUsageRecord, VO, VONameCorrection" +
+            ", JobUsageRecord_Meta.ServerDate " +
+            ", ProjectNameCorrection.ReportableProjectName " +
+            " from JobUsageRecord_Meta, Site, Probe, JobUsageRecord, VO, VONameCorrection, ProjectNameCorrection " +
             " where " +
             " JobUsageRecord_Meta.probeid = Probe.probeid and Probe.siteid = Site.siteid" +
             " and JobUsageRecord_Meta.dbid = JobUsageRecord.dbid" +
@@ -689,7 +703,9 @@ public class DatabaseMaintenance {
             " and ((binary JobUsageRecord.ReportableVOName = binary VONameCorrection.ReportableVOName) or" +
             " ((JobUsageRecord.ReportableVOName is null) and (VONameCorrection.ReportableVOName is null)))" +
             " and VONameCorrection.void = VO.void" +
-            " and JobUsageRecord.VOName = VONameCorrection.VOName");
+            " and JobUsageRecord.VOName = VONameCorrection.VOName" +
+            " and ((binary JobUsageRecord.ProjectName = binary ProjectNameCorrection.ProjectName) or " +
+            " ((JobUsageRecord.ProjectName is null) and (ProjectNameCorrection.ProjectName is null)))");
    }
 
    public int readIntegerDBProperty(String property) {
@@ -1311,25 +1327,79 @@ public class DatabaseMaintenance {
                 }
          }
 
-         // update the database
          schemaOnlyLowerBound = 86;
-         schemaOnlyUpperBound = gratiaDatabaseVersion;
+         schemaOnlyUpperBound = 91;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
-           UpdateDbVersion(gratiaDatabaseVersion);
-           Logging.fine("DatabaseMaintenance: Gratia database upgraded from " + current + " to " + liveVersion);
-           current = schemaOnlyUpperBound;
+             // Stored procedures, trigger procedures only.
+            Logging.fine("DatabaseMaintenance: Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
+            current = schemaOnlyUpperBound;
+            UpdateDbVersion(current);
          }
 
-         if ( current != gratiaDatabaseVersion  ) {
+         //Upgrade from 91 to 92
+         if (current == 91) {
+           int result = 0;
+           boolean updateResult;
+           updateResult = SetAutoIncrement("ProjectNameCorrection", "ProjectNameCorrid"); 
+           if ( updateResult = false) {
+              Logging.log(LogLevel.SEVERE,"DatabaseMaintenance: FAILED to update database from " + current + " to " + (current + 1));
+              return false;
+           }
+           // verify we don't already have an entry for an empty set of values
+           if (getCount("select count(*) from ProjectNameCorrection where ProjectName is NULL") == 0) {
+              Execute("insert into ProjectNameCorrection(ProjectNameCorrid,ProjectName,ReportableProjectName) values(NULL,NULL,'Unknown')");
+           }
+           Logging.log("DatabaseMaintenance: Gratia database upgraded from " + current + " to " + (current + 1));
+           current = current + 1;
+           UpdateDbVersion(current);
+         }  
+
+         if ( liveVersion != gratiaDatabaseVersion  ) {
            Logging.log(LogLevel.SEVERE,"DatabaseMaintenance: FAILED to update database from " + current + " to " + gratiaDatabaseVersion);
            return false;
          }
 
          // Stored procedures, trigger procedures.
-         Logging.info("DatabaseMaintenance: Gratia database now at version " + gratiaDatabaseVersion);
+         Logging.info("DatabaseMaintenance: Gratia database now at version " + liveVersion);
          return checkAndUpgradeDbAuxiliaryItems();
-      }
-   }
+      } // end of else
+   } // end of Upgrade method
+
+   // check to see if a column has auto_increment set.
+   // if not, set it.
+   private boolean SetAutoIncrement(String table_name, String column_name) {
+     int result;
+     Statement statement;
+     ResultSet resultSet;
+     String command = "SELECT COLUMN_NAME, COLUMN_KEY, TABLE_NAME, EXTRA FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '" + table_name + "' AND COLUMN_NAME = '" + column_name + "';";
+     // May need to add primary key manually if not already
+     // done by Hibernate (table already existed).
+     try {
+        Logging.log("Executing: " + command);
+        statement = connection.createStatement();
+        resultSet = statement.executeQuery(command);
+       while (resultSet.next()) {
+          String columnName = resultSet.getString(1);
+          String columnKey  = resultSet.getString(2);
+          String tableName  = resultSet.getString(3);
+          String extra      = resultSet.getString(4);
+          if (extra.contains("auto_increment")) {
+             Logging.info("DatabaseMaintenance: auto_increment and primary key already set for TABLE(" + table_name + ") COLUMN(" + column_name + ")");
+             continue; // No change required.
+          }
+          Logging.info("DatabaseMaintenance: adding auto_increment and primary key to TABLE(" + table_name + ") COLUMN(" + column_name + ")");
+          command = "ALTER TABLE " + table_name + "MODIFY COLUMN " + column_name + " INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (" + column_name + ");";
+          result = Execute(command);
+          if ( result > -1 ) { 
+            return false;
+          }
+        } // end of while
+     } catch (Exception e) {
+        Logging.warning("Command: Error: " + command + " : ", e);
+        return false;
+     } // end of try/catch
+     return true;
+   } // end SetAutoIncrement
 
    private String FindRecordsColumn() {
       Statement statement;
@@ -1731,5 +1801,5 @@ public class DatabaseMaintenance {
          HibernateWrapper.closeSession( session );
          throw e;
       }
-   }
-}
+   } 
+} 

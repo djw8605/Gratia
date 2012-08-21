@@ -82,5 +82,10 @@
            <column name="StorageUnit" not-null="true" default="0" />
        </property>
    </component>
+   <component name="ProjectNameCorrid" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="ProjectNameCorrid" not-null="true" default="1" />
+       </property>
+   </component>
 </class>
 </hibernate-mapping>

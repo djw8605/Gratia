@@ -29,6 +29,12 @@
         <servlet-class>net.sf.gratia.administration.SiteMgmt</servlet-class>
         <load-on-startup>2</load-on-startup>
     </servlet>
+    <servlet>
+        <servlet-name>ProjectNameCorrection</servlet-name>
+        <servlet-class>net.sf.gratia.administration.ProjectNameCorrection</servlet-class>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
 
     <servlet>
         <servlet-name>ProbeTable</servlet-name>
@@ -216,6 +222,12 @@
         <servlet-name>SiteMgmt</servlet-name>
         <url-pattern>/site.html</url-pattern>
     </servlet-mapping>
+   <servlet-mapping>
+        <servlet-name>ProjectNameCorrection</servlet-name>
+        <url-pattern>/projectnamecorrection.html</url-pattern>
+    </servlet-mapping>
+
+
 
     <servlet-mapping>
         <servlet-name>VOMgmt</servlet-name>

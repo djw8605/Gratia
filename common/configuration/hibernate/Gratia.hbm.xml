@@ -180,6 +180,18 @@
     </property>
   </class>
        
+  <class name="ProjectNameCorrection" table="ProjectNameCorrection" node="ProjectNameCorrection" lazy="true">
+    <id name="ProjectNameCorrid" column="ProjectNameCorrid" type="long">
+      <generator class="native"/>
+    </id>
+    <property name="ProjectName" type="string">
+      <column name="ProjectName" sql-type="varchar(255)"/>
+    </property>
+    <property name="ReportableProjectName" type="string">
+      <column name="ReportableProjectName" sql-type="varchar(255)"/>
+    </property>
+  </class>
+       
   <class name="Site" table="Site" node="Site" lazy="false">
     <id name="siteid" column="siteid" type="long">
       <generator class="native"/>

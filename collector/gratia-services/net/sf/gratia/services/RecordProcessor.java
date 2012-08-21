@@ -52,6 +52,7 @@ public class RecordProcessor extends Thread {
    RecordConverter      fConverter = new RecordConverter();
    StatusUpdater        fStatusUpdater = null;
    NewVOUpdate          fNewVOUpdate = null;
+   NewProjectNameUpdate fNewProjectNameUpdate = null;
    NewClusterUpdate     fNewClusterUpdate = null;
    ErrorRecorder        fErrorRecorder = new ErrorRecorder();
 
@@ -213,6 +214,7 @@ public class RecordProcessor extends Thread {
 
       fStatusUpdater = new StatusUpdater();
       fNewVOUpdate = new NewVOUpdate();
+      fNewProjectNameUpdate = new NewProjectNameUpdate();
       fNewClusterUpdate = new NewClusterUpdate();
 
       NEXTFILE:
@@ -801,6 +803,7 @@ public class RecordProcessor extends Thread {
                         // we were synchronizing on the objects
                         // themselves.
                         fNewVOUpdate.check(current, rec_session);
+                        fNewProjectNameUpdate.check(current, rec_session);
                         fNewClusterUpdate.check(current, rec_session);
                         current.attachContent(rec_session);
                         // Reduce contention on the attached objects (in particular Connection)

@@ -87,5 +87,10 @@
            <column name="Cores" not-null="true" default="1" />
        </property>
    </component>
+      <component name="ProjectNameCorrid" class="IntegerElement" insert="true">
+       <property name="Value">
+           <column name="ProjectNameCorrid" not-null="true" default="1" />
+       </property>
+   </component>
 </class>
 </hibernate-mapping>

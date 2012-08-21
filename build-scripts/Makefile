@@ -1,7 +1,7 @@
 PLATFORM := $(shell uname)
 
-# tarbal version
-version_default = v1.12
+# tarball version
+version_default = v1.13-1
 
 gratia_reporting_version := $(shell echo '$$HeadURL$$' | sed -e 's?^\$$\HeadURL: .*gratia/[^/]*tags/\(v[^ ]*\)/build-scripts/Makefile \$$?\1?' -e 's/-/./g' )
 gratia_services_version = $(gratia_reporting_version)
@@ -9,6 +9,8 @@ gratia_services_version = $(gratia_reporting_version)
 ifneq (,$(findstring $$HeadURL,$(gratia_reporting_version)))
   override gratia_reporting_version := $(version_default)
 endif
+override gratia_reporting_version := $(version_default)
+override gratia_services_version  := $(version_default)
 
 # define useful variables
 base := $(shell cd .. >/dev/null 2>&1; /bin/pwd)
@@ -495,13 +497,15 @@ reporting: birt-reporting
 	rm -f $(war-dir)/$@/test1.rptdesign
 	# --- edit the web.xml for timezone configuration ---
 	tmp=`mktemp $${TMPDIR:-/tmp}/gratia-build.XXXXXXXXXX`; \
+	tmp2=`mktemp $${TMPDIR:-/tmp}/gratia-build.XXXXXXXXXX`; \
 	[[ -n "$$tmp" ]] || exit 1; \
-	trap "[[ -n \"$$tmp\" ]] && rm -f \"$$tmp\"" EXIT; \
+	[[ -n "$$tmp2" ]] || exit 1; \
+	trap "[[ -n \"$$tmp\" ]] && rm -f \"$$tmp\" \"$$tmp2\"" EXIT; \
 	perl -we 'use strict; my $$seen_par; my $$par = "BIRT_VIEWER_TIMEZONE"; my $$val = "GMT"; while (<>) { m&<param-name>\Q$$par\E</param-name>& and $$seen_par = 1; $$seen_par and s&<param-value>.*&<param-value>$$val</param-value>& and undef $$seen_par; print }' $(war-dir)/$@/WEB-INF/web.xml > "$$tmp"; \
   (( $$? == 0 )) || exit 1; \
-	perl -we 'use strict; my $$seen_par; my $$par = "WORKING_FOLDER_ACCESS_ONLY"; my $$val = "false"; while (<>) { m&<param-name>\Q$$par\E</param-name>& and $$seen_par = 1; $$seen_par and s&<param-value>.*&<param-value>$$val</param-value>& and undef $$seen_par; print }' "$$tmp" > "$$tmp.2"; \
+	perl -we 'use strict; my $$seen_par; my $$par = "WORKING_FOLDER_ACCESS_ONLY"; my $$val = "false"; while (<>) { m&<param-name>\Q$$par\E</param-name>& and $$seen_par = 1; $$seen_par and s&<param-value>.*&<param-value>$$val</param-value>& and undef $$seen_par; print }' "$$tmp" > "$$tmp2"; \
   (( $$? == 0 )) || exit 1; \
-  perl -wpe 'use strict; m&display-name& and do { print "        <!-- Gratia Reporting Service Listener -->\n        <listener>\n                <listener-class>net.sf.gratia.reporting.ReportingService</listener-class>\n        </listener>\n\n"; print "    <servlet>\n        <servlet-name>MonitorStatus</servlet-name>\n        <servlet-class>net.sf.gratia.administration.MonitorStatus</servlet-class>\n        <load-on-startup>2</load-on-startup>\n    </servlet>\n\n    <servlet-mapping>\n        <servlet-name>MonitorStatus</servlet-name>\n        <url-pattern>/monitor-status.html</url-pattern>\n    </servlet-mapping>\n\n"};' "$$tmp.2" > "$$tmp"; \
+  perl -wpe 'use strict; m&display-name& and do { print "        <!-- Gratia Reporting Service Listener -->\n        <listener>\n                <listener-class>net.sf.gratia.reporting.ReportingService</listener-class>\n        </listener>\n\n"; print "    <servlet>\n        <servlet-name>MonitorStatus</servlet-name>\n        <servlet-class>net.sf.gratia.administration.MonitorStatus</servlet-class>\n        <load-on-startup>2</load-on-startup>\n    </servlet>\n\n    <servlet-mapping>\n        <servlet-name>MonitorStatus</servlet-name>\n        <url-pattern>/monitor-status.html</url-pattern>\n    </servlet-mapping>\n\n"};' "$$tmp2" > "$$tmp"; \
   (( $$? == 0 )) || exit 1; \
 	cp -p $(war-dir)/$@/WEB-INF/web.xml $(war-dir)/$@/WEB-INF/web.xml.old; \
 	cat "$$tmp" > $(war-dir)/$@/WEB-INF/web.xml;
@@ -609,8 +613,8 @@ release: gratia
         perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/configure_tomcat; \
         rm -f tarball/tomcat/v55/gratia/configure_tomcat.bak; \
 	cp $(configuration)/truststore $(configuration)/keystore tarball/tomcat/v55/gratia; \
-	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1$(gratia_services_version)&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1$(gratia_reporting_version)&; ' $(configuration)/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties.new && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties.new; \
-	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1$(gratia_services_version)&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1$(gratia_reporting_version)&; ' $(configuration)/service-authorization.properties > tarball/tomcat/v55/gratia/service-authorization.properties.new && chmod 600 tarball/tomcat/v55/gratia/service-authorization.properties.new; \
+	sed -e 's/^gratia.services.version.*=.*/gratia.services.version = v$(gratia_services_version)/'  -e 's/^gratia.reporting.version.*=.*/gratia.reporting.version = v$(gratia_reporting_version)/' $(configuration)/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties.new && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties.new; \
+	sed -e 's/^gratia.services.version.*=.*/gratia.services.version = v$(gratia_services_version)/'  -e 's/^gratia.reporting.version.*=.*/gratia.reporting.version = v$(gratia_reporting_version)/' $(configuration)/service-authorization.properties > tarball/tomcat/v55/gratia/service-authorization.properties.new &&  chmod 600 tarball/tomcat/v55/gratia/service-authorization.properties.new; \
 	cp $(target)/gratia-reports.war tarball/gratia/gratia_reporting; \
 	cp $(target)/gratia-reporting.war tarball/gratia/gratia_reporting; \
 	tar $(tarowner) -cvf $(target)/gratia_reporting_$(gratia_reporting_version).tar -C tarball .; \
@@ -643,8 +647,8 @@ release: gratia
         perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/configure_tomcat; \
         rm -f tarball/tomcat/v55/gratia/configure_tomcat.bak; \
 	cp $(configuration)/truststore $(configuration)/keystore tarball/tomcat/v55/gratia; \
-	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1$(gratia_services_version)&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1$(gratia_reporting_version)&; ' $(configuration)/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties.new && chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties.new; \
-	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1$(gratia_services_version)&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1$(gratia_reporting_version)&; ' $(configuration)/service-authorization.properties > tarball/tomcat/v55/gratia/service-authorization.properties.new && chmod 600 tarball/tomcat/v55/gratia/service-authorization.properties.new; \
+	sed -e 's/^gratia.services.version.*=.*/gratia.services.version = v$(gratia_services_version)/'  -e 's/^gratia.reporting.version.*=.*/gratia.reporting.version = v$(gratia_reporting_version)/' $(configuration)/service-configuration.properties > tarball/tomcat/v55/gratia/service-configuration.properties.new &&  chmod 600 tarball/tomcat/v55/gratia/service-configuration.properties.new; \
+	sed -e 's/^gratia.services.version.*=.*/gratia.services.version = v$(gratia_services_version)/' -e 's/^gratia.reporting.version.*=.*/gratia.reporting.version = v$(gratia_reporting_version)/' $(configuration)/service-authorization.properties > tarball/tomcat/v55/gratia/service-authorization.properties.new &&  chmod 600 tarball/tomcat/v55/gratia/service-authorization.properties.new; \
 	cp $(target)/gratia-services.war tarball/gratia/gratia_services; \
 	cp $(target)/gratia-servlets.war tarball/gratia/gratia_services; \
 	cp $(target)/gratia-soap.war tarball/gratia/gratia_services; \
@@ -723,9 +727,9 @@ gratia: clean util services servlets registration administration soap reporting 
 	chmod 755 tarball/*.py
 	chmod 700 tarball/post-install; \
 	chmod 700 tarball/install-database; \
-	chmod 700 tarball/configure_tomcat; \
-	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1$(gratia_services_version)&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1$(gratia_reporting_version)&; ' $(configuration)/service-configuration.properties > tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties; \
-	perl -wape 's&^(\s*gratia\.services\.version\s*=\s*).*$$&$$1$(gratia_services_version)&; s&^(\s*gratia\.reporting\.version\s*=\s*).*$$&$$1$(gratia_reporting_version)&; ' $(configuration)/service-authorization.properties > tarball/service-authorization.properties && chmod 600 tarball/service-authorization.properties; \
+	chmod 700 tarball/configure_tomcat;  \
+	sed -e 's/^gratia.services.version.*=.*/gratia.services.version = v$(gratia_services_version)/'  -e 's/^gratia.reporting.version.*=.*/gratia.reporting.version = v$(gratia_reporting_version)/' $(configuration)/service-configuration.properties > tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties;  \
+	sed -e 's/^gratia.services.version.*=.*/gratia.services.version = v$(gratia_services_version)/'  -e 's/^gratia.reporting.version.*=.*/gratia.reporting.version = v$(gratia_reporting_version)/' $(configuration)/service-authorization.properties > tarball/service-authorization.properties &&  chmod 600 tarball/service-authorization.properties;  \
 	cp $(configuration)/configure-* $(configuration)/update-gratia-local tarball; \
 	cp $(configuration)/truststore $(configuration)/keystore tarball; \
 	cp $(configuration)/cleanup_misc tarball/; \
