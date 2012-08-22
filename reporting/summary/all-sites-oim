@@ -194,6 +194,12 @@ if ($options->{"exclusive-mail"}) { # Short-circuit people list.
 sub expandSites(\@) {
   my $siteList = shift;
   my %u_sites = ();
+
+# hk modification to deal with global or local situation
+  my $bool_glocal = grep /default/, @{$options->{"data-source"}};
+  if ( $bool_glocal ) {
+# hk mod
+
   foreach my $site (@$siteList) {
     if ($site =~ m&^all$&i) {
       map { $u_sites{$_} = 1 } keys %$site_data;
@@ -210,6 +216,15 @@ sub expandSites(\@) {
       $u_sites{$site} = 1;
     }
   }
+
+# hk mod
+} else {
+  foreach my $site (@$siteList) {
+      $u_sites{$site} = 1;
+    }
+}
+# hk mod
+
   return sort keys %u_sites;
 }
 
