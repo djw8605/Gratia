@@ -23,6 +23,9 @@
 #
 # 8/21/12 (John Weigand)
 #         Added Purdue-Carter  per goc ticket 12500 NF 16.4
+#
+# 10/10/12 (John Weigand)
+#         Changed UFlorida-HPC NF from 9660 to 10940 (per Bockjoo)
 ##################################################################
 #
 #-- Site  ------- HEPSpec2006
@@ -44,7 +47,7 @@ Purdue-Carter      16400
 UCSDT2             13240
 SPRACE             13480
 GridUNESP_CENTRAL  14688
-UFlorida-HPC        9660
+UFlorida-HPC       10940
 UFlorida-SSERCA     7250
 # 
 ###############################
