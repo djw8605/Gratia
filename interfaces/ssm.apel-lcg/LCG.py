@@ -910,7 +910,6 @@ def CreateVOSummary(results,params,reportableSites):
         month       = values[4]
         year        = values[5]
         nf          = reportableSites[resourceGrp]
-        continue
       else:  # new resource group / vo .. write the previous one
         writeHtmlLine(htmlfile, resourceGrp, vo, nf, totals, metrics, earliest, latest, currentTime, month, year)
         writeSummaryFile(summaryfile, resourceGrp, vo, nf, totals, metrics, earliest, latest, currentTime, month, year)
