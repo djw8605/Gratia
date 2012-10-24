@@ -26,6 +26,9 @@
 #
 # 10/10/12 (John Weigand)
 #         Changed UFlorida-HPC NF from 9660 to 10940 (per Bockjoo)
+#
+# 10/24/12 (John Weigand)
+#         Changed UFlorida-HPC NF from 7488 to 10800 (per Max)
 ##################################################################
 #
 #-- Site  ------- HEPSpec2006
@@ -37,7 +40,7 @@ USCMS-FNAL-WC1     10264
 ##--- CMS Tier 2 -----
 CIT_CMS_T2         12944
 GLOW                9632
-MIT_CMS             7488
+MIT_CMS            10800
 Nebraska           10412
 Purdue-RCAC        12124
 Purdue-Steele      12784
