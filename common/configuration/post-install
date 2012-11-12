@@ -24,7 +24,7 @@ dbport=`grep ^service.mysql.url /etc/gratia/collector/service-configuration.prop
 dbpasswd=`grep ^service.mysql.rootpassword /etc/gratia/collector/service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'`
 if [ "x$dbpasswd" = "x" ] || [ $dbpasswd = "service.mysql.rootpassword" ]
 then
-    dbpasswd=" "
+    dbpasswd=""
 fi
 
 # This would be so much easier if we could guarantee a "drop trigger if
