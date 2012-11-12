@@ -4,7 +4,7 @@ Name: gratia-service
 Summary: Gratia OSG accounting system
 Group: Applications/System
 Version: 1.13
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -200,6 +200,9 @@ sed -i 's|^gratia.services.version.*=|gratia.services.version = v%{version}-%{re
 
 
 %changelog
+* Mon Nov 12 2012 Tanya Levshina <tlevshin@fnal.gov> - 1.13.4
+Fix post-install script for the case when root password is not set for mysql database 
+
 * Thu Aug 09 2012 Tanya Levshina <tlevshin@fnal.gov> - 1.13.3
 Added check for ProjectName not being null in NewProjectNameUpdate.java
 
