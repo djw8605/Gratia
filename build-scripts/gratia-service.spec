@@ -29,6 +29,7 @@ Requires: tomcat6
 %define _tomcat tomcat6
 %endif
 
+Requires: osg-version 
 Requires: emi-trustmanager-tomcat
 Requires: mysql-server
 Requires: vo-client-edgmkgridmap
@@ -200,6 +201,9 @@ sed -i 's|^gratia.services.version.*=|gratia.services.version = v%{version}-%{re
 
 
 %changelog
+* Wed Nov 14 2012 Tanya Levshina <tlevshin@fnal.gov> - 1.13.5
+Added osg-version to spec requirements 
+
 * Mon Nov 12 2012 Tanya Levshina <tlevshin@fnal.gov> - 1.13.4
 Fix post-install script for the case when root password is not set for mysql database 
 
