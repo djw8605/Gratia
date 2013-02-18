@@ -20,7 +20,7 @@ Summary: Gratia OSG accounting system
 Group: Applications/System
 Requires: java
 Requires: jpackage-utils
-Requires: jsvc 
+#Requires: jsvc 
 %if 0%{?rhel} < 6
 Requires: tomcat5
 %define _tomcat tomcat5
