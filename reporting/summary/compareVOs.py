@@ -36,6 +36,14 @@ def compareVOs(argv=None):
     excluded = ['unknown','other']
     allVOs = oimAll + gratia
 
+# BEGIN: fix for JIRA Ticket 81 by HK
+    jira81idx = 0
+    for jira81vo in oimDisabled:
+        if jira81vo in oimActive:
+            del oimDisabled[jira81idx]
+        jira81idx =jira81idx +1
+# END: fix for JIRA Ticket 81 by HK
+
     diff = {}
 
     # case sensitive vo comparison
