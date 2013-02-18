@@ -1,8 +1,8 @@
 Name: gratia
 Summary: Gratia OSG accounting system
 Group: Applications/System
-Version: 1.13
-Release: 9%{?dist}
+Version: 1.13.9
+Release: -%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -344,6 +344,9 @@ fi
 
 
 %changelog
+* Mon Feb 11 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9-1
+Merged fermi branch and trunk; Changed version to 1.13.9 and rpm package to 1, according to OSG ST reqs
+
 * Mon Feb 11 2013 Hyunwoo Kim <hyunwoo@fnal.gov> - 1.13.9
 a bug fix in this spec file, new lines in post section to deal with /etc/gratia/collector in old version
 
