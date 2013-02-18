@@ -11,7 +11,7 @@ public class Configuration {
 
     public static String getConfigurationPath()
     {
-        String path = "/etc/gratia/collector";
+        String path = "/etc/gratia/services";
         return path;
     }
 

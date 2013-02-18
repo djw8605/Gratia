@@ -182,8 +182,8 @@ function update_mysql {
 ### MAIN ######################################################
 #set -x
 PGM=`basename $0`
-CONFIGURATIONS=/etc/gratia/collector/service-configuration.properties
-AUTHORIZATIONS=/etc/gratia/collector/service-authorization.properties
+CONFIGURATIONS=/etc/gratia/services/service-configuration.properties
+AUTHORIZATIONS=/etc/gratia/services/service-authorization.properties
 TMPPSWD=/tmp/.${PGM}.pwsd.$$   # very temporary passwd file
 TMPSQL=/tmp/.${PGM}.sql.$$     # very temporary sql file
 MYSQL_CONFIG=/etc/my.cnf

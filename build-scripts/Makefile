@@ -505,10 +505,11 @@ reporting: birt-reporting
   (( $$? == 0 )) || exit 1; \
 	perl -we 'use strict; my $$seen_par; my $$par = "WORKING_FOLDER_ACCESS_ONLY"; my $$val = "false"; while (<>) { m&<param-name>\Q$$par\E</param-name>& and $$seen_par = 1; $$seen_par and s&<param-value>.*&<param-value>$$val</param-value>& and undef $$seen_par; print }' "$$tmp" > "$$tmp2"; \
   (( $$? == 0 )) || exit 1; \
-  perl -wpe 'use strict; m&display-name& and do { print "        <!-- Gratia Reporting Service Listener -->\n        <listener>\n                <listener-class>net.sf.gratia.reporting.ReportingService</listener-class>\n        </listener>\n\n"; print "    <servlet>\n        <servlet-name>MonitorStatus</servlet-name>\n        <servlet-class>net.sf.gratia.administration.MonitorStatus</servlet-class>\n        <load-on-startup>2</load-on-startup>\n    </servlet>\n\n    <servlet-mapping>\n        <servlet-name>MonitorStatus</servlet-name>\n        <url-pattern>/monitor-status.html</url-pattern>\n    </servlet-mapping>\n\n"};' "$$tmp2" > "$$tmp"; \
+  perl -wpe 'use strict; m&display-name& and do { print "  <!-- UrlRewriteFilter configuration -->\n <filter>\n	<filter-name>UrlRewriteFilter</filter-name>\n	<filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>\n	<init-param>\n	 <param-name>logLevel</param-name>\n	 <param-value>WARN</param-value>\n	 </init-param>\n </filter>\n <filter-mapping>\n	 <filter-name>UrlRewriteFilter</filter-name>\n	 <url-pattern>/*</url-pattern>\n </filter-mapping>\n\n <!-- Gratia Reporting Service Listener -->\n        <listener>\n                <listener-class>net.sf.gratia.reporting.ReportingService</listener-class>\n        </listener>\n\n"; print "    <servlet>\n        <servlet-name>MonitorStatus</servlet-name>\n        <servlet-class>net.sf.gratia.administration.MonitorStatus</servlet-class>\n        <load-on-startup>2</load-on-startup>\n    </servlet>\n\n    <servlet-mapping>\n        <servlet-name>MonitorStatus</servlet-name>\n        <url-pattern>/monitor-status.html</url-pattern>\n    </servlet-mapping>\n\n"};' "$$tmp2" > "$$tmp"; \
   (( $$? == 0 )) || exit 1; \
 	cp -p $(war-dir)/$@/WEB-INF/web.xml $(war-dir)/$@/WEB-INF/web.xml.old; \
 	cat "$$tmp" > $(war-dir)/$@/WEB-INF/web.xml;
+	cp -p $(reportsrc)/WebContent/urlrewrite.xml	       $(war-dir)/$@/WEB-INF/.
 	# --- copy in needed libraries ---
 	cp -p $(target)/gratiaReporting.jar                    $(war-dir)/$@/WEB-INF/lib/.
 	cp -p $(target)/gratiaReporting.jar                    $(war-dir)/$@/scriptlib/.
@@ -516,8 +517,13 @@ reporting: birt-reporting
 	cp -p $(commonLib)/mysql-connector-java-*-bin.jar      $(war-dir)/$@/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
 	cp -p $(commonLib)/dom4j-1.6.1.jar                     $(war-dir)/$@/WEB-INF/lib/.
 	cp -p $(commonLib)/commons-lang-*.jar                  $(war-dir)/$@/WEB-INF/lib/.
+	cp -p $(commonLib)/urlrewritefilter-4.0.3.jar          $(war-dir)/$@/WEB-INF/lib/.
 	# --- copy needed jsp and css files ----
 	cp -p $(reportsrc)/WebContent/*.jsp                    $(war-dir)/$@/.
+	cp -p $(reportsrc)/WebContent/*.xml                    $(war-dir)/$@/.
+	# --- don't need urlrewrite.xml here , it is in WEB-INF
+	rm -f $(war-dir)/$@/urlrewrite.xml
+        # ---
 	cp -p $(reportsrc)/WebContent/*.html                   $(war-dir)/$@/.
 	cp -p $(reportsrc)/WebContent/*.css                    $(war-dir)/$@/.
 	# --- copy directories paths ---
@@ -597,9 +603,9 @@ release: gratia
 	mkdir -p tarball/tomcat/v55/gratia; \
 	mkdir -p tarball/gratia/gratia_reporting; \
 	echo "$(gratia_release_data)" >tarball/tomcat/v55/gratia/gratia-release
-	cp $(configuration)/*gov $(configuration)/log4j.properties $(staticScript)/*.py tarball/tomcat/v55/gratia; \
-	chmod 755 tarball/tomcat/v55/gratia/*.py
-	cp $(configuration)/*sql $(configuration)/configure_tomcat $(configuration)/*sh $(configuration)/post-install $(configuration)/install-database $(configuration)/collector-backlog-byprobes $(configuration)/*.template tarball/tomcat/v55/gratia; \
+	cp $(configuration)/*gov $(configuration)/log4j.properties $(staticScript)/staticReports tarball/tomcat/v55/gratia; \
+	chmod 755 tarball/tomcat/v55/gratia/staticReports
+	cp $(configuration)/*sql $(configuration)/configure_tomcat $(configuration)/configure_urlredirect $(configuration)/*sh $(configuration)/post-install $(configuration)/install-database $(configuration)/collector-backlog-byprobes $(configuration)/*.template tarball/tomcat/v55/gratia; \
 	rm -rf tarball/tomcat/v55/gratia/.svn; \
 	cp -R $(configuration)/hibernate tarball/tomcat/v55/gratia; \
 	rm -rf tarball/tomcat/v55/gratia/hibernate/.svn; \
@@ -610,6 +616,7 @@ release: gratia
         perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/install-database; \
         rm -f tarball/tomcat/v55/gratia/install-database.bak; \
         chmod 700 tarball/tomcat/v55/gratia/configure_tomcat; \
+        chmod 700 tarball/tomcat/v55/gratia/configure_urlredirect; \
         perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/configure_tomcat; \
         rm -f tarball/tomcat/v55/gratia/configure_tomcat.bak; \
 	cp $(configuration)/truststore $(configuration)/keystore tarball/tomcat/v55/gratia; \
@@ -635,11 +642,11 @@ release: gratia
 	cp $(security)/scripts/voms-server.sh   tarball/tomcat/v55/gratia; 
 	chmod 744 tarball/tomcat/v55/gratia/voms-server.sh;
 	cp $(security)/scripts/voms-server.cron   tarball/tomcat/v55/gratia; 
-	cp $(configuration)/*gov $(configuration)/log4j.properties  $(staticScript)/*.py tarball/tomcat/v55/gratia; \
-	chmod 755 tarball/tomcat/v55/gratia/*.py
+	cp $(configuration)/*gov $(configuration)/log4j.properties  $(staticScript)/staticReports tarball/tomcat/v55/gratia; \
+	chmod 755 tarball/tomcat/v55/gratia/staticReports
 	cp -R $(configuration)/hibernate tarball/tomcat/v55/gratia; \
 	rm -rf tarball/tomcat/v55/gratia/hibernate/.svn; \
-	cp $(configuration)/*sql $(configuration)/configure_tomcat $(configuration)/*sh $(configuration)/collector-backlog-byprobes $(configuration)/*.template  tarball/tomcat/v55/gratia; \
+	cp $(configuration)/*sql $(configuration)/configure_tomcat $(configuration)/configure_urlredirect $(configuration)/*sh $(configuration)/collector-backlog-byprobes $(configuration)/*.template   $(staticScript)/staticReports tarball/tomcat/v55/gratia; \
 	perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/post-install; \
 	rm -f tarball/tomcat/v55/gratia/post-install.bak; \
         perl -wapi.bak -e 's&CMD_(?:PREAMBLE|PREFIX|SUFFIX)&&g' tarball/tomcat/v55/gratia/install-database; \
@@ -718,16 +725,17 @@ gratia: clean util services servlets registration administration soap reporting 
 	rm -f -r tarball; \
 	mkdir tarball; \
 	echo "$(gratia_release_data)" >tarball/gratia-release
-	cp $(configuration)/UserVoMap.* $(staticScript)/*.py $(configuration)/*properties tarball; \
-	cp $(configuration)/*sql $(configuration)/configure_tomcat $(configuration)/*sh $(configuration)/post-install $(configuration)/install-database  $(configuration)/*.template  tarball; \
+	cp $(configuration)/UserVoMap.* $(staticScript)/staticReports $(configuration)/*properties tarball; \
+	cp ${staticScript}/staticReports $(configuration)/*sql $(configuration)/configure_tomcat $(configuration)/configure_urlredirect $(configuration)/*sh $(configuration)/post-install $(configuration)/install-database  $(configuration)/*.template  tarball; \
 	cp -R $(configuration)/hibernate tarball; \
 	rm -rf tarball/hibernate/.svn; \
 	cp $(security)/scripts/voms-server.sh         tarball; chmod 744 tarball/voms-server.sh
 	cp $(security)/scripts/voms-server.cron        tarball
-	chmod 755 tarball/*.py
+	chmod 755 tarball/staticReports
 	chmod 700 tarball/post-install; \
 	chmod 700 tarball/install-database; \
 	chmod 700 tarball/configure_tomcat;  \
+	chmod 700 tarball/configure_urlredirect;  \
 	sed -e 's/^gratia.services.version.*=.*/gratia.services.version = v$(gratia_services_version)/'  -e 's/^gratia.reporting.version.*=.*/gratia.reporting.version = v$(gratia_reporting_version)/' $(configuration)/service-configuration.properties > tarball/service-configuration.properties && chmod 600 tarball/service-configuration.properties;  \
 	sed -e 's/^gratia.services.version.*=.*/gratia.services.version = v$(gratia_services_version)/'  -e 's/^gratia.reporting.version.*=.*/gratia.reporting.version = v$(gratia_reporting_version)/' $(configuration)/service-authorization.properties > tarball/service-authorization.properties &&  chmod 600 tarball/service-authorization.properties;  \
 	cp $(configuration)/configure-* $(configuration)/update-gratia-local tarball; \

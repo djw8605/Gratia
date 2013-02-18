@@ -1,0 +1,20 @@
+#!/bin/sh
+#This script modifies /usr/share/tomcat5/webapps/gratia-reporting/WEB-INF/urlrewrite.xml
+#based on the service-configuration.properties attributes
+# service.reporting.urlrewrite and service.reporting.permanent-redirect
+#
+##---------------------------------------------------
+## Checking to see if reporting should be re-directed
+REDIRECT_REPORTING=`grep service.reporting.urlrewrite /etc/gratia/services/service-configuration.properties |tr '=' ' ' |awk '{print $NF;}'`
+ perl -wapi.bak -e 's/enabled\s*=\s*".*?"(.*<!-- Controlled by REDIRECT_REPORTING in service start -->.*)$/enabled="'"$REDIRECT_REPORTING"'"$1/' /usr/share/tomcat5/webapps/gratia-reporting/WEB-INF/urlrewrite.xml
+if [ ${REDIRECT_REPORTING} = 'true' ]
+then
+   fname=`mktemp`
+   grep service.reporting.permanent-redirect /etc/gratia/services/service-configuration.properties |tr '=' ' ' |awk '{print $NF;}'|awk '{ gsub(/\//,"\\/");gsub(/:/,"\\:");print $0}' > $fname
+   REPORTING_URL=`cat $fname`
+   perl -wapi.bak -e 's/type="permanent-redirect"\>.*\/gratia-reporting/type="permanent-redirect"\>'$REPORTING_URL'\/gratia-reporting/' /usr/share/tomcat5/webapps/gratia-reporting/WEB-INF/urlrewrite.xml
+   rm -f $fname
+fi
+## end of reporting re-direct evaluation
+
+exit 0

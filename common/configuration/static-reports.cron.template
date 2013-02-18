@@ -1,0 +1,1 @@
+42 0 * * * root /usr/share/gratia/staticReports /usr/share/tomcat<VERSION> http://<HOST>:<PORT>/gratia-reporting/

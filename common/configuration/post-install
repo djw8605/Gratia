@@ -2,6 +2,7 @@
 # Create the mysql gratia summary tables, triggers and stored procedures
 # Called automatically by the services.
 #
+#########################################################################################
 
 TMP=${TMPDIR:-/tmp}/post-install.$$
 trap "rm $TMP* 2>/dev/null" EXIT
@@ -19,9 +20,10 @@ function preprocess_proc() {
         proc="$TPROC"
      fi
 }
-dbhost=`grep ^service.mysql.url /etc/gratia/collector/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $3;}'`
-dbport=`grep ^service.mysql.url /etc/gratia/collector/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $4;}'`
-dbpasswd=`grep ^service.mysql.rootpassword /etc/gratia/collector/service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'`
+dbname=`grep ^service.mysql.url /etc/gratia/services/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $5;}'`
+dbhost=`grep ^service.mysql.url /etc/gratia/services/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $3;}'`
+dbport=`grep ^service.mysql.url /etc/gratia/services/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $4;}'`
+dbpasswd=`grep ^service.mysql.rootpassword /etc/gratia/services/service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'`
 if [ "x$dbpasswd" = "x" ] || [ $dbpasswd = "service.mysql.rootpassword" ]
 then
     dbpasswd=""
@@ -218,7 +220,7 @@ password="$dbpasswd"
 EOF
     chmod 600 $tmpfile
     #--- do it -----
-   cat ${proc} | mysql --defaults-extra-file=$tmpfile -B --unbuffered --user=root  --host=$dbhost --port=$dbport gratia
+   cat ${proc} | mysql --defaults-extra-file=$tmpfile -B --unbuffered --user=root  --host=$dbhost --port=$dbport $dbname 
    status=$?
     #--- remove temporary password file ---
     rm -f $tmpfile

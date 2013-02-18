@@ -56,9 +56,9 @@ function add_vo_line {
 }
 #### MAIN ################################################################
 gratiaVOMS=voms-servers
-tmpFile=`grep service.voms.connections /etc/gratia/collector/service-configuration.properties |grep -v "^#"|cut -d'=' -f2`
+tmpFile=`grep service.voms.connections /etc/gratia/services/service-configuration.properties |grep -v "^#"|cut -d'=' -f2`
 if [ "$?" != "0" ];then
-  logerr "service.voms.connections are not defined /etc/gratia/collector/service-configuration.properties"
+  logerr "service.voms.connections are not defined /etc/gratia/services/service-configuration.properties"
 fi
 if [ x"$tmpFile" != "x" ];then
 	gratiaVOMS=$tmpFile

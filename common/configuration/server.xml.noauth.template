@@ -3,22 +3,9 @@
        <Connector port="OPEN_PORT" maxHttpHeaderSize="8192"
                maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
                enableLookups="false"
-               redirectPort="SECURE_PORT"
                acceptCount="100"
                connectionTimeout="20000" disableUploadTimeout="true" 
                maxPostSize="10485760" />
-    <Connector port="SECURE_PORT" SSLEnabled="true"
-               maxThreads="150" minSpareThreads="25" maxSpareThreads="75"
-               enableLookups="false" disableUploadTimeout="true"
-               acceptCount="100" debug="0" scheme="https" secure="true"
-               sSLImplementation="org.glite.security.trustmanager.tomcat.TMSSLImplementation"
-               trustStoreDir="/etc/grid-security/certificates"
-               sslCertFile="/etc/grid-security/http/httpcert.pem"
-               sslKey="/etc/grid-security/http/httpkey.pem"
-               crlUpdateInterval="2h"
-               log4jConfFile="/etc/gratia/services/log4j.properties"
-               clientAuth="true" sslProtocol="TLS"
-               crlEnabled="true" crlRequired="true"/>
     <Engine name="Catalina" defaultHost="localhost">
         <Valve className="org.apache.catalina.valves.FastCommonAccessLogValve"
                directory="/var/log/gratia-service/access"

@@ -69,7 +69,7 @@ def main():
     config = ConfigParser()
     catalinaHome = args[0]
     birtURL = args[1]
-    propertiesFile = os.path.join(catalinaHome,'gratia/service-configuration.properties')
+    propertiesFile = os.path.join('/etc/gratia/services/','service-configuration.properties')
     config.read(propertiesFile)
     reportsFolder = os.path.join(catalinaHome, 'webapps', config.get( 'gratia', 'service.reporting.reports.folder'))
     exists = os.path.exists(reportsFolder)

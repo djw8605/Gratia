@@ -38,14 +38,63 @@ function find_tomcat_version {
   fi
 }
 #---------------
+function determine_gratia_services {
+  if [ -d "$COLLECTOR_SERVICES" ];then
+    logit "Gratia services: collector and reporting"
+    REPORTING_ONLY="false"
+  else
+    logit "Gratia services: reporting only"
+    REPORTING_ONLY="true"
+    SERVER_XML_TEMPLATE=$SERVER_XML_NOAUTH_TEMPLATE
+  fi 
+  [ "$JSVC" = "yes" ] && logit "... using the jakarta jsvc daemon"
+  if [ ! -f "$SERVER_XML_TEMPLATE" ];then
+    logerr "The necessary server.xml template needed for this type of configuration
+does not exist: $SERVER_XML_TEMPLATE
+There appears to be something wrong with your installation.
+"
+  fi 
+}
+#---------------
+function verify_jsvc_installed {
+  # there is an additional jar file required in tomcat6
+  case "$TOMCAT_VERSION" in
+     "tomcat5" )  JAR_FILES=":/usr/share/java/jakarta-commons-daemon.jar" 
+                  JSVC_FILE=/usr/sbin/jsvc
+                   ;;
+      "tomcat6" )  JAR_FILES=":/usr/share/java/jakarta-commons-daemon.jar:\$CATALINA_HOME/bin/tomcat-juli.jar" 
+                   JSVC_FILE=/usr/bin/jsvc
+                   ;;
+            * ) logerr "The tomcat version could not be detected" ;;
+    esac
+  [ ! -e "$JSVC_FILE" ] && logerr "Cannot find the jsvc executable for the $TOMCAT_VERSION version: $JSVC_FILE"
+}
+#---------------
+function find_gratia_ports {
+  logit "--- Finding the Tomcat ports to use ---"
+  logit "Using: $GRATIA_PROPERTIES_FILE"
+  [ ! -r "$GRATIA_PROPERTIES_FILE" ] && logerr "Unable to read the Gratia properties file" 
+  TOMCAT_PORT="`grep "^service.open.connection=" $GRATIA_PROPERTIES_FILE | cut -d":" -f3`" 
+  TOMCAT_SSL_PORT="`grep "^service.secure.connection=" $GRATIA_PROPERTIES_FILE | cut -d":" -f3`" 
+  [ -z "$TOMCAT_PORT" ] && logerr "Unable to find the 'service.open.connection' attribute in the configuration file"
+  if [ "$REPORTING_ONLY" = "false" ];then
+    [ -z "$TOMCAT_SSL_PORT" ] && logerr "Unable to find the 'service.secure.connection' attribute in the Gratia configuration file"
+  fi
+  logit "Open port: $TOMCAT_PORT"
+  logit "Secure port: $TOMCAT_SSL_PORT"
+  logit
+  sleep 3
+}
+#---------------
 function configuring_tomcat {
   logit "--- Configuring Tomcat and server.xml ---"
-  script="/var/lib/trustmanager-tomcat/configure.sh"
-  if [ ! -x "$script" ];then
-    logerr "Configuration file does not exist or is not executable: $script"
+  if [ "$REPORTING_ONLY" = "false" ];then
+    local script="/var/lib/trustmanager-tomcat/configure.sh"
+    if [ ! -x "$script" ];then
+      logerr "Configuration file does not exist or is not executable: $script"
+    fi
+    runit "/var/lib/trustmanager-tomcat/configure.sh"
   fi
-  runit "/var/lib/trustmanager-tomcat/configure.sh"
-  find_tomcat_version
   case "$TOMCAT_VERSION" in
       "tomcat5" )
         dest=/usr/share/java/log4j.jar
@@ -62,53 +111,163 @@ function configuring_tomcat {
         * ) logerr "This version of tomcat is not supported: $TOMCAT_VERSION" ;;
     esac
   logit
+  sleep 3
 }
 #---------------
-function update_tomcat_conf {
+function update_tomcat_sysconfig {
   find_tomcat_version 
-  logit "--- Updating ${TOMCAT_VERSION}.conf ---"
-  cfg=/usr/share/${TOMCAT_VERSION}/conf/${TOMCAT_VERSION}.conf
-  if [ ! -f $cfg ];then
-    logerr "tomcat config file does not exist: $cfg"
-  fi
+  logit "--- Updating ${TOMCAT_SYSCONFIG} ---"
+  local cfg=${TOMCAT_SYSCONFIG}
+  [ ! -e $cfg ] && logerr "tomcat config file does not exist: $cfg"
+  [ ! -w $cfg ] && logerr "Cannot write to tomcat config file: $cfg"
+  logit "Creating backup"
   runit "cp -p $cfg ${cfg}.${BACKUP_DATE}"
+  sleep 3
+  # append additional variables to the config file for Gratia
   cat >>$cfg <<EOF
+#
+##--------------------------------------------------
+## Gratia options
 JAVA_OPTS=' -server -Xmx1024M -XX:MaxPermSize=256m -Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator -Dcom.sun.management.jmxremote'
+#
+CONNECTOR_PORT=$TOMCAT_PORT
+#
+## end of Gratia options
+##--------------------------------------------------
+#
+#Change ulimit
+ulimit -n 8192
 EOF
+
   logit
+  #-- if jsvc option, add its variables --
+  if [ "$JSVC" = "yes" ];then
+    logit "JSVC is being used. Adding more variables"
+    if [ "$REPORTING_ONLY" = "false" ];then
+      SSL_ARGS="SSL_ARG=\"-Dssl_port=$TOMCAT_SSL_PORT\""
+    else
+      SSL_ARGS=""
+    fi
+
+    # append additional variables to the config file for JSVC
+    cat >>$cfg <<EOF
+##--------------------------------------------------
+# JSVC variables/arguments
+#
+JAVA_HOME=/usr/lib/jvm/java
+JSVC=$JSVC_FILE
+$SSL_ARGS
+COMMONS_JAR="$JAR_FILES"
+
+CATALINA_OPTS="-Dsun.net.inetaddr.ttl=297 -Dcom.sun.management.jmxremote \${SSL_ARG} -Dcom.mchange.v2.c3p0.management.ManagementCoordinator=com.mchange.v2.c3p0.management.NullManagementCoordinator -Xmx1536m -XX:MaxPermSize=256m"
+
+JSVC_ARGS=" -user \$TOMCAT_USER -home \$JAVA_HOME -cp \$CATALINA_HOME/bin/bootstrap.jar\$COMMONS_JAR -outfile \$CATALINA_HOME/logs/catalina.out -errfile \$CATALINA_HOME/logs/catalina.err -pidfile \$CATALINA_PID \${CATALINA_OPTS} -Djava.endorsed.dirs=\$CATALINA_HOME/common/endorsed -Dcatalina.home=\$CATALINA_HOME -Djava.io.tmpdir=\$CATALINA_TMPDIR  org.apache.catalina.startup.Bootstrap "
+#
+# end of JSVC variables/arguments
+##--------------------------------------------------
+#
+EOF
+  fi
+  logit
+  logit "Changes applied to $cfg"
+  cmd="diff $cfg ${cfg}.${BACKUP_DATE}"
+  logit "...executing: $cmd"
+  $cmd
+  logit
+  sleep 3
 }
 #----------------
 function update_server_xml {
-  find_tomcat_version 
-  logit "--- Updating server.xml ---"
-  server_xml=/usr/share/${TOMCAT_VERSION}/conf/server.xml
+  local server_xml=$TOMCAT_SERVER_XML
+  logit "--- Updating $server_xml ---"
   logit "Replacing Tomcat server.xml file: $server_xml"
+  logit "with: $SERVER_XML_TEMPLATE"
+  logit "Creating backup"
   runit "cp -p $server_xml ${server_xml}.${BACKUP_DATE}"
+  logit "Copying in template"
   runit "cp -p $SERVER_XML_TEMPLATE $server_xml"
   runit "chmod 644         $server_xml"
   runit "chown tomcat.root $server_xml"
+  logit
+  logit "... updating ports"
+  sed -i "s/OPEN_PORT/$TOMCAT_PORT/g"        $server_xml
+  sed -i "s/SECURE_PORT/$TOMCAT_SSL_PORT/g"  $server_xml
+  cmd="diff $server_xml $SERVER_XML_TEMPLATE"
+  logit "...executing: $cmd"
+  $cmd
+  sleep 3
+}
+#----------------
+function update_initd_service {
+  if [ "$JSVC" != "yes" ];then
+    return ## no need to update the init.d service
+  fi
+  logit
+  logit "JSVC is in effect. Replacing the init.d service tomcat script"
+  backup_file=/etc/init.d/${TOMCAT_VERSION}.$BACKUP_DATE
+  if [ -f "/etc/init.d/$TOMCAT_VERSION" ];then
+    logit "... making backup: $backup_file"
+    cp -p /etc/init.d/$TOMCAT_VERSION $backup_file
+    rm /etc/init.d/$TOMCAT_VERSION
+  fi
+  logit "... copying in new service"
+  cp $INITD_TEMPLATE /etc/init.d/$TOMCAT_VERSION.jsvc
+  ln -s /etc/init.d/$TOMCAT_VERSION.jsvc /etc/init.d/$TOMCAT_VERSION
+  ls -l /etc/init.d/tomcat*
   logit
 }
 #-------------------
 function usage {
   echo "
-Usage: $PGM 
+Usage: $PGM  [--jsvc | --help]
 
 Configures tomcat for a Gratia Collector RPM instance:
 1. runs /var/lib/trustmanager-tomcat/configure.sh
-2. appends to the tomcat5/6.conf a new JAVA_OPTS 
+2. appends Gratia options to the $TOMCAT_SYSCONFIG
+   if the '--jsvc' option is used, additional options are appended
 3. creates a new server.xml from a template 
+
+Options:
+   --jsvc  Implements the necessary changes to use the jsvc functionality.
+           Jsvc is a set of libraries and applications for making Java 
+           applications run on UNIX more easily.  Jsvc allows the Tomcat
+           to perform some privileged operations as root, e.g. bind to a port 
+           less than 1024, and then switch identity to a non-privileged user. 
 "
 }
 #### MAIN ############################################################
 PGM=`basename $0`
+find_tomcat_version
 BACKUP_DATE=`date +'%Y%m%d-%H%M'`
+TOMCAT_SERVER_XML=/usr/share/${TOMCAT_VERSION}/conf/server.xml
 SERVER_XML_TEMPLATE=/usr/share/gratia/server.xml.template
+SERVER_XML_NOAUTH_TEMPLATE=/usr/share/gratia/server.xml.noauth.template
+INITD_TEMPLATE=/usr/share/gratia/${TOMCAT_VERSION}.jsvc.initd.template
+TOMCAT_SYSCONFIG=/etc/sysconfig/${TOMCAT_VERSION}
+COLLECTOR_SERVICES=/usr/share/${TOMCAT_VERSION}/webapps/gratia-services
+GRATIA_PROPERTIES_FILE=/etc/gratia/services/service-configuration.properties
+TOMCAT_PORT=NNNN
+TOMCAT_SSL_PORT=NNNN
+REPORTING_ONLY=NNNN
+
+JSVC="no"
+
+if [ $# -gt 0 ];then
+  case "$1" in
+    "-jsvc" | "--jsvc" ) JSVC="yes" ;;
+    "-h" | "--h" | "-help" | "--help" | "-q") usage; exit 1    ;;
+     * ) usage;logerr "Invalid argument: $1" ;;
+  esac
+fi
 
 logit "====== Configuring Tomcat for gratia ===="
 verify_root
+[ "$JSVC" = "yes" ] && verify_jsvc_installed
+determine_gratia_services
+find_gratia_ports 
 configuring_tomcat
-update_tomcat_conf
+update_tomcat_sysconfig
 update_server_xml
+update_initd_service
 logit "====== Completed Tomcat configuration for Gatia ==="
 exit 0
