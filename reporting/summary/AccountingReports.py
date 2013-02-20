@@ -858,17 +858,28 @@ def DailySiteJobStatusCondor(begin,end,selection = "", count = "", what = "Site.
 # Condor Exit Status
 
 def CMSProdData(begin,end):
+    LogToFile("#######################\n## CMSProdData")
     schema = gDBSchema[mainDB]
-    select = "select sum(WallDuration) from JobUsageRecord_Report  " \
-            "where \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\" " \
-            "and ResourceType = \"Batch\" and VOName = \"cms\" "\
-            "and (LocalUserId = \"cmsprod\" or LocalUserId = \"cmsprd\") and SiteName = \"USCMS-FNAL-WC1-CE\" "
 
-    select = "select (LocalUserId = \"cmsprod\" or LocalUserId = \"cmsprd\") as production, sum(WallDuration) from JobUsageRecord_Report  " \
-            "where \""+ DateToString(begin) +"\"<=EndTime and EndTime<\"" + DateToString(end) + "\" " \
-            "and ResourceType = \"Batch\" and VOName = \"cms\" "\
-            "and SiteName = \"USCMS-FNAL-WC1-CE\" " \
-            "group by production"
+    select = """select
+    COALESCE(voc.VOName,"Total") as FQAN,
+    round(sum(WallDuration)/3600,0)
+from MasterSummaryData msd
+    ,Probe p
+    ,Site  s
+    ,VONameCorrection voc
+    ,VO  vo
+where
+    SiteName in ("USCMS-FNAL-WC1-CE", "USCMS-FNAL-WC1-CE2", "USCMS-FNAL-WC1-CE3", "USCMS-FNAL-WC1-CE4")
+and s.siteid = p.siteid
+and p.probename = msd.ProbeName
+and msd.EndTime >= "%(begin)s" and msd.EndTime  < "%(end)s"
+and msd.ResourceType = "Batch"
+and msd.VOcorrid = voc.corrid and voc.VOid = vo.VOid
+and vo.VOName = "cms"
+group by FQAN
+WITH ROLLUP""" % {  "begin" : DateToString(begin), "end" : DateToString(end) }
+
     return RunQueryAndSplit(select)
 
 def GetSiteVOEfficiency(begin,end):
@@ -3395,8 +3406,7 @@ def LongJobs(range_end = datetime.date.today(),
 def CMSProd(range_end = datetime.date.today(),
             range_begin = None,
             output = "text"):
-
-    factor = 3600  # Convert number of seconds to number of hours
+    LogToFile("#######################\n## def CMSProd")
 
     if not range_end:
         if not range_begin:
@@ -3411,24 +3421,21 @@ def CMSProd(range_end = datetime.date.today(),
 
     print "For jobs finished between %s and %s (midnight UTC)" % ( DateToString(range_begin,False),
                                                                    DateToString(range_end,False) )
-    print "Number of wallclock hours during the previous 7 days consumed by the cmsprod and cmsprd user ids reported via USCMS-FNAL-WC1-CE:"
+    print """Number of wallclock hours during the previous 7 days consumed by users FQANs
+reported via USCMS-FNAL-WC1-CE/CE2/CE3/CE4:"""
+    print
 
     data = CMSProdData(range_begin,range_end)
-    wall = 0
-    user = 0
+    print "%(fqan)-43s %(value)12s" % \
+              {"fqan":"FQAN", "value":"Hours"}
+    print "%(fqan)-43s %(value)12s" % \
+              {"fqan":"------------", "value":"----------"}
     for line in data:
-       (prod, value) = line.split("\t")
-       if (prod == "0"):
-          user = float( value ) / factor
-       elif (prod == "1"):
-          wall = float( value ) / factor
-       else:
-          print "Unexpected value in first column (production):",prod
-    total = wall + user
-    print
-    print "Production: ",niceNum(wall)
-    print "Users     : ",niceNum(user)
-    print "Total     : ",niceNum(total)
+       (fqan, value) = line.split("\t")
+       if fqan == "NULL":
+         fqan = "Total"
+       print "%(fqan)-45s %(value)10s" % \
+              {"fqan":fqan, "value":niceNum(float(value))}
 
 def SoftwareVersionData(schema,begin,end):
    select = """SELECT Si.SiteName, M.ProbeName, S.Name, S.Version, M.ServerDate as StartedOn, Pr.CurrentTime as LastReport
