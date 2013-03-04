@@ -348,6 +348,9 @@ fi
 
 
 %changelog
+* Mon Mar 04 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9-3
+has to change rpm version so will not conflict with koji release 
+
 * Mon Mar 04 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9-2
 added fetch-crl, fetch-crl3 dependencies 
 
