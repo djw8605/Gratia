@@ -18,7 +18,7 @@ then
 else
 	CATALINA_HOME=$1
 fi
-if [ "x"${CATALINA_HOME} = "x " ] || [  !-d ${CATALINA_HOME} ]
+if [ "x"${CATALINA_HOME} = "x " ] || [  ! -d ${CATALINA_HOME} ]
 then 
 	echo "CATALINA_HOME is not defined, exiting"
 	exit 1
