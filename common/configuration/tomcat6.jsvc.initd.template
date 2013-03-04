@@ -130,7 +130,7 @@ function start() {
     if [[ -n "$JSVC" ]] && [[ -x "$JSVC" ]] && [[ -n "$TOMCAT_USER" ]]; then
       echo -n ".. using jsvc .. sleeping 10"
       if [ -x "/usr/share/gratia/configure_urlredirect" ];then
-         /usr/share/gratia/configure_urlredirect
+         /usr/share/gratia/configure_urlredirect $CATALINA_HOME
       fi
       export JAVA_HOME
       JSVC_ARGS="-wait 10 $JSVC_ARGS"

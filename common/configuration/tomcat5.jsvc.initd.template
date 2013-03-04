@@ -242,7 +242,7 @@ function start() {
     fi
     # --- check url redirection ----
     if [ -x "/usr/share/gratia/configure_urlredirect" ];then
-         /usr/share/gratia/configure_urlredirect
+         /usr/share/gratia/configure_urlredirect $CATALINA_HOME
     fi
     # --- start up jsvc ----
     export JAVA_HOME

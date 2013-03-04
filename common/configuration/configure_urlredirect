@@ -1,18 +1,38 @@
 #!/bin/sh
-#This script modifies /usr/share/tomcat5/webapps/gratia-reporting/WEB-INF/urlrewrite.xml
-#based on the service-configuration.properties attributes
+# This script modifies ${CATALINA_HOME}/webapps/gratia-reporting/WEB-INF/urlrewrite.xml
+# based on the service-configuration.properties attributes
 # service.reporting.urlrewrite and service.reporting.permanent-redirect
-#
+# This is called from /etc/init.d/tomcat{VERSION} script
 ##---------------------------------------------------
+#Finds CATALINA_HOME
+if [ $# -ne 1 ]
+then
+	for name in `rpm -qa|grep ^tomcat|cut -d '-' -f 1|sort|uniq`
+	do
+		if [ -d /usr/share/${name} ]
+		then 
+			CATALINA_HOME=/usr/share/${name}
+			break
+		fi
+	done
+else
+	CATALINA_HOME=$1
+fi
+if [ "x"${CATALINA_HOME} = "x " ] || [  !-d ${CATALINA_HOME} ]
+then 
+	echo "CATALINA_HOME is not defined, exiting"
+	exit 1
+fi
+
 ## Checking to see if reporting should be re-directed
 REDIRECT_REPORTING=`grep service.reporting.urlrewrite /etc/gratia/services/service-configuration.properties |tr '=' ' ' |awk '{print $NF;}'`
- perl -wapi.bak -e 's/enabled\s*=\s*".*?"(.*<!-- Controlled by REDIRECT_REPORTING in service start -->.*)$/enabled="'"$REDIRECT_REPORTING"'"$1/' /usr/share/tomcat5/webapps/gratia-reporting/WEB-INF/urlrewrite.xml
+ perl -wapi.bak -e 's/enabled\s*=\s*".*?"(.*<!-- Controlled by REDIRECT_REPORTING in service start -->.*)$/enabled="'"$REDIRECT_REPORTING"'"$1/' ${CATALINA_HOME}/webapps/gratia-reporting/WEB-INF/urlrewrite.xml
 if [ ${REDIRECT_REPORTING} = 'true' ]
 then
    fname=`mktemp`
    grep service.reporting.permanent-redirect /etc/gratia/services/service-configuration.properties |tr '=' ' ' |awk '{print $NF;}'|awk '{ gsub(/\//,"\\/");gsub(/:/,"\\:");print $0}' > $fname
    REPORTING_URL=`cat $fname`
-   perl -wapi.bak -e 's/type="permanent-redirect"\>.*\/gratia-reporting/type="permanent-redirect"\>'$REPORTING_URL'\/gratia-reporting/' /usr/share/tomcat5/webapps/gratia-reporting/WEB-INF/urlrewrite.xml
+   perl -wapi.bak -e 's/type="permanent-redirect"\>.*\/gratia-reporting/type="permanent-redirect"\>'$REPORTING_URL'\/gratia-reporting/' ${CATALINA_HOME}/webapps/gratia-reporting/WEB-INF/urlrewrite.xml
    rm -f $fname
 fi
 ## end of reporting re-direct evaluation
