@@ -2,7 +2,7 @@ Name: gratia
 Summary: Gratia OSG accounting system
 Group: Applications/System
 Version: 1.13.9
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -22,12 +22,12 @@ Requires: java
 Requires: jpackage-utils
 #Requires: jsvc 
 %if 0%{?rhel} < 6
-Requires: fetch-crl
+Requires: fetch-crl3
 Requires: tomcat5
 %define _tomcat tomcat5
 %endif
 %if 0%{?rhel} == 6
-Requires: fetch-crl3
+Requires: fetch-crl
 Requires: tomcat6
 %define _tomcat tomcat6
 %endif
@@ -64,12 +64,12 @@ Requires: java
 Requires: jpackage-utils
 #Requires: jsvc 
 %if 0%{?rhel} < 6
-Requires: fetch-crl 
+Requires: fetch-crl3 
 Requires: tomcat5
 %define _tomcat tomcat5
 %endif
 %if 0%{?rhel} == 6
-Requires: fetch-crl3 
+Requires: fetch-crl 
 Requires: tomcat6
 %define _tomcat tomcat6
 %endif
@@ -348,6 +348,9 @@ fi
 
 
 %changelog
+* Tue Mar 05 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9-4
+fetch-crl3 is required for sl5
+
 * Mon Mar 04 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9-3
 has to change rpm version so will not conflict with koji release 
 
