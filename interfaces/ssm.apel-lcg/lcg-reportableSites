@@ -32,6 +32,10 @@
 #
 # 10/09/12 (John Weigand)
 #         Changed NERSC-PDSF from 13920 to 15494 (per Jeff) Ticket 13117
+#
+# 03/07/13 (John Weigand)
+#         Removing Purdue-Steele from interface. 
+#         It is being de-commissioned per ScottT.
 ##################################################################
 #
 #-- Site  ------- HEPSpec2006
@@ -46,7 +50,6 @@ GLOW                9632
 MIT_CMS            10800
 Nebraska           10412
 Purdue-RCAC        12124
-Purdue-Steele      12784
 Purdue-Rossmann    11240
 Purdue-Hansen       8680
 Purdue-Carter      16400
@@ -75,4 +78,5 @@ UTA_SWT2           11240
 #--- ALICE Tier 2 ----
 NERSC-PDSF         15494
 LC-glcc            15680
-#
+#################################
+#Purdue-Steele      12784
