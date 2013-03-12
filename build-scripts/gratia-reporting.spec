@@ -1,8 +1,8 @@
 Name: gratia-reporting
 Summary: Reporting Gratia OSG accounting system
 Group: Applications/System
-Version: 1.13.5
-Release: 1%{?dist}
+Version: 1.13.9
+Release: 4%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -98,7 +98,7 @@ mkdir -p $RPM_BUILD_ROOT%{_var}/lib/gratia/tmp
 
 
 %changelog
-* Tue Mar 12 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.5 - 1
+* Tue Mar 12 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9 - 4
 fixes for AccountingReport.py and compareVOs.py
 
 * Fri Sep 14 2012 Hyunwoo Kim <hyunwoo@fnal.gov>
