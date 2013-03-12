@@ -98,7 +98,7 @@ mkdir -p $RPM_BUILD_ROOT%{_var}/lib/gratia/tmp
 
 
 %changelog
-* Tue Mar 12 2012 Tanya Levshina <tlevshin@fnal.gov> - 1.13.5 - 1
+* Tue Mar 12 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.5 - 1
 fixes for AccountingReport.py and compareVOs.py
 
 * Fri Sep 14 2012 Hyunwoo Kim <hyunwoo@fnal.gov>
