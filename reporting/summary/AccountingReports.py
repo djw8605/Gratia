@@ -1633,6 +1633,29 @@ def DataTransferData(begin, end, with_panda = False):
     gMySQLConnectString = keepConnectionValue 
     return result
 
+# HK TransferVO Apr 26 2013 BEGIN 
+def DataTransferDataTrVO(begin, end, with_panda = False):
+    siteStr=""
+    if gGrid == 'local': 
+        siteStr = getLocalSiteStr(GetListOfOSGSEs())
+    global gMySQLConnectString,gDBCurrent
+    schema = gDBSchema[transferDB]
+    gDBCurrent = transferDB
+    keepConnectionValue = gMySQLConnectString
+    gMySQLConnectString = gMySQLTransferConnectString
+
+#    select = "select T.SiteName, M.Protocol, sum(M.Njobs), sum(M.TransferSize * Multiplier) from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T, " + schema + ".SizeUnits su where " + siteStr + " M.StorageUnit = su.Unit and P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" group by P.siteid, Protocol"
+
+# HK TransferVO Apr 26 2013
+    select = "select T.SiteName, M.Protocol, V.ReportableVOName, sum(M.Njobs), sum(M.TransferSize * Multiplier) from " + schema + ".MasterTransferSummary M, " + schema + ".Probe P, " + schema + ".Site T, " + schema + ".SizeUnits su, " + schema + ".VONameCorrection V where " + siteStr + " M.StorageUnit = su.Unit and P.siteid = T.siteid and M.ProbeName = P.Probename and StartTime >= \"" + DateTimeToString(begin) + "\" and StartTime < \"" + DateTimeToString(end) + "\" and M.ProbeName not like \"psacct:%\" and V.corrid=M.VOcorrid group by M.VOcorrid, P.siteid, Protocol"
+
+    result = RunQueryAndSplit(select)
+    gMySQLConnectString = keepConnectionValue 
+    return result
+# HK TransferVO Apr 26 2013 END
+
+
+
 def RangeSiteData(begin, end, with_panda = False):
     schema = gDBSchema[mainDB]
     select = """\
@@ -1873,6 +1896,54 @@ class DataTransferReportConf(GenericConf):
     def GetData(self, start, end):
         LogToFile("#######################\n## DataTransferReportConf")
         return DataTransferData(start, end, self.with_panda)
+
+# HK TransferVO Apr 26 2013 BEGIN 
+class DataTransferReportConfTrVO(GenericConf):
+    #title = """\
+#OSG Data transfer summary for  %s - %s (midnight UTC - midnight UTC)
+#including all data that transferred in that time period.
+#Deltas are the differences with the previous period."""
+    #headline = "For all data transferred between %s and %s (midnight, UTC)"
+    title = ""
+    headline = ""
+# HK TransferVO Apr 26 2013 
+#    headers = ("","Site","Protocol","Num transfer","Delta transfer","Number of MiB","Delta MiB")
+#    num_header = 2
+    headers = ("","Site","Protocol","VO","Num transfer","Delta transfer","Number of MiB","Delta MiB")
+    num_header = 3
+
+    factor = 1 # This is the factor to convert time from seconds to hours for other reports. But for data transfer report there is nothing to convert since we are just dealing with the transfer size (not time)
+    delta_column_location = "adjacent"
+    formats = {}
+    lines = {}
+# HK TransferVO Apr 26 2013 
+#    totalheaders = ["All sites","All Protocols"]
+    totalheaders = ["All sites","All Protocols", "All VOs"]
+    defaultSort = True
+
+    def __init__(self, header = False, with_panda = False):
+# HK TransferVO Apr 26 2013 
+#        self.formats["csv"] = ",\%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+#        self.formats["text"] = "| %3s | %-30s | %-25s | %15s | %15s | %17s | %17s"
+#        self.formats["html"] = "<tr bgcolor=white><td>%s</td><td>%s</td><td align=right>%s</td><td align=right> %s </td><td align=right> %s </td><td align=right> %s </td><td align=right> %s</td></tr>"
+        self.formats["csv"] = ",\%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\""
+        self.formats["html"] = "<tr bgcolor=white> <td>%s</td><td>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right>%s</td><td align=right> %s</td> </tr>"
+        self.formats["text"] = "| %3s | %-30s | %-30s | %-25s | %15s | %15s | %17s | %17s"
+
+        self.lines["csv"] = ""
+        self.lines["html"] = ""
+        self.lines["text"] = "---------------------------------------------------------------------------------------------------------------------------------------------"
+
+        if (not header) :  self.title = ""
+        self.with_panda = with_panda
+
+    def GetData(self, start, end):
+# HK TransferVO Apr 26 2013 
+#        LogToFile("#######################\n## DataTransferReportConf")
+#        return DataTransferData(start, end, self.with_panda)
+        LogToFile("#######################\n## DataTransferReportConfTrVO")
+        return DataTransferDataTrVO(start, end, self.with_panda)
+# HK TransferVO Apr 26 2013 END
 
 class RangeSiteVOReportConf(GenericConf):
     title = """\
@@ -2469,6 +2540,196 @@ def GenericRange(what, range_end = datetime.date.today(),
     ret = stdout.getvalue()
     return ret
 
+# HK TransferVO Apr 26 2013 BEGIN 
+def GenericRangeTrVO(what, range_end = datetime.date.today(),
+                 range_begin = None,
+                 output = "text"):
+
+    old_stdout = sys.stdout
+    sys.stdout = stdout = StringIO()
+    ret = ""
+
+    factor = what.factor # Convert number of seconds to number of hours for most reports except data transfer report
+
+    if (not range_begin or range_begin == None): range_begin = range_end + datetime.timedelta(days=-1)
+    if (not range_end or range_end == None): range_end = range_begin + datetime.timedelta(days=+1)
+    timediff = range_end - range_begin
+
+    if (output != "None") :
+        if (what.title != "") :
+            if(output == "html"):
+                what.title = "<br>" + what.title + "<br>"
+            print what.title % ( DateToString(range_begin,False),
+                                 DateToString(range_end,False) )
+        if (what.headline != "") :
+            if(output == "html"):
+                what.headline = "<br>" + what.headline + "<br>"
+
+            print what.headline % ( DateToString(range_begin,False),
+                                    DateToString(range_end,False) )
+
+        if(output == "html"):
+            print "&nbsp<p>"
+            print "</td></tr></table>"
+            print "<table bgcolor=black cellspacing=1 cellpadding=5>"
+
+        print what.lines[output]
+        print what.formats[output] % what.headers
+        print what.lines[output]
+        
+    # First get the previous' range-length's information
+    totalwall = 0
+    totaljobs = 0
+    oldValues = {}
+    result = []
+
+    start = range_begin - timediff
+    end = range_end - timediff
+    lines = what.GetData(start,end)
+    for i in range (0,len(lines)):
+        val = lines[i].split('\t')
+        offset = 0
+        
+#        lkeys = ["","",""] # HK
+        lkeys = ["","","",""]
+        for iheaders in range(0,what.num_header):
+           lkeys[iheaders] = val[iheaders]
+
+        if what.headers[0] == "VO":
+            # "site" is really "VO": hack to harmonize Panda output
+            if lkeys[0] != "Unknown": lkeys[0] = string.lower(lkeys[0])
+
+        if (len(val)==4) :
+            # Nasty hack to harmonize Panda output
+            if what.headers[1] == "VO":
+               if lkeys[1] != "Unknown": lkeys[1] = string.lower(lkeys[1])
+
+        #for iheaders in range(1,len(keys)):
+        #   key = key + keys[iheaders] + " "
+        keys = tuple(lkeys)
+        
+        num_header = what.num_header;
+        offset = num_header - 1;
+
+        njobs= int( val[offset+1] )
+        wall = float( val[offset+2] ) / factor
+        totalwall = totalwall + wall
+        totaljobs = totaljobs + njobs
+        if (oldValues.has_key(keys)):
+            oldValues[keys][0] += njobs
+            oldValues[keys][1] += wall
+        else:
+            oldValues[keys] = [njobs,wall]
+    oldValues[("total","","")] = (totaljobs, totalwall)
+
+    # Then getting the current information and print it
+    totalwall = 0
+    totaljobs = 0
+    start = range_begin
+    end = range_end
+    lines = what.GetData(start,end)
+    num_header = what.num_header;
+    index = 0
+    printValues = {}
+    for i in range (0,len(lines)):
+        val = lines[i].split('\t')
+
+#        lkeys = ["","",""] # HK
+        lkeys = ["","","",""]
+        for iheaders in range(0,what.num_header):
+           lkeys[iheaders] = val[iheaders]
+
+        if what.headers[0] == "VO":
+            # "site" is really "VO": hack to harmonize Panda output
+            if lkeys[0] != "Unknown": lkeys[0] = string.lower(lkeys[0])
+
+        if (len(val)==4) :
+            # Nasty hack to harmonize Panda output
+            if what.headers[1] == "VO":
+               if lkeys[1] != "Unknown": lkeys[1] = string.lower(lkeys[1])
+
+#        for iheaders in range(0,len(keys)):
+#           key = key + keys[iheaders] + " "
+        keys = tuple( lkeys )
+
+        num_header = what.num_header;
+        offset = num_header - 1;
+
+        (oldnjobs,oldwall) = (0,0)
+        if oldValues.has_key(keys):
+            (oldnjobs,oldwall) = oldValues[keys]
+            del oldValues[keys]
+        njobs= int( val[offset+1] )
+        wall = float( val[offset+2] ) / factor
+        totalwall = totalwall + wall
+        totaljobs = totaljobs + njobs
+        if printValues.has_key(keys):
+            printValues[keys][0] += njobs
+            printValues[keys][1] += wall
+        else:
+            printValues[keys] = [njobs,wall,oldnjobs,oldwall]
+                
+    for key,(oldnjobs,oldwall) in oldValues.iteritems():            
+        if (key[0] != "total") :
+            printValues[key] = (0,0,oldnjobs,oldwall)
+
+    if (what.defaultSort):
+        sortedValues = sortedDictValues(printValues)
+    else:
+        sortedValues = sortedDictValuesFunc(printValues,what.Sorting)
+        
+    for key,(njobs,wall,oldnjobs,oldwall) in sortedValues:
+        index = index + 1;
+        printedvalues = []
+        printedvalues.append(index)
+        for iheaders in range(0,num_header):
+           printedvalues.append( key[iheaders] )
+        if(what.delta_column_location == "adjacent"): # print the delta columns adjacent to the corresponding field for which the delta has been calculated
+            printedvalues.append( niceNum(njobs) )
+            printedvalues.append( niceNum(njobs-oldnjobs) )
+            printedvalues.append( niceNum(wall) )
+            printedvalues.append( niceNum(wall-oldwall) )
+	else: # print the delta columns to the right
+            printedvalues.append( niceNum(njobs) )
+            printedvalues.append( niceNum(wall) )
+            printedvalues.append( niceNum(njobs-oldnjobs) )
+            printedvalues.append( niceNum(wall-oldwall) )
+
+        if (output != "None") :
+            #print "%3d " %(index), what.formats[output] % tuple(printedvalues)
+            print what.formats[output] % tuple(printedvalues)
+        result.append(tuple(printedvalues))       
+                
+    (oldnjobs,oldwall) = oldValues[("total","","")]
+    if (output != "None") :
+        print what.lines[output]
+        printedvalues = []
+        for iheaders in range(0,num_header):
+           printedvalues.append("")
+           printedvalues.append( what.totalheaders[iheaders] )
+        if(what.delta_column_location == "adjacent"): # sum delta columns adjacent to the corresponding field for which the delta has been calculated
+            printedvalues.append( niceNum(totaljobs) )
+            printedvalues.append( niceNum(totaljobs-oldnjobs) )
+            printedvalues.append( niceNum(totalwall) )
+            printedvalues.append( niceNum(totalwall-oldwall) )
+	else:
+            printedvalues.append( niceNum(totaljobs) )
+            printedvalues.append( niceNum(totalwall) )
+            printedvalues.append( niceNum(totaljobs-oldnjobs) )
+            printedvalues.append( niceNum(totalwall-oldwall) )
+
+        #print "    ", what.formats[output] % tuple(printedvalues)
+        #print what.formats[output] % tuple(printedvalues)
+        print what.lines[output]
+
+    if(output == "html"):
+        print "</table>"
+
+    sys.stdout = old_stdout
+    ret = stdout.getvalue()
+    return ret
+# HK TransferVO Apr 26 2013 END
+
 def negate(val):
     if(val != 0):
         return -val
@@ -2697,6 +2958,18 @@ def DataTransferReport(range_end = datetime.date.today(),
                         range_end,
                         range_begin,
                         output)
+
+# HK TransferVO Apr 26 2013 BEGIN 
+def DataTransferReportTrVO(range_end = datetime.date.today(),
+                      range_begin = None,
+                      output = "text",
+                      header = True,
+                      with_panda = False):
+    return GenericRangeTrVO( DataTransferReportConfTrVO(header, with_panda),
+                        range_end,
+                        range_begin,
+                        output)
+# HK TransferVO Apr 26 2013 END
 
 def RangeVOSiteReport(range_end = datetime.date.today(),
                       range_begin = None,
@@ -3045,6 +3318,158 @@ Deltas are the differences with the previous period.\n"""
     sys.stdout = old_stdout
     ret = stdout.getvalue()
     return ret
+
+# HK TransferVO Apr 26 2013 BEGIN
+def DataTransferSumupTrVO(range_end = datetime.date.today(),
+                range_begin = None,
+                output = "text",
+                header = True):
+# HK TransferVO Apr 26 2013
+    LogToFile("#######################\n## def DataTransferSumupTrVO")
+    old_stdout = sys.stdout
+    sys.stdout = stdout = StringIO()
+    ret = ""
+
+    br = "\n" # line break
+    if(output == "html"):
+       br = "<br>" # line break
+
+    title = """\
+OSG Data transfer summary for  %s - %s (midnight UTC - midnight UTC)
+including all data that transferred in that time period.
+Deltas are the differences with the previous period.\n"""
+
+    #title += "\nFor all data transferred between %s and %s (midnight, UTC)\n"
+    #title += "\nFor all data transferred in the above time period.\n"
+
+    print title % (range_begin, range_end)
+ 
+    if not gGrid or gGrid.lower() == 'local':
+        try:
+            gridDisplayName = gConfig.get("local", "grid_name")
+        except:
+            gridDisplayName = "OSG"
+    else:
+        gridDisplayName = gGrid 
+
+    if not range_end:
+        if not range_begin:
+            range_end = datetime.date.today()
+        else:
+            range_end = range_begin + datetime.timedelta(days=+1)
+    if not range_begin:
+        range_begin = range_end + datetime.timedelta(days=-1)
+    timediff = range_end - range_begin
+
+    regSites = GetListOfOSGSEs();
+    disabledSites = GetListOfDisabledOSGSites()
+    reportingSitesDate = GetSiteLastReportingDate(range_begin, True)
+
+    pingSites = []
+    for data in reportingSitesDate:
+        if ( len(data) > 0 ):
+           (name,lastreport) = data.split("\t")
+           pingSites.append(name)
+
+    exceptionSites = ['AGLT2_CE_2', 'BNL-LCG2', 'BNL_ATLAS_1', 'BNL_ATLAS_2',
+        'FNAL_GPGRID_2', 'USCMS-FNAL-XEN', 'USCMS-FNAL-WC1-CE2',
+        'USCMS-FNAL-WC1-CE3', 'USCMS-FNAL-WC1-CE4', 'BNL_LOCAL', 'BNL_OSG',
+        'BNL_PANDA', 'GLOW-CMS', 'UCSDT2-B', 'Purdue-Lear' ]
+
+    reportingSites = GetListOfDataTransferReportingSites(range_begin,range_end)
+
+    # a super list of all sites to be used as a reference to restore lists back to their original case after finding common entries between one or more lists using a case insensitive search
+    completeSiteList = list(set(regSites) | set(exceptionSites) | set(reportingSites) | set(pingSites) | set(disabledSites))
+
+    allSites = None
+    if regSites != None:
+        allSites = restoreOriginalCase([name for name in listToLower(regSites) if name not in listToLower(exceptionSites)], completeSiteList)
+
+    missingSites, emptySites = None, None
+    if allSites:
+        missingSites = restoreOriginalCase([name for name in listToLower(allSites) if name not in \
+            listToLower(reportingSites) and name not in listToLower(pingSites)], completeSiteList)
+        emptySites = restoreOriginalCase([name for name in listToLower(allSites) if name not in listToLower(reportingSites) \
+            and name in listToLower(pingSites)], completeSiteList)
+ 
+    extraSites = restoreOriginalCase([name for name in listToLower(reportingSites) if listToLower(allSites) and name not in \
+        listToLower(allSites) and listToLower(disabledSites) and name not in listToLower(disabledSites)], completeSiteList)
+    knownExtras = restoreOriginalCase([name for name in listToLower(extraSites) if name in listToLower(exceptionSites) and \
+        name not in listToLower(regSites)], completeSiteList)
+    extraSites = restoreOriginalCase([name for name in listToLower(extraSites) if name not in listToLower(exceptionSites)], completeSiteList)
+
+    reportingDisabled = None
+    if disabledSites != None:
+        reportingDisabled = restoreOriginalCase([name for name in listToLower(reportingSites) if name in \
+            listToLower(disabledSites)], completeSiteList)
+
+    if allSites != None:
+        print br + "As of %s, there are %s registered SRMv2 %s storage resources." % \
+            (DateToString(datetime.date.today(),False),
+            prettyInt(len(allSites)), gridDisplayName)
+
+    #print "\nBetween %s - %s (midnight - midnight UTC):\n" % \
+    #    (DateToString(range_begin, False), DateToString(range_end, False))
+                                                               
+    n = len(reportingSites)
+    print prettyInt(n)+" storage resources reported" + br
+
+    (njobs, totalSize, avgRate, duration) = GetDataTransferTotals(range_begin,range_end)
+
+    print br + "Total number of transfers: " + niceNum(njobs)
+    print br + "Total transfer size: "+niceNum(totalSize/(1024*1024))+ " TiB" + br
+
+    if reportingSites != None and extraSites != None and knownExtras != None \
+            and allSites != None:
+        n = len(reportingSites)-len(extraSites)-len(knownExtras)
+        print br + "%s registered storage resources reported some activity (%s%% of %s storage resources)" % \
+            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
+
+    if emptySites != None and allSites != None:
+        n = len(emptySites)
+        print br + "%s registered storage resources have reported but have no activity (%s%% " \
+            "of %s storage resources)" % (prettyInt(n), niceNum(n*100/len(allSites), 1),
+            gridDisplayName)
+
+    if missingSites != None and allSites != None:
+        n = len(missingSites)
+        print br + "%s registered storage resources have NOT reported (%s%% of %s storage resources)" % \
+            (prettyInt(n), niceNum(n*100/len(allSites),1), gridDisplayName)
+
+    print br
+    
+    n = len(extraSites);
+    if not gGrid or gGrid.lower() != "local":
+        print br + prettyInt(n)+" non-sanctioned non-registered storage resources reported " \
+            "(might indicate a discrepancy between OIM and Gratia)."
+    elif allSites != None:
+        print br + prettyInt(n)+" non-sanctioned non-registered storage resources reported."
+
+    if reportingDisabled != None: 
+        n = len(reportingDisabled)
+        print br + prettyInt(n)+" disabled storage resources have reported." + br
+
+    # data transfer table HK TransferVO Apr 26 2013
+    print br + DataTransferReportTrVO(range_end, range_begin, output, True, gWithPanda)
+    
+    if emptySites != None:
+        print br + "The storage resources with no activity are: "+ br +prettyList(emptySites)
+
+    if missingSites != None:
+        print br + br + "The non reporting storage resources are: "+ br +prettyList(missingSites)
+
+    if allSites != None:
+        print br + br + "Sites that are registered but have not registered/advertised a SRMV2 service are: " + br +prettyList(extraSites)
+    if reportingDisabled != None:
+        print br + br + "The disabled storage resources that are reporting: " + br + \
+            prettyList(reportingDisabled)
+
+    sys.stdout = old_stdout
+    ret = stdout.getvalue()
+    return ret
+
+# HK TransferVO Apr 26 2013 END
+
 
 def RangeSummup(range_end = datetime.date.today(),
                 range_begin = None,

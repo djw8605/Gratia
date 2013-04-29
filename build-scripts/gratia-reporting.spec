@@ -1,8 +1,8 @@
 Name: gratia-reporting
 Summary: Reporting Gratia OSG accounting system
 Group: Applications/System
-Version: 1.13.9
-Release: 4%{?dist}
+Version: 1.13.10
+Release: 1%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -65,8 +65,9 @@ install -m 0644 reporting/summary/range_mutt_nightly.sh $RPM_BUILD_ROOT%{_datadi
 install -m 0644 reporting/summary/range_mutt.sh         $RPM_BUILD_ROOT%{_datadir}/gratia-reporting
 install -m 0755 reporting/summary/reporting             $RPM_BUILD_ROOT%{_datadir}/gratia-reporting
 install -m 0755 reporting/summary/transfer              $RPM_BUILD_ROOT%{_datadir}/gratia-reporting
+install -m 0755 reporting/summary/transfertrvo          $RPM_BUILD_ROOT%{_datadir}/gratia-reporting
 install -m 0755 reporting/summary/usersitereport        $RPM_BUILD_ROOT%{_datadir}/gratia-reporting
-install -m 0755 reporting/summary/usersreport            $RPM_BUILD_ROOT%{_datadir}/gratia-reporting
+install -m 0755 reporting/summary/usersreport           $RPM_BUILD_ROOT%{_datadir}/gratia-reporting
 install -m 0755 reporting/summary/voefficiency          $RPM_BUILD_ROOT%{_datadir}/gratia-reporting
 
 install -m 0644 reporting/summary/GratiaReporting/Data.pm          $RPM_BUILD_ROOT%{_datadir}/gratia-reporting/GratiaReporting/
@@ -98,6 +99,9 @@ mkdir -p $RPM_BUILD_ROOT%{_var}/lib/gratia/tmp
 
 
 %changelog
+* Fri Apr 26 2013 Hyunwoo Kim <hyunwoo@fnal.gov> - 1.13.10 - 1
+modified AccountingReport.py and range_mutt_nightly.sh, and created transfertrvo, for a new report transfer vo decache
+
 * Tue Mar 12 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9 - 4
 fixes for AccountingReport.py and compareVOs.py
 

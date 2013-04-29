@@ -6,6 +6,7 @@ sendtohtml ./efficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}
 sendtohtml ./voefficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG Efficiency by VO for $when" $RECIPIENT
 sendtohtml ./gradedefficiency "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}OSG Efficiency by VO by time period for $when" $RECIPIENT
 sendtohtml ./transfer "$ExtraArgs $whenarg" ${WORK_DIR}/report "$TR_MAIL_MSG" $RECIPIENT
+sendtohtml ./transfertrvo "$ExtraArgs $whenarg" ${WORK_DIR}/report "$TR_MAIL_MSG" $RECIPIENT
 sendtohtml ./usersitereport "$ExtraArgs $whenarg" ${WORK_DIR}/report "${ExtraHeader}Report by user by site for $when" $USER_RECIPIENT
 sendtohtml ./compareVOs.py "$ExtraArgs $whenarg" ${WORK_DIR}/report "Subject will be set in compareVOs.py" $RECIPIENT 
 if [ "$ExtraArgs" == "--monthly" ] ; then
