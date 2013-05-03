@@ -421,7 +421,9 @@ DJUR:BEGIN
          (((J.ReportableVOName IS NULL) AND (VC.ReportableVOName IS NULL))
           OR (BINARY J.ReportableVOName = BINARY VC.ReportableVOName)))
        JOIN ProjectNameCorrection PNC ON
-         (J.ProjectName = BINARY PNC.ProjectName)
+         ((J.ProjectName = BINARY PNC.ProjectName) OR
+         (((J.ProjectName IS NULL) AND (PNC.ProjectName IS NULL))
+          OR (BINARY J.ProjectName = BINARY PNC.ProjectName)))
        LEFT JOIN Resource EC ON
         ((J.dbid = EC.dbid) AND
          (EC.description = 'ExitCode'))
