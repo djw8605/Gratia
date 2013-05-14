@@ -21,6 +21,10 @@ import java.sql.*;
 
 import java.util.regex.*;
 
+// HK-New
+import java.util.HashMap;
+import java.util.Map;
+
 public class SiteMgmt extends HttpServlet {
     XP xp = new XP();
     //
@@ -53,6 +57,47 @@ public class SiteMgmt extends HttpServlet {
     String cr = "\n";
     Hashtable table = new Hashtable();
     String newname = "<New CE Name>";
+
+    // NG is our new prefix that stands for New Gratia
+    // HK start  //private static long hkcount = 0;
+
+    private static Map<String, String> ngmap = null;
+
+    private String nggetquerystring (HttpServletRequest request, String key) {
+
+        String hkanswer = "";
+
+	if ( ngmap == null ) {
+
+            try {
+		ngmap = new HashMap<String, String>();
+
+		String HK1 = convertStreamToString( request.getInputStream() );
+		//System.out.println("HK String : " + HK1 );
+		String[] HKa = HK1.split("&");
+		for (String hk : HKa) {
+		    String [] hktemp = hk.split("=");
+		    ngmap.put( hktemp[0], hktemp[1] );
+		}
+            }
+            catch (IOException ex){
+                ex.printStackTrace();
+            }
+        } // end of if
+
+        hkanswer = ngmap.get ( key );
+        return hkanswer;
+    }
+
+    public static String convertStreamToString(java.io.InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return URLDecoder.decode( s.hasNext() ? s.next() : "" );
+        //      return s.hasNext() ? s.next() : "";
+    }
+    // HK end
+
+
+
 
     public void init(ServletConfig config) throws ServletException 
     {
@@ -94,6 +139,8 @@ public class SiteMgmt extends HttpServlet {
             }
     }
 
+
+
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         if (LoginChecker.checkLogin(request, response)) {
@@ -104,7 +151,7 @@ public class SiteMgmt extends HttpServlet {
             response.setContentType("text/html");
             response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
             response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-            request.getSession().setAttribute("table",table);
+            request.getSession().setAttribute("table", table);
             PrintWriter writer = response.getWriter();
             writer.write(html);
             writer.flush();
@@ -118,12 +165,22 @@ public class SiteMgmt extends HttpServlet {
         if (LoginChecker.checkLogin(request, response)) {
             openConnection();
             table = (Hashtable) request.getSession().getAttribute("table");
+	    // HK this is critical, without this, nggetquerystring will Never again invoke getInputStream(and update the ngmap) after the very first time.
+	    //hkcount = 0;
+	    ngmap = null;
             update(request);
             closeConnection();
             response.sendRedirect("site.html");
         }
     }
 
+    // HK called by doGet()
+    // HK This function simply constructs a template string that looks like
+    //<tr><td><label>
+    //<input name="cename:#index#" type="text" id="cename:#index#" value="#cename#" />
+    //<input name="index:#index#" type="hidden" id="index:#index#" value="#index#" />
+    //<input name="dbid:#index#" type="hidden" id="dbid:#index#" value="#dbid#" />
+    //</label></td></tr>
     public void setup(HttpServletRequest request) throws IOException
     {
         html = xp.get(request.getRealPath("/") + "site.html");
@@ -133,7 +190,8 @@ public class SiteMgmt extends HttpServlet {
                 String temp = m.group();
                 if (temp.indexOf("#index#") > 0)
                     {
-                        row = temp;
+			//System.out.println("hk row =  " + temp);
+                        row = temp;     // HK String row is initialized to "";
                         break;
                     }
             }
@@ -153,15 +211,28 @@ public class SiteMgmt extends HttpServlet {
                 while(resultSet.next())
                     {
                         String newrow = new String(row);
-                        newrow = xp.replaceAll(newrow,"#index#","" + index);
-                        newrow = xp.replace(newrow,"#dbid#","" + resultSet.getInt(1));
-                        newrow = xp.replace(newrow,"#cename#",resultSet.getString(2));
-                        table.put("index:" + index,"" + index);
-                        table.put("dbid:" + index,resultSet.getString(1));
-                        table.put("cename:" + index,resultSet.getString(2));
+			// HK Comments Begin
+			// The following part constructs a form.html from the template string(setup) by replacing "#dbid#" with real values.
+			// HK Comments End
+
+			// HK Comments Begin
+			//
+			// HK Comments End
+
+                        newrow = xp.replaceAll( newrow, "#index#",  "" + index);
+                        newrow = xp.replace(    newrow, "#dbid#",   "" + resultSet.getInt(1));
+                        newrow = xp.replace(    newrow, "#cename#",      resultSet.getString(2));
+
+			// HK Comments Begin
+			// The following part constructs an internal HashTable which logs the current contents of the DB
+			// and this Table will be compared with Query String of the POST method in doPost function
+			// HK Comments End
+                        table.put("index:"  + index, "" + index);
+                        table.put("dbid:"   + index, resultSet.getString(1));
+                        table.put("cename:" + index, resultSet.getString(2));
                         index++;
                         buffer.append(newrow);
-                    }
+                    } // end of while
                 resultSet.close();
                 statement.close();
             }
@@ -169,17 +240,26 @@ public class SiteMgmt extends HttpServlet {
             {
                 e.printStackTrace();
             }
+
         for (int j = 0; j < 5; j++)
             {
                 String newrow = new String(row);
-                newrow = xp.replaceAll(newrow,"#index#","" + index);
-                newrow = xp.replace(newrow,"#cename#",newname);
-                table.put("index:" + index,"" + index);
-                table.put("cename:" + index,newname);
+		// HK Comments Begin
+		// In addition, form.html and the Table will always have 5 more rows
+		// Here form.html and Table still have #dbid# not replaced
+		// HK Comments End
+                newrow = xp.replaceAll( newrow, "#index#",  "" + index);
+                newrow = xp.replace(    newrow, "#cename#", newname);
+
+                table.put("index:"  + index,  "" + index);
+                table.put("cename:" + index,  newname);
+
                 index++;
                 buffer.append(newrow);
             }
-        html = xp.replace(html,row,buffer.toString());
+
+	// HK this actually constructs a response to GET method of HTTP
+        html = xp.replace(html, row, buffer.toString() );
     }
 
     public void update(HttpServletRequest request)
@@ -193,18 +273,33 @@ public class SiteMgmt extends HttpServlet {
             {
                 key = "index:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
-                if (oldvalue == null)
-                    break;
+
+		// HK
+                //newvalue = (String) request.getParameter(key);
+		// HK, the first invocation of nggetquerystring must always invoke getInputStream to fetch the Query String
+		// but if doPost does not reset hkcount, nggetquerystring will always look at the very first output of getInputStream
+                newvalue = (String) nggetquerystring(request, key);
+
+                if (oldvalue == null)                    break;
+
+
                 key = "cename:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+
+		// HK
+                //newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key);
+
+		System.out.println("hk index = " + index + " hk old bef =  " + oldvalue + " new bef = " + newvalue);
+
                 if (oldvalue.equals(newvalue))
                     continue;
-                if (oldvalue.equals(newname))
-                    insert(index, request);
-                else
-                    update(index, request);
+
+		System.out.println("hk index = " + index + " hk old aft =  " + oldvalue + " new aft = " + newvalue);
+
+		// HK at this point, oldvale is not equal to newvalue
+                if (oldvalue.equals(newname))                    insert(index, request); // HK user filled the last 5 boxes
+                else                                             update(index, request); // HK user modified the existing box
             }
     }
 
@@ -215,8 +310,14 @@ public class SiteMgmt extends HttpServlet {
         try
             {
                 statement = connection.prepareStatement(command);
-                statement.setString(1, request.getParameter("cename:" + index));
-                statement.setInt(2, Integer.parseInt(request.getParameter("dbid:" + index)));
+
+		// HK
+                //statement.setString(1, request.getParameter("cename:" + index));
+                statement.setString(1, nggetquerystring(request, "cename:" + index )  );
+
+                //statement.setInt(2, Integer.parseInt(  request.getParameter("dbid:" + index)  )  );
+                statement.setInt(2,   Integer.parseInt( nggetquerystring(request, "dbid:" + index )       )  );
+
                 statement.executeUpdate();
             }
         catch (Exception e)
@@ -242,7 +343,10 @@ public class SiteMgmt extends HttpServlet {
         try
             {
                 statement = connection.prepareStatement(command);
-                statement.setString(1, request.getParameter("cename:" + index));
+		// HK
+                //statement.setString(1, request.getParameter("cename:" + index));
+                statement.setString(1, nggetquerystring(request, "cename:" + index )  );
+
                 statement.executeUpdate();
             }
         catch (Exception e)
