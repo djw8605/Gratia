@@ -1,0 +1,76 @@
+README.jur-efficiency-cleanup  (John Weigand 6/21/13)
+-------------------------------------------------------
+
+This was created due to a problem with PBS probes which were creating
+probe records with ridiculously high CPU times under some circumstances.
+No one could find just what was causing the bug, so a patch was made to
+the PBS probe to quarantine anything higher that 1000 percent efficiency.
+  https://jira.opensciencegrid.org/browse/SOFTWARE-1032
+
+This is set to go into OSG 3.1.19 as of 6/21/13 anyway.
+
+When sites actually upgrade to this is an unknown.
+
+The jur-efficiency-cleanup.sh was created to identify sites/probes causing
+these distorted CPUs.  The usage function in the script describes the options
+required.... run with a -h option.
+
+When run, the script will create a directory for the database being accessed, 
+The gratia database is currently the only one of importance.  It will contain
+the following files:
+
+./gratia/analysis.log
+   This shows all the queries and results performed.
+
+./grata/del_JUR_from_summary.PROBE_NAME
+   This contains the sql commands to all the del_JUR_from_summary for each dbid
+    with a high CPU.
+
+./grata/update_jur_records.PROBE_NAME 
+   This contains the sql commands to zero out the CPU and Wall times on the
+   JobUsageRecords for each dbid with high CPU.
+
+----------
+
+When taking corrective action, these are the steps that should be taken.
+1. Run the del_JUR* file first.
+
+2. Verify it has worked by running this sql for the time period in question
+     SELECT ProbeName
+     ,sum(NJobs) as Jobs
+     ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
+     ,round(sum(WallDuration)/3600,0) as Wall_Hrs
+     ,round(sum((CpuSystemDuration + CpuUserDuration)/WallDuration),0) as Efficiency
+      FROM VOProbeSummary
+      WHERE
+             EndTime >= "2013-06-01"
+         and EndTime <  "2020-01-01"
+         and (CpuSystemDuration + CpuUserDuration)/WallDuration > 10
+      group by ProbeName
+
+    The probe with the problem should no longer appear.
+  
+    If it does, something went wrong with the del_JUR commands.
+
+    If it is gone, then we want to run the update_jur* commands to zero out
+    the CPU.  This is done in the event the del_JUR commands get run accidently
+    again.  If they are, we will drive the summary tables negative which
+    is not really a good thing.
+
+3. Run the update_jur commands.
+
+-----------------
+
+If, for whatever reason, one needs to restore the JobUsageRecords back to their
+original values, there is a section in the log files which does a select on 
+the JobUsageRecords displaying both CPUs and Wall time in seconds.
+
+-----------------
+IMPORTANT:
+It is suggested that when this utility is run, you commit the output files to 
+svn so there is a history of what has been done.
+
+
+
+    
+

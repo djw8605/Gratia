@@ -1,0 +1,352 @@
+
+#================================
+# Database: gratia
+# Start: Thu Jun 20 11:28:45 CDT 2013
+#================================
+#
+#=========================================================
+#  Probes with ridiculous efficiency 
+#  Start: Thu Jun 20 11:28:45 CDT 2013
+#=========================================================
+
+
+#-- summary by probe ---
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+SELECT ProbeName 
+     ,sum(NJobs) as Jobs
+     ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
+     ,round(sum(WallDuration)/3600,0) as Wall_Hrs
+     ,round(sum((CpuSystemDuration + CpuUserDuration)/WallDuration),0) as Efficiency
+FROM VOProbeSummary
+WHERE
+       EndTime >= "2013-06-01"
+   and EndTime <  "2020-01-01"
+   and (CpuSystemDuration + CpuUserDuration)/WallDuration > 10
+
+group by ProbeName
+
++--------------------------------+------+-----------+----------+------------+
+| ProbeName                      | Jobs | CPU_Hrs   | Wall_Hrs | Efficiency |
++--------------------------------+------+-----------+----------+------------+
+| pbs:carter-osg.rcac.purdue.edu | 5035 | 802578284 |     9710 |   36423783 | 
+| pbs:ce.grid.unesp.br           |  101 | 199929821 |    18358 |     278117 | 
++--------------------------------+------+-----------+----------+------------+
+
+#-- summary by probe/date ---
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+SELECT
+      ProbeName
+     ,date_format(EndTime,'%Y-%m-%d') as EndTime
+     ,sum(NJobs) as Jobs
+     ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
+     ,round(sum(WallDuration)/3600,0) as Wall_Hrs
+     ,round(sum((CpuSystemDuration + CpuUserDuration)/WallDuration),0) as Efficiency
+   FROM
+      VOProbeSummary
+  WHERE
+       EndTime >= "2013-06-01"
+   and EndTime <  "2020-01-01"
+   and (CpuSystemDuration + CpuUserDuration)/WallDuration > 10
+
+   group by
+     ProbeName
+    ,EndTime
+;
+
++--------------------------------+------------+------+-----------+----------+------------+
+| ProbeName                      | EndTime    | Jobs | CPU_Hrs   | Wall_Hrs | Efficiency |
++--------------------------------+------------+------+-----------+----------+------------+
+| pbs:carter-osg.rcac.purdue.edu | 2013-06-06 | 4642 | 488859570 |     8527 |      57332 | 
+| pbs:carter-osg.rcac.purdue.edu | 2013-06-10 |   62 |  83435976 |        3 |   27665977 | 
+| pbs:carter-osg.rcac.purdue.edu | 2013-06-11 |  331 | 230282738 |     1180 |    8700474 | 
+| pbs:ce.grid.unesp.br           | 2013-06-01 |    4 |  20504516 |     1141 |      38359 | 
+| pbs:ce.grid.unesp.br           | 2013-06-02 |    2 |  10252098 |      508 |      20198 | 
+| pbs:ce.grid.unesp.br           | 2013-06-03 |    2 |  10252514 |      549 |      18689 | 
+| pbs:ce.grid.unesp.br           | 2013-06-04 |    1 |   5126275 |      276 |      18549 | 
+| pbs:ce.grid.unesp.br           | 2013-06-08 |    5 |  10253867 |      875 |      27803 | 
+| pbs:ce.grid.unesp.br           | 2013-06-11 |    7 |  25629027 |     1071 |      23931 | 
+| pbs:ce.grid.unesp.br           | 2013-06-12 |    5 |  20503004 |      830 |      24716 | 
+| pbs:ce.grid.unesp.br           | 2013-06-13 |    7 |  10254718 |     1050 |      19741 | 
+| pbs:ce.grid.unesp.br           | 2013-06-14 |   62 |  56398451 |    10702 |      22462 | 
+| pbs:ce.grid.unesp.br           | 2013-06-15 |    1 |   5126196 |      263 |      19466 | 
+| pbs:ce.grid.unesp.br           | 2013-06-17 |    1 |   5126189 |      263 |      19526 | 
+| pbs:ce.grid.unesp.br           | 2013-06-18 |    4 |  20502965 |      831 |      24677 | 
++--------------------------------+------------+------+-----------+----------+------------+
+   
+#========================================================
+#  Distinct Probes with ridiculous efficiency 
+#  Start: Thu Jun 20 11:28:45 CDT 2013
+#=========================================================
+
+mysql --skip-column-names --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+SELECT distinct(ProbeName) 
+FROM VOProbeSummary
+WHERE
+       EndTime >= "2013-06-01"
+   and EndTime <  "2020-01-01"
+   and (CpuSystemDuration + CpuUserDuration)/WallDuration > 10
+
+pbs:ce.grid.unesp.br
+pbs:carter-osg.rcac.purdue.edu
+
+#=============================================================
+#  JobUsageRecords for the Probes with ridiculous efficiency 
+#  Start: Thu Jun 20 11:28:45 CDT 2013
+#  Probe: pbs:ce.grid.unesp.br
+#=============================================================
+
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+   SELECT
+      jur.dbid as dbid
+     ,CpuSystemDuration 
+     ,CpuUserDuration
+     ,WallDuration
+     ,round(((CpuSystemDuration + CpuUserDuration)/ WallDuration)*100,1) as Efficiency
+   FROM
+      JobUsageRecord_Meta meta
+     ,JobUsageRecord jur
+   WHERE
+    meta.ProbeName = "pbs:ce.grid.unesp.br"
+AND meta.ServerDate >= "2013-06-01"
+AND meta.ServerDate <  "2020-01-01"
+AND meta.dbid = jur.dbid
+AND jur.EndTime >= "2013-06-01"
+AND jur.EndTime < "2020-01-01"
+AND (jur.CpuSystemDuration + jur.CpuUserDuration)/jur.WallDuration > 10
+
+   order by
+     dbid
+;
+
++------------+-------------------+-----------------+--------------+------------+
+| dbid       | CpuSystemDuration | CpuUserDuration | WallDuration | Efficiency |
++------------+-------------------+-----------------+--------------+------------+
+| 1061130045 |                 0 |     18454238757 |      1036571 |  1780315.9 | 
+| 1061245956 |                 0 |     18454097041 |      1073385 |  1719243.1 | 
+| 1061343625 |                 0 |     18453428251 |       867135 |  2128091.7 | 
+| 1061969385 |                 0 |     18454492336 |      1131703 |  1630683.3 | 
+| 1061971719 |                 0 |     18453803963 |       918523 |  2009073.7 | 
+| 1062232468 |                 0 |     18453750606 |       908793 |  2030578.0 | 
+| 1062519402 |                 0 |     18454517100 |       986933 |  1869885.5 | 
+| 1062815904 |                 0 |     18454533652 |       987933 |  1867994.5 | 
+| 1062928953 |                 0 |     18454590097 |       994898 |  1854922.8 | 
+| 1065572094 |                 0 |     18453590624 |      1103322 |  1672548.1 | 
+| 1066017657 |                 0 |     18454322544 |       950538 |  1941460.8 | 
+| 1067713085 |                 0 |     18451036617 |       537678 |  3431614.6 | 
+| 1068025648 |                 0 |     18451287376 |       569093 |  3242227.1 | 
+| 1068034204 |                 0 |     18451292068 |       569682 |  3238875.7 | 
+| 1068047925 |                 0 |     18451121555 |       548372 |  3364708.9 | 
+| 1068205907 |                 0 |     18451501068 |       595875 |  3096538.9 | 
+| 1068267633 |                 0 |     18451332754 |       574961 |  3209145.1 | 
+| 1068321458 |                 0 |     18451579518 |       605673 |  3046459.0 | 
+| 1068332941 |                 0 |     18451622300 |       611017 |  3019821.4 | 
+| 1068824663 |                 0 |     18452118784 |       673469 |  2739861.6 | 
+| 1069159270 |                 0 |     18462422388 |      2080010 |   887612.2 | 
+| 1069634074 |                 0 |     18452598318 |       733541 |  2515551.0 | 
+| 1070953249 |                 0 |     18452843034 |       764239 |  2414538.3 | 
+| 1071412053 |                 0 |     18453052798 |       790490 |  2334381.6 | 
+| 1072853771 |                 0 |     18454555079 |       978799 |  1885428.5 | 
+| 1072853990 |                 0 |     18454552953 |       978796 |  1885434.0 | 
+| 1072853999 |                 0 |     18453864551 |       892362 |  2067979.6 | 
+| 1072854002 |                 0 |     18454557370 |       978800 |  1885426.8 | 
+| 1072854014 |                 0 |     18454555055 |       978811 |  1885405.4 | 
+| 1072854018 |                 0 |     18454555997 |       978810 |  1885407.4 | 
+| 1072854060 |                 0 |     18453865026 |       892322 |  2068072.4 | 
+| 1072854064 |                 0 |     18454553249 |       978508 |  1885989.0 | 
+| 1072854065 |                 0 |     18454556348 |       978711 |  1885598.1 | 
+| 1073486751 |                 0 |     18454304763 |       948027 |  1946601.2 | 
+| 1074618760 |                 0 |     18454280995 |       945114 |  1952598.4 | 
+| 1075271022 |                 0 |     18451394922 |       588082 |  3137554.8 | 
+| 1075271147 |                 0 |     18451724336 |       629375 |  2931753.6 | 
+| 1075271310 |                 0 |     18453773564 |       886265 |  2082195.9 | 
+| 1075271320 |                 0 |     18453782625 |       887368 |  2079608.8 | 
++------------+-------------------+-----------------+--------------+------------+
+-- Probe: pbs:ce.grid.unesp.br -----
+call del_JUR_from_summary(1061130045);
+call del_JUR_from_summary(1061245956);
+call del_JUR_from_summary(1061343625);
+call del_JUR_from_summary(1061969385);
+call del_JUR_from_summary(1061971719);
+call del_JUR_from_summary(1062232468);
+call del_JUR_from_summary(1062519402);
+call del_JUR_from_summary(1062815904);
+call del_JUR_from_summary(1062928953);
+call del_JUR_from_summary(1065572094);
+call del_JUR_from_summary(1066017657);
+call del_JUR_from_summary(1067713085);
+call del_JUR_from_summary(1068025648);
+call del_JUR_from_summary(1068034204);
+call del_JUR_from_summary(1068047925);
+call del_JUR_from_summary(1068205907);
+call del_JUR_from_summary(1068267633);
+call del_JUR_from_summary(1068321458);
+call del_JUR_from_summary(1068332941);
+call del_JUR_from_summary(1068824663);
+call del_JUR_from_summary(1069159270);
+call del_JUR_from_summary(1069634074);
+call del_JUR_from_summary(1070953249);
+call del_JUR_from_summary(1071412053);
+call del_JUR_from_summary(1072853771);
+call del_JUR_from_summary(1072853990);
+call del_JUR_from_summary(1072853999);
+call del_JUR_from_summary(1072854002);
+call del_JUR_from_summary(1072854014);
+call del_JUR_from_summary(1072854018);
+call del_JUR_from_summary(1072854060);
+call del_JUR_from_summary(1072854064);
+call del_JUR_from_summary(1072854065);
+call del_JUR_from_summary(1073486751);
+call del_JUR_from_summary(1074618760);
+call del_JUR_from_summary(1075271022);
+call del_JUR_from_summary(1075271147);
+call del_JUR_from_summary(1075271310);
+call del_JUR_from_summary(1075271320);
+-- Probe: pbs:ce.grid.unesp.br -----
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1061130045 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1061245956 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1061343625 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1061969385 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1061971719 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1062232468 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1062519402 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1062815904 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1062928953 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1065572094 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1066017657 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1067713085 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1068025648 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1068034204 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1068047925 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1068205907 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1068267633 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1068321458 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1068332941 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1068824663 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1069159270 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1069634074 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1070953249 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1071412053 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1072853771 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1072853990 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1072853999 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1072854002 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1072854014 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1072854018 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1072854060 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1072854064 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1072854065 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1073486751 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1074618760 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1075271022 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1075271147 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1075271310 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1075271320 ;
+
+#=============================================================
+#  JobUsageRecords for the Probes with ridiculous efficiency 
+#  Start: Thu Jun 20 11:44:18 CDT 2013
+#  Probe: pbs:carter-osg.rcac.purdue.edu
+#=============================================================
+
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+   SELECT
+      jur.dbid as dbid
+     ,CpuSystemDuration 
+     ,CpuUserDuration
+     ,WallDuration
+     ,round(((CpuSystemDuration + CpuUserDuration)/ WallDuration)*100,1) as Efficiency
+   FROM
+      JobUsageRecord_Meta meta
+     ,JobUsageRecord jur
+   WHERE
+    meta.ProbeName = "pbs:carter-osg.rcac.purdue.edu"
+AND meta.ServerDate >= "2013-06-01"
+AND meta.ServerDate <  "2020-01-01"
+AND meta.dbid = jur.dbid
+AND jur.EndTime >= "2013-06-01"
+AND jur.EndTime < "2020-01-01"
+AND (jur.CpuSystemDuration + jur.CpuUserDuration)/jur.WallDuration > 10
+
+   order by
+     dbid
+;
+
++------------+-------------------+-----------------+--------------+----------------+
+| dbid       | CpuSystemDuration | CpuUserDuration | WallDuration | Efficiency     |
++------------+-------------------+-----------------+--------------+----------------+
+| 1064766661 |                 0 |     98426467442 |         2758 |   3568762416.3 | 
+| 1064766690 |                 0 |     81678553967 |         2869 |   2846934610.2 | 
+| 1064767047 |                 0 |     90024299047 |         3038 |   2963275149.7 | 
+| 1064767088 |                 0 |    110251662898 |         2967 |   3715930667.3 | 
+| 1064768859 |                 0 |    113738524117 |         3216 |   3536645650.4 | 
+| 1064768878 |                 0 |    326940637226 |         3094 |  10566924280.1 | 
+| 1064768882 |                 0 |     91549829983 |         3131 |   2923980516.9 | 
+| 1064768925 |                 0 |     75307668972 |         3054 |   2465869972.9 | 
+| 1064768926 |                 0 |    101616165792 |         3076 |   3303516443.2 | 
+| 1064768941 |                 0 |     94422575062 |         3236 |   2917879328.2 | 
+| 1064768961 |                 0 |    112818392330 |         3201 |   3524473362.4 | 
+| 1064769013 |                 0 |     89830218744 |         3070 |   2926065757.1 | 
+| 1064769038 |                 0 |     89336018671 |         3148 |   2837865904.4 | 
+| 1064769051 |                 0 |     73534134803 |         3115 |   2360646382.1 | 
+| 1064769057 |                 0 |    101572020498 |         3120 |   3255513477.5 | 
+| 1064776212 |                 0 |    108829226384 |         3677 |   2959728756.7 | 
+| 1067375919 |                 0 |    300369511429 |          243 | 123608852439.9 | 
+| 1067829005 |                 0 |     45753577316 |        48328 |     94673020.4 | 
+| 1067829007 |                 0 |     42966461822 |        48327 |     88907777.9 | 
+| 1067829019 |                 0 |    130176277321 |        48252 |    269784210.6 | 
+| 1067829021 |                 0 |     25352489458 |        47930 |     52894824.7 | 
+| 1067829023 |                 0 |    584766692356 |        48139 |   1214746239.8 | 
++------------+-------------------+-----------------+--------------+----------------+
+-- Probe: pbs:carter-osg.rcac.purdue.edu -----
+call del_JUR_from_summary(1064766661);
+call del_JUR_from_summary(1064766690);
+call del_JUR_from_summary(1064767047);
+call del_JUR_from_summary(1064767088);
+call del_JUR_from_summary(1064768859);
+call del_JUR_from_summary(1064768878);
+call del_JUR_from_summary(1064768882);
+call del_JUR_from_summary(1064768925);
+call del_JUR_from_summary(1064768926);
+call del_JUR_from_summary(1064768941);
+call del_JUR_from_summary(1064768961);
+call del_JUR_from_summary(1064769013);
+call del_JUR_from_summary(1064769038);
+call del_JUR_from_summary(1064769051);
+call del_JUR_from_summary(1064769057);
+call del_JUR_from_summary(1064776212);
+call del_JUR_from_summary(1067375919);
+call del_JUR_from_summary(1067829005);
+call del_JUR_from_summary(1067829007);
+call del_JUR_from_summary(1067829019);
+call del_JUR_from_summary(1067829021);
+call del_JUR_from_summary(1067829023);
+-- Probe: pbs:carter-osg.rcac.purdue.edu -----
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064766661 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064766690 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064767047 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064767088 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064768859 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064768878 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064768882 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064768925 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064768926 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064768941 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064768961 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064769013 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064769038 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064769051 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064769057 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1064776212 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1067375919 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1067829005 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1067829007 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1067829019 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1067829021 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1067829023 ;
+
+#================================
+# Database: gratia
+# Started: Thu Jun 20 11:28:45 CDT 2013
+#     End: Thu Jun 20 11:53:52 CDT 2013
+#================================
+
