@@ -50,9 +50,13 @@ function find_probes {
    and EndTime <  \"$END_TIME\"
    and (CpuSystemDuration + CpuUserDuration)/WallDuration > $THRESHOLD
 "
-  logit;logit "#-- summary by probe ---"
+  logit "
+#----------------------------
+#-- summary by probe/vo   ---
+#----------------------------"
   cat >$SQLFILE <<EOF
 SELECT ProbeName 
+     ,VOName
      ,sum(NJobs) as Jobs
      ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
      ,round(sum(WallDuration)/3600,0) as Wall_Hrs
@@ -60,14 +64,19 @@ SELECT ProbeName
 FROM VOProbeSummary
 $whereClause
 group by ProbeName
+        ,VOName
 EOF
   set_mysql_cmd "--table"
   run_mysql  
 
-  logit;logit "#-- summary by probe/date ---"
+  logit "
+#-------------------------------
+#-- summary by probe/vo/date ---
+#-------------------------------"
   cat >$SQLFILE <<EOF
 SELECT
       ProbeName
+     ,VOName
      ,date_format(EndTime,'%Y-%m-%d') as EndTime
      ,sum(NJobs) as Jobs
      ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
@@ -78,6 +87,7 @@ SELECT
   $whereClause
    group by
      ProbeName
+    ,VOName
     ,EndTime
 ;
 EOF
@@ -142,8 +152,12 @@ EOF
 }
 #---------------------------------------
 function create_sqlcmds {
-  echo  "-- Probe: $PROBE -----" >>$DEL_JUR_SUMMARY.$PROBE
-  echo  "-- Probe: $PROBE -----" >>$UPDATE_JUR_FILE.$PROBE
+  probehdr="
+-- ------------------------------------
+-- Probe: $PROBE
+-- ------------------------------------"
+  echo  "$probehdr" >>$DEL_JUR_SUMMARY.$PROBE
+  echo  "$probehdr" >>$UPDATE_JUR_FILE.$PROBE
   for dbid in $DBIDS
   do
     echo "call del_JUR_from_summary($dbid);" >>$DEL_JUR_SUMMARY.$PROBE
