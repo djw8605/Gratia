@@ -30,6 +30,10 @@ AJUR:BEGIN
   DECLARE n_Cores BIGINT(20);
   DECLARE n_ProjectNameCorrid BIGINT(20);
 
+  -- temporary variables for a CPU exceeding Wall verification
+  DECLARE t_TotalWall  DOUBLE;
+  DECLARE t_TotalCPU   DOUBLE;
+
   -- Storage only
   DECLARE n_DN VARCHAR(255);
   DECLARE n_Protocol VARCHAR(255);
@@ -191,7 +195,6 @@ AJUR:BEGIN
 
     -- Note entries with different StorageUnit values get stored
     -- independently and must be combined manually outside the DB
-
     INSERT INTO MasterTransferSummary(StartTime, VOcorrid, ProbeName, Grid,
                                       CommonName, DistinguishedName, Protocol, RemoteSite, Status,
                                       IsNew, Njobs, TransferSize, StorageUnit,
@@ -242,6 +245,15 @@ AJUR:BEGIN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to EndTime < StartTime');
      LEAVE AJUR;
+  END IF;
+
+
+  SET t_TotalWall = n_WallDuration * n_Cores;
+  SET t_TotalCPU  = n_CpuUserDuration + n_CpuSystemDuration;
+  IF t_TotalCPU > t_TotalWall THEN
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Warning due to CPU exceeding Wall');
+     -- LEAVE AJUR; -- currently just a warning. MasterSummaryData will be updated
   END IF;
 
   -- MasterSummaryData

@@ -31,10 +31,10 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 92;
+   static final int gratiaDatabaseVersion = 93;
    static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
    static final int latestDBVersionRequiringSummaryViewLoad = 92;
-   static final int latestDBVersionRequiringSummaryTriggerLoad = 92;
+   static final int latestDBVersionRequiringSummaryTriggerLoad = 93;
    static final int latestDBVersionRequiringTableStatisticsRefresh = 87;
    static boolean dbUseJobUsageSiteName = false;
    java.sql.Connection connection;
@@ -520,7 +520,7 @@ public class DatabaseMaintenance {
    }
 
    private int CallPostInstall(String action) {
-      Logging.fine("DatabaseMaintenance: Calling post-install script for action \"" + action + "\"");
+      Logging.info("DatabaseMaintenance: Calling post-install script for action \"" + action + "\"");
       String post_install = "/usr/share/gratia/post-install"; 
       String chmod_cmd[] = {"chmod", "700", post_install};
       Execute.execute(chmod_cmd); // Mark executable just in case.
@@ -1353,6 +1353,15 @@ public class DatabaseMaintenance {
            current = current + 1;
            UpdateDbVersion(current);
          }  
+
+         schemaOnlyLowerBound = 92;
+         schemaOnlyUpperBound = gratiaDatabaseVersion;
+         if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
+             // Stored procedures, trigger procedures only.
+            Logging.fine("DatabaseMaintenance: Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
+            current = schemaOnlyUpperBound;
+            UpdateDbVersion(current);
+         }
 
          if ( liveVersion != gratiaDatabaseVersion  ) {
            Logging.log(LogLevel.SEVERE,"DatabaseMaintenance: FAILED to update database from " + current + " to " + gratiaDatabaseVersion);
