@@ -6,7 +6,7 @@
 # removed from the Gratia database summary tables and VO tables.
 ###################################################################
 function logit {
-  echo "$1" >>$LOGFILE
+  echo "$1" >>$OUTPUTDIR/$LOGFILE
 }
 #----------------
 function logerr {
@@ -29,16 +29,12 @@ $(cat $SQLFILE)
 $(cat $TMPFILE)
 "
   fi
-  cat $TMPFILE >>$LOGFILE
+  cat $TMPFILE >>$OUTPUTDIR/$LOGFILE
   remove_file $SQLFILE
 }
 #----------------
 function find_probes {
   logit "
-#================================
-# Database: $DATABASE
-# Start: $(date)
-#================================
 #
 #=========================================================
 #  Probes with ridiculous efficiency 
@@ -48,23 +44,31 @@ function find_probes {
   whereClause="WHERE
        EndTime >= \"$START_TIME\"
    and EndTime <  \"$END_TIME\"
-   and (CpuSystemDuration + CpuUserDuration)/WallDuration > $THRESHOLD
+   and ((CpuSystemDuration + CpuUserDuration)/WallDuration) * 100 > $THRESHOLD
 "
   logit "
 #----------------------------
 #-- summary by probe/vo   ---
 #----------------------------"
   cat >$SQLFILE <<EOF
+SELECT   ProbeName
+        ,VOName
+        ,Jobs
+        ,CPU_Hrs
+        ,Wall_hrs
+        ,round((CPU_Hrs/Wall_Hrs)*100,0) as Efficiency
+FROM 
+(
 SELECT ProbeName 
      ,VOName
      ,sum(NJobs) as Jobs
      ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
      ,round(sum(WallDuration)/3600,0) as Wall_Hrs
-     ,round(sum((CpuSystemDuration + CpuUserDuration)/WallDuration),0) as Efficiency
 FROM VOProbeSummary
 $whereClause
 group by ProbeName
         ,VOName
+) x
 EOF
   set_mysql_cmd "--table"
   run_mysql  
@@ -74,6 +78,15 @@ EOF
 #-- summary by probe/vo/date ---
 #-------------------------------"
   cat >$SQLFILE <<EOF
+SELECT   ProbeName
+        ,VOName
+        ,EndTime
+        ,Jobs
+        ,CPU_Hrs
+        ,Wall_hrs
+        ,round((CPU_Hrs/Wall_Hrs)*100,0) as Efficiency
+FROM 
+(
 SELECT
       ProbeName
      ,VOName
@@ -81,7 +94,6 @@ SELECT
      ,sum(NJobs) as Jobs
      ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
      ,round(sum(WallDuration)/3600,0) as Wall_Hrs
-     ,round(sum((CpuSystemDuration + CpuUserDuration)/WallDuration),0) as Efficiency
    FROM
       VOProbeSummary
   $whereClause
@@ -89,6 +101,7 @@ SELECT
      ProbeName
     ,VOName
     ,EndTime
+) x
 ;
 EOF
   set_mysql_cmd "--table"
@@ -111,21 +124,26 @@ EOF
 }
 #----------------
 function find_jur_records {
+  local main_logfile=$LOGFILE
   for PROBE in $PROBES
   do
+    LOGFILE=$PROBE.log
+    echo  "... $PROBE ($LOGFILE) - start $(date)" >> $OUTPUTDIR/$main_logfile
+
     whereClause="WHERE
     meta.ProbeName = \"$PROBE\"
 AND meta.ServerDate >= \"$START_TIME\"
-AND meta.ServerDate <  \"$END_TIME\"
+-- AND meta.ServerDate <  \"$END_TIME\"
 AND meta.dbid = jur.dbid
 AND jur.EndTime >= \"$START_TIME\"
 AND jur.EndTime < \"$END_TIME\"
-AND (jur.CpuSystemDuration + jur.CpuUserDuration)/jur.WallDuration > $THRESHOLD
+AND (CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100 > $THRESHOLD
 "
+    start_time=$(date)
     logit "
 #=============================================================
 #  JobUsageRecords for the Probes with ridiculous efficiency 
-#  Start: $(date)
+#  Start: $start_time
 #  Probe: $PROBE
 #=============================================================
 "
@@ -135,7 +153,9 @@ AND (jur.CpuSystemDuration + jur.CpuUserDuration)/jur.WallDuration > $THRESHOLD
      ,CpuSystemDuration 
      ,CpuUserDuration
      ,WallDuration
-     ,round(((CpuSystemDuration + CpuUserDuration)/ WallDuration)*100,1) as Efficiency
+     ,Processors
+     ,(WallDuration * IFNULL(Processors,1)) as Wall_w_Cores
+     ,round((CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100,0) as Efficiency
    FROM
       JobUsageRecord_Meta meta
      ,JobUsageRecord jur
@@ -148,23 +168,34 @@ EOF
     run_mysql 
     DBIDS="$(cat $TMPFILE | egrep -v '^#|^$' | awk -F'|' '{ if ( NR < 4 ) {next}; print $2}')"
     create_sqlcmds
+    echo  "... $PROBE ($LOGFILE) -   end $(date)" >> $OUTPUTDIR/$main_logfile
   done
+  logit "
+#=============================================================
+#  JobUsageRecords for the Probes with ridiculous efficiency 
+#  Start: $start_time
+#    End: $(date)
+#  Probe: $PROBE
+#=============================================================
+"
 }
 #---------------------------------------
 function create_sqlcmds {
-  probehdr="
+  local deljur_file=$OUTPUTDIR/$PROBE.$DEL_JUR_SUMMARY
+  local updjur_file=$OUTPUTDIR/$PROBE.$UPDATE_JUR_FILE
+  local probehdr="
 -- ------------------------------------
 -- Probe: $PROBE
 -- ------------------------------------"
-  echo  "$probehdr" >>$DEL_JUR_SUMMARY.$PROBE
-  echo  "$probehdr" >>$UPDATE_JUR_FILE.$PROBE
+  echo  "$probehdr" >>$deljur_file
+  echo  "$probehdr" >>$updjur_file
   for dbid in $DBIDS
   do
-    echo "call del_JUR_from_summary($dbid);" >>$DEL_JUR_SUMMARY.$PROBE
-    echo "update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = $dbid ;" >>$UPDATE_JUR_FILE.$PROBE
+    echo "call del_JUR_from_summary($dbid);" >>$deljur_file
+    echo "update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = $dbid ;" >>$updjur_file
   done
-  logit "$(cat $DEL_JUR_SUMMARY.$PROBE)"
-  logit "$(cat $UPDATE_JUR_FILE.$PROBE)"
+  logit "$(cat $deljur_file)"
+  logit "$(cat $updjur_file)"
 }
 #----------------
 function validate_environ {
@@ -173,7 +204,7 @@ function validate_environ {
     logerr "Cannot find the mysql client."
   fi
   #-- verify output directory exists --
-  make_dir $outputdir
+  make_dir $OUTPUTDIR
 }
 #----------------
 function remove_file {
@@ -185,6 +216,7 @@ function remove_file {
 #----------------
 function make_dir {
   local dir=$1
+  [ -z "$dir" ] && logerr " in make_dir.  no arg"
   if [ ! -d "$dir" ];then
     mkdir $dir
   fi
@@ -231,14 +263,10 @@ Script supports gratia, gratia_osg_daily"
 }
 #----------------
 function clean_all_directories {
-    outputdir="$DIR/$DATABASE"
-    make_dir $outputdir
-    SQLFILE=$outputdir/$SQLFILE
-    LOGFILE=$outputdir/$LOGFILE
-    TMPFILE=$outputdir/$TMPFILE
-    DEL_JUR_SUMMARY=$outputdir/$DEL_JUR_SUMMARY
-    UPDATE_JUR_FILE=$outputdir/$UPDATE_JUR_FILE
-    remove_all_files $outputdir
+    make_dir $OUTPUTDIR
+    SQLFILE=$OUTPUTDIR/$SQLFILE
+    TMPFILE=$OUTPUTDIR/$TMPFILE
+    remove_all_files $OUTPUTDIR
 }
 #----------------
 function remove_all_files {
@@ -268,24 +296,24 @@ Optiions:
      DEFAULT: start- $START_TIME  end- $END_TIME
 
 This scripts queries the VOProbeSummary table with the time period specified
-for probes where the CPU time exceeds Wall time by more than 1000%.
+for probes where the CPU time exceeds Wall time by more than ${THRESHOLD}%.
 
 For those probes, it then searches the JobUsageRecord table for the
 specific records exceeding that threshold.  It will then create two
 files with sql commands to zero out those records and adjust the summary
-tables accordingly.  A log file is also created
+tables accordingly.  A log file is also created.
 
 ./DATABASE/analysis.log
    Shows all the queries and results used.  It is best to review this
    before applying the adjustments.
 
-./DATABASE/del_JUR_from_summary.PROBE_NAME 
+./DATABASE/PROBE_NAME.del_JUR_from_summary
    Contains the following procedure call for each dbid
       call del_JUR_from_summary(DBID);
    This called procedure will remove the current values for that specific
    JobUsageRecord from the summary tables.
 
-./DATABASE/update_jur_records.PROBE_NAME 
+./DATABASE/PROBE_NAME.update_jur_records
    Contains the sql update statements for each dbid to zeroe out the 
    user/system cpu time and the wall time on those specific records.  
    This is done to insure that one does not accidently run the 
@@ -304,10 +332,11 @@ UPDATE_JUR_FILE=update_jur_records
 
 START_TIME="$(date +'%Y-%m')-01"
 END_TIME="2020-01-01"
-THRESHOLD=10
+THRESHOLD=1000
 
 DATABASE=gratia 
 
+OUTPUTDIR=$DIR/$DATABASE
 STARTING_LOG_TIME="$(date)"
 logit "
 #================================
@@ -321,6 +350,7 @@ validate_environ
 find_probes 
 find_jur_records 
 
+LOGFILE=analysis.log
 logit "
 #================================
 # Database: $DATABASE
