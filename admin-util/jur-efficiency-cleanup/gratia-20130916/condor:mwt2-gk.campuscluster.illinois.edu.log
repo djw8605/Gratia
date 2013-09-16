@@ -1,0 +1,137 @@
+
+#=============================================================
+#  JobUsageRecords for the Probes with ridiculous efficiency 
+#  Start: Sat Sep 14 19:50:25 CDT 2013
+#  Probe: condor:mwt2-gk.campuscluster.illinois.edu
+#=============================================================
+
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+   SELECT
+      jur.dbid as dbid
+     ,CpuSystemDuration 
+     ,CpuUserDuration
+     ,WallDuration
+     ,Processors
+     ,(WallDuration * IFNULL(Processors,1)) as Wall_w_Cores
+     ,round((CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100,0) as Efficiency
+   FROM
+      JobUsageRecord_Meta meta
+     ,JobUsageRecord jur
+   WHERE
+    meta.ProbeName = "condor:mwt2-gk.campuscluster.illinois.edu"
+AND meta.ServerDate >= "2013-06-01"
+-- AND meta.ServerDate <  "2013-09-15"
+AND meta.dbid = jur.dbid
+AND jur.EndTime >= "2013-06-01"
+AND jur.EndTime < "2013-09-15"
+AND (CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100 > 2500
+
+   order by
+     dbid
+;
+
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+| dbid       | CpuSystemDuration | CpuUserDuration | WallDuration | Processors | Wall_w_Cores | Efficiency |
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+| 1079557613 |        2147483648 |            8049 |        15948 |          1 |        15948 |   13465586 | 
+| 1079609691 |        2147483648 |          152281 |       170613 |          1 |       170613 |    1258776 | 
+| 1079621396 |        2147483648 |           19830 |        23006 |          1 |        23006 |    9334537 | 
+| 1079629790 |        2147483648 |           88704 |       108730 |          1 |       108730 |    1975142 | 
+| 1079660091 |        2147483648 |          119726 |       140765 |          1 |       140765 |    1525666 | 
+| 1079665879 |        2147483648 |            9231 |        16674 |          1 |        16674 |   12879290 | 
+| 1086101713 |        2147483648 |            4478 |         7128 |          1 |         7128 |   30127499 | 
+| 1089334266 |        2147483648 |           41071 |        53093 |          1 |        53093 |    4044836 | 
+| 1089437064 |        2147483648 |           63846 |        76288 |          1 |        76288 |    2815053 | 
+| 1089513194 |        2147483648 |           74590 |        86727 |          1 |        86727 |    2476228 | 
+| 1090098182 |        2147483648 |          140342 |       161029 |          1 |       161029 |    1333688 | 
+| 1091504482 |        2147483648 |           94523 |       105373 |          1 |       105373 |    2038073 | 
+| 1091552794 |        2147483648 |          140560 |       150003 |          1 |       150003 |    1431721 | 
+| 1094000903 |        2147483648 |           97374 |       142135 |          1 |       142135 |    1510945 | 
+| 1094052051 |        2147483648 |          131063 |       166102 |          1 |       166102 |    1292949 | 
+| 1094163324 |        2147483648 |          120398 |       159964 |          1 |       159964 |    1342555 | 
+| 1096196476 |        2147483648 |           81112 |       140414 |          1 |       140414 |    1529452 | 
+| 1096986389 |        2147483648 |           89818 |       161060 |          1 |       161060 |    1333400 | 
+| 1097130640 |        2147483648 |           15884 |       170856 |          1 |       170856 |    1256906 | 
+| 1097443230 |        2147483648 |          114238 |       147612 |          1 |       147612 |    1454894 | 
+| 1097498208 |        2147483648 |          121245 |       160505 |          1 |       160505 |    1338030 | 
+| 1099141635 |        2147483648 |          119461 |       145840 |          1 |       145840 |    1472575 | 
+| 1099159817 |        2147483648 |           97727 |       138134 |          1 |       138134 |    1554709 | 
+| 1100317692 |        2147483648 |          103116 |       136685 |          1 |       136685 |    1571194 | 
+| 1100338144 |        2147483648 |          118140 |       136957 |          1 |       136957 |    1568085 | 
+| 1100415618 |        2147483648 |          133502 |       152531 |          1 |       152531 |    1407987 | 
+| 1132667614 |                 9 |             513 |            1 |          1 |            1 |      52200 | 
+| 1132667742 |                 1 |            1417 |           11 |          1 |           11 |      12891 | 
+| 1132667753 |                 0 |             517 |           14 |          1 |           14 |       3693 | 
+| 1132667997 |                 0 |             545 |           10 |          1 |           10 |       5450 | 
+| 1132668028 |                 3 |            1425 |            1 |          1 |            1 |     142800 | 
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+
+-- ------------------------------------
+-- Probe: condor:mwt2-gk.campuscluster.illinois.edu
+-- ------------------------------------
+call del_JUR_from_summary(1079557613);
+call del_JUR_from_summary(1079609691);
+call del_JUR_from_summary(1079621396);
+call del_JUR_from_summary(1079629790);
+call del_JUR_from_summary(1079660091);
+call del_JUR_from_summary(1079665879);
+call del_JUR_from_summary(1086101713);
+call del_JUR_from_summary(1089334266);
+call del_JUR_from_summary(1089437064);
+call del_JUR_from_summary(1089513194);
+call del_JUR_from_summary(1090098182);
+call del_JUR_from_summary(1091504482);
+call del_JUR_from_summary(1091552794);
+call del_JUR_from_summary(1094000903);
+call del_JUR_from_summary(1094052051);
+call del_JUR_from_summary(1094163324);
+call del_JUR_from_summary(1096196476);
+call del_JUR_from_summary(1096986389);
+call del_JUR_from_summary(1097130640);
+call del_JUR_from_summary(1097443230);
+call del_JUR_from_summary(1097498208);
+call del_JUR_from_summary(1099141635);
+call del_JUR_from_summary(1099159817);
+call del_JUR_from_summary(1100317692);
+call del_JUR_from_summary(1100338144);
+call del_JUR_from_summary(1100415618);
+call del_JUR_from_summary(1132667614);
+call del_JUR_from_summary(1132667742);
+call del_JUR_from_summary(1132667753);
+call del_JUR_from_summary(1132667997);
+call del_JUR_from_summary(1132668028);
+
+-- ------------------------------------
+-- Probe: condor:mwt2-gk.campuscluster.illinois.edu
+-- ------------------------------------
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1079557613 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1079609691 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1079621396 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1079629790 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1079660091 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1079665879 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1086101713 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1089334266 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1089437064 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1089513194 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1090098182 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1091504482 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1091552794 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1094000903 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1094052051 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1094163324 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1096196476 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1096986389 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1097130640 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1097443230 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1097498208 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1099141635 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1099159817 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1100317692 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1100338144 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1100415618 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1132667614 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1132667742 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1132667753 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1132667997 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1132668028 ;

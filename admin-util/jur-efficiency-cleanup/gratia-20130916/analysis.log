@@ -1,0 +1,269 @@
+
+#
+#=========================================================
+#  Probes with ridiculous efficiency 
+#  Start: Sat Sep 14 18:55:34 CDT 2013
+#=========================================================
+
+
+#----------------------------
+#-- summary by probe/vo   ---
+#----------------------------
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+SELECT   ProbeName
+        ,VOName
+        ,Jobs
+        ,CPU_Hrs
+        ,Wall_hrs
+        ,round((CPU_Hrs/Wall_Hrs)*100,0) as Efficiency
+FROM 
+(
+SELECT ProbeName 
+     ,VOName
+     ,sum(NJobs) as Jobs
+     ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
+     ,round(sum(WallDuration)/3600,0) as Wall_Hrs
+FROM VOProbeSummary
+WHERE
+       EndTime >= "2013-06-01"
+   and EndTime <  "2013-09-15"
+   and ((CpuSystemDuration + CpuUserDuration)/WallDuration) * 100 > 2500
+
+group by ProbeName
+        ,VOName
+) x
+
++-------------------------------------------+-----------+-------+-----------+----------+------------+
+| ProbeName                                 | VOName    | Jobs  | CPU_Hrs   | Wall_hrs | Efficiency |
++-------------------------------------------+-----------+-------+-----------+----------+------------+
+| condor:iut2-gk.mwt2.org                   | cms       |   335 |    598580 |     2308 |      25935 | 
+| condor:iut2-gk.mwt2.org                   | osg       |  3235 |  10170025 |    39905 |      25486 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | engage    |    14 |         1 |        0 |       NULL | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       |  3234 |  15569065 |    70403 |      22114 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 80527 | 273252217 |   137154 |     199230 | 
+| condor:red.unl.edu                        | cms       |  1324 |        26 |        1 |       2600 | 
+| condor:uct2-gk.mwt2.org                   | cms       |   103 |    597046 |      597 |     100008 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 20573 |  44837821 |   127957 |      35041 | 
+| lsf:grid1.oscer.ou.edu                    | Unknown   |     1 |         6 |        0 |       NULL | 
+| lsf:grid1.oscer.ou.edu                    | dosar     |   207 |     17924 |      519 |       3454 | 
+| pbs:ce.grid.unesp.br                      | gridunesp |  2156 | 735166601 |    97179 |     756508 | 
++-------------------------------------------+-----------+-------+-----------+----------+------------+
+
+#-------------------------------
+#-- summary by probe/vo/date ---
+#-------------------------------
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+SELECT   ProbeName
+        ,VOName
+        ,EndTime
+        ,Jobs
+        ,CPU_Hrs
+        ,Wall_hrs
+        ,round((CPU_Hrs/Wall_Hrs)*100,0) as Efficiency
+FROM 
+(
+SELECT
+      ProbeName
+     ,VOName
+     ,date_format(EndTime,'%Y-%m-%d') as EndTime
+     ,sum(NJobs) as Jobs
+     ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
+     ,round(sum(WallDuration)/3600,0) as Wall_Hrs
+   FROM
+      VOProbeSummary
+  WHERE
+       EndTime >= "2013-06-01"
+   and EndTime <  "2013-09-15"
+   and ((CpuSystemDuration + CpuUserDuration)/WallDuration) * 100 > 2500
+
+   group by
+     ProbeName
+    ,VOName
+    ,EndTime
+) x
+;
+
++-------------------------------------------+-----------+------------+-------+-----------+----------+------------+
+| ProbeName                                 | VOName    | EndTime    | Jobs  | CPU_Hrs   | Wall_hrs | Efficiency |
++-------------------------------------------+-----------+------------+-------+-----------+----------+------------+
+| condor:iut2-gk.mwt2.org                   | cms       | 2013-08-06 |   335 |    598580 |     2308 |      25935 | 
+| condor:iut2-gk.mwt2.org                   | osg       | 2013-07-09 |   224 |    598994 |     3004 |      19940 | 
+| condor:iut2-gk.mwt2.org                   | osg       | 2013-07-12 |   342 |    600380 |     4599 |      13055 | 
+| condor:iut2-gk.mwt2.org                   | osg       | 2013-07-19 |   147 |    598050 |     1885 |      31727 | 
+| condor:iut2-gk.mwt2.org                   | osg       | 2013-07-21 |   119 |    597722 |     1415 |      42242 | 
+| condor:iut2-gk.mwt2.org                   | osg       | 2013-09-04 |   270 |   1195986 |     3730 |      32064 | 
+| condor:iut2-gk.mwt2.org                   | osg       | 2013-09-09 |    82 |    596989 |      806 |      74068 | 
+| condor:iut2-gk.mwt2.org                   | osg       | 2013-09-10 |   769 |    599056 |     3991 |      15010 | 
+| condor:iut2-gk.mwt2.org                   | osg       | 2013-09-11 |  1011 |   4186562 |    15577 |      26877 | 
+| condor:iut2-gk.mwt2.org                   | osg       | 2013-09-12 |   271 |   1196285 |     4898 |      24424 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | engage    | 2013-09-04 |    14 |         1 |        0 |       NULL | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-06-22 |   336 |   2986619 |     4504 |      66310 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-06-23 |   319 |    602281 |     6178 |       9749 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-05 |   212 |    598165 |     2524 |      23699 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-09 |   226 |   1792909 |     4634 |      38690 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-11 |   464 |    605621 |    10448 |       5797 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-13 |   376 |   1203173 |    11775 |      10218 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-16 |   242 |    602409 |     7136 |       8442 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-17 |   112 |   1196627 |     4299 |      27835 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-20 |   121 |    599326 |     3223 |      18595 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-21 |   118 |   2388165 |     2706 |      88254 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-24 |    62 |   1194676 |     1961 |      60922 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-25 |   214 |   1199281 |     7077 |      16946 | 
+| condor:mwt2-gk.campuscluster.illinois.edu | osg       | 2013-07-26 |   432 |    599813 |     3938 |      15231 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-09 |  5906 |   1798237 |    17343 |      10369 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-12 |  5235 |   2988710 |    11326 |      26388 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-13 |  1810 |   1794916 |     8047 |      22305 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-15 |  5285 |   2988919 |    10790 |      27701 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-18 |  1070 |   1790946 |     2150 |      83300 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-19 |  1634 |   1194467 |     2375 |      50293 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-20 |  1917 |   1791759 |     3306 |      54197 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-21 |   888 |    596688 |      396 |     150679 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-22 |  2265 |   1792858 |     6381 |      28097 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-24 |   159 |    597919 |     2628 |      22752 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-07-25 |  2348 |   1194256 |     2332 |      51212 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-08-15 |  1050 |   1193784 |     2069 |      57699 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-08-16 |   300 |    597472 |     2325 |      25698 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-08-18 |    87 |    596604 |      128 |     466097 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-08-23 |  4217 |   8354938 |     7192 |     116170 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-08-24 |   894 |    597150 |     1300 |      45935 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-08-26 |  1661 |   3580261 |     2224 |     160983 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-08-27 |  1127 |   4176623 |     1936 |     215735 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-09-04 |  5978 |  10143118 |     6542 |     155046 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-09-06 |   542 |   5124706 |      958 |     534938 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-09-07 |   164 |   5124107 |       36 |   14233631 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-09-09 |  2963 |  10249416 |     2727 |     375850 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-09-10 | 12718 |  20502907 |    13603 |     150723 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-09-11 | 14297 | 122986070 |    18921 |     649998 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-09-12 |  5297 |  56368967 |     7318 |     770278 | 
+| condor:osg-xsede.grid.iu.edu              | osg       | 2013-09-13 |   715 |   5126422 |     2803 |     182891 | 
+| condor:red.unl.edu                        | cms       | 2013-09-11 |  1324 |        26 |        1 |       2600 | 
+| condor:uct2-gk.mwt2.org                   | cms       | 2013-08-04 |   103 |    597046 |      597 |     100008 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-06-22 |   451 |   1793668 |     4801 |      37360 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-06-24 |   231 |    598709 |     2504 |      23910 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-07-02 |   745 |    600289 |     4314 |      13915 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-07-05 |   351 |    597832 |     2463 |      24273 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-07-08 |   223 |    597789 |     2577 |      23197 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-07-09 |   231 |   1195193 |     2682 |      44563 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-07-18 |   205 |    599063 |     2779 |      21557 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-07-21 |   127 |    597876 |     1718 |      34801 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-07-22 |   110 |    597916 |     1660 |      36019 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-07-25 |   142 |    598232 |     1988 |      30092 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-08-16 |  2550 |    598521 |     2923 |      20476 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-08-20 |  2179 |   2388934 |     3834 |      62309 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-08-23 |  3037 |   8962007 |    19437 |      46108 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-08-24 |   424 |   1193198 |     1249 |      95532 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-08-25 |   976 |    598209 |     2458 |      24337 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-08-26 |  2347 |   2989003 |     7806 |      38291 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-08-27 |  1689 |   6570355 |    10391 |      63231 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-09-10 |  1373 |   3591660 |    16698 |      21510 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-09-11 |  2611 |   9567786 |    29407 |      32536 | 
+| condor:uct2-gk.mwt2.org                   | osg       | 2013-09-13 |   571 |    601581 |     6267 |       9599 | 
+| lsf:grid1.oscer.ou.edu                    | Unknown   | 2013-09-13 |     1 |         6 |        0 |       NULL | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-07-17 |     2 |      2978 |       72 |       4136 | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-07-19 |     1 |      2970 |       48 |       6188 | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-07-23 |   157 |      5074 |      166 |       3057 | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-07-25 |    16 |       188 |        4 |       4700 | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-07-27 |    18 |      3217 |      103 |       3123 | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-07-28 |     1 |       222 |        4 |       5550 | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-08-01 |     4 |        70 |        3 |       2333 | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-08-03 |     1 |        42 |        2 |       2100 | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-08-04 |     3 |        51 |        2 |       2550 | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-08-05 |     1 |        44 |        2 |       2200 | 
+| lsf:grid1.oscer.ou.edu                    | dosar     | 2013-09-08 |     3 |      3068 |      114 |       2691 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-06-13 |  1766 |   5140956 |    14134 |      36373 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-06-25 |     1 |   5125924 |      262 |    1956460 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-06-28 |     1 |   5125609 |      190 |    2697689 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-06-30 |     1 |   5125905 |      242 |    2118143 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-04 |     6 |  30829856 |     2244 |    1373880 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-09 |     4 |  20504165 |     1040 |    1971554 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-10 |     1 |   5126402 |      317 |    1617162 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-11 |     7 |  15379454 |     1405 |    1094623 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-12 |     2 |  10251134 |      397 |    2582150 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-13 |     2 |   5125319 |      153 |    3349882 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-14 |     1 |   5125973 |      248 |    2066925 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-15 |   110 |  25670052 |    27239 |      94240 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-17 |     1 |   5126439 |      303 |    1691894 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-18 |     1 |   5127951 |      485 |    1057309 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-19 |    13 |  20509653 |     1770 |    1158737 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-21 |     2 |  10253192 |      669 |    1532615 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-07-22 |    11 |  59408905 |     3933 |    1510524 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-01 |     3 |   5125310 |      153 |    3349876 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-03 |     2 |  10252677 |      579 |    1770756 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-04 |     1 |   5126565 |      316 |    1622331 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-05 |    27 | 164171222 |    10661 |    1539923 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-06 |     8 |  10254163 |      759 |    1351010 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-07 |    40 |   5133589 |     1207 |     425318 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-08 |    15 |  20508625 |     1572 |    1304620 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-09 |    11 |  20508838 |     1621 |    1265197 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-10 |     4 |   5128513 |      591 |     867769 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-13 |     3 |  16837901 |     1112 |    1514200 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-16 |    21 |   5127052 |      371 |    1381955 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-18 |     2 |   5126263 |      272 |    1884656 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-19 |     1 |   5126840 |      344 |    1490360 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-20 |     4 |   5125680 |      199 |    2575719 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-21 |    14 |   5135963 |     1490 |     344696 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-23 |    15 |   5130593 |      826 |     621137 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-24 |     6 |  20509823 |     2244 |     913985 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-28 |     1 |   5127430 |      421 |    1217917 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-29 |     2 |   5129041 |      637 |     805187 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-30 |     1 |   5125813 |      462 |    1109483 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-08-31 |     4 |  16020754 |     1339 |    1196472 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-09-01 |     1 |   8425163 |      505 |    1668349 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-09-02 |     1 |   5126959 |      379 |    1352760 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-09-03 |     1 |   5128455 |      550 |     932446 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-09-04 |     6 |  25630501 |     1575 |    1627333 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-09-06 |     6 |  10253100 |      939 |    1091917 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-09-08 |    13 |  56012156 |     7379 |     759075 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-09-10 |     6 |  29648611 |     3129 |     947543 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-09-13 |     5 |   5126700 |      354 |    1448220 | 
+| pbs:ce.grid.unesp.br                      | gridunesp | 2013-09-14 |     2 |   5125411 |      165 |    3106310 | 
++-------------------------------------------+-----------+------------+-------+-----------+----------+------------+
+   
+#========================================================
+#  Distinct Probes with ridiculous efficiency 
+#  Start: Sat Sep 14 18:56:19 CDT 2013
+#=========================================================
+
+mysql --skip-column-names --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+SELECT distinct(ProbeName) 
+FROM VOProbeSummary
+WHERE
+       EndTime >= "2013-06-01"
+   and EndTime <  "2013-09-15"
+   and ((CpuSystemDuration + CpuUserDuration)/WallDuration) * 100 > 2500
+
+condor:uct2-gk.mwt2.org
+condor:iut2-gk.mwt2.org
+condor:red.unl.edu
+condor:mwt2-gk.campuscluster.illinois.edu
+slurm:sandhills-ce1.unl.edu
+lsf:grid1.oscer.ou.edu
+slurm:tusker-gw1.unl.edu
+condor:glidein.unl.edu
+pbs:ce.grid.unesp.br
+condor:osg-xsede.grid.iu.edu
+... condor:uct2-gk.mwt2.org (condor:uct2-gk.mwt2.org.log) - start Sat Sep 14 18:56:26 CDT 2013
+... condor:uct2-gk.mwt2.org (condor:uct2-gk.mwt2.org.log) -   end Sat Sep 14 19:16:21 CDT 2013
+... condor:iut2-gk.mwt2.org (condor:iut2-gk.mwt2.org.log) - start Sat Sep 14 19:16:21 CDT 2013
+... condor:iut2-gk.mwt2.org (condor:iut2-gk.mwt2.org.log) -   end Sat Sep 14 19:34:40 CDT 2013
+... condor:red.unl.edu (condor:red.unl.edu.log) - start Sat Sep 14 19:34:40 CDT 2013
+... condor:red.unl.edu (condor:red.unl.edu.log) -   end Sat Sep 14 19:50:25 CDT 2013
+... condor:mwt2-gk.campuscluster.illinois.edu (condor:mwt2-gk.campuscluster.illinois.edu.log) - start Sat Sep 14 19:50:25 CDT 2013
+... condor:mwt2-gk.campuscluster.illinois.edu (condor:mwt2-gk.campuscluster.illinois.edu.log) -   end Sat Sep 14 20:05:35 CDT 2013
+... slurm:sandhills-ce1.unl.edu (slurm:sandhills-ce1.unl.edu.log) - start Sat Sep 14 20:05:35 CDT 2013
+... slurm:sandhills-ce1.unl.edu (slurm:sandhills-ce1.unl.edu.log) -   end Sat Sep 14 20:07:03 CDT 2013
+... lsf:grid1.oscer.ou.edu (lsf:grid1.oscer.ou.edu.log) - start Sat Sep 14 20:07:03 CDT 2013
+... lsf:grid1.oscer.ou.edu (lsf:grid1.oscer.ou.edu.log) -   end Sat Sep 14 20:16:21 CDT 2013
+... slurm:tusker-gw1.unl.edu (slurm:tusker-gw1.unl.edu.log) - start Sat Sep 14 20:16:21 CDT 2013
+... slurm:tusker-gw1.unl.edu (slurm:tusker-gw1.unl.edu.log) -   end Sat Sep 14 20:18:26 CDT 2013
+... pbs:ce.grid.unesp.br (pbs:ce.grid.unesp.br.log) - start Sat Sep 14 20:43:52 CDT 2013
+... pbs:ce.grid.unesp.br (pbs:ce.grid.unesp.br.log) -   end Sat Sep 14 21:11:55 CDT 2013
+... condor:osg-xsede.grid.iu.edu (condor:osg-xsede.grid.iu.edu.log) - start Sat Sep 14 21:11:55 CDT 2013
+... condor:osg-xsede.grid.iu.edu (condor:osg-xsede.grid.iu.edu.log) -   end Sat Sep 14 22:04:36 CDT 2013
+
+#================================
+# Database: gratia
+# Started: Sat Sep 14 18:55:34 CDT 2013
+#     End: Sat Sep 14 22:04:36 CDT 2013
+#================================
+

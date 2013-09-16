@@ -1,0 +1,290 @@
+
+#=============================================================
+#  JobUsageRecords for the Probes with ridiculous efficiency 
+#  Start: Sat Sep 14 18:56:26 CDT 2013
+#  Probe: condor:uct2-gk.mwt2.org
+#=============================================================
+
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+   SELECT
+      jur.dbid as dbid
+     ,CpuSystemDuration 
+     ,CpuUserDuration
+     ,WallDuration
+     ,Processors
+     ,(WallDuration * IFNULL(Processors,1)) as Wall_w_Cores
+     ,round((CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100,0) as Efficiency
+   FROM
+      JobUsageRecord_Meta meta
+     ,JobUsageRecord jur
+   WHERE
+    meta.ProbeName = "condor:uct2-gk.mwt2.org"
+AND meta.ServerDate >= "2013-06-01"
+-- AND meta.ServerDate <  "2013-09-15"
+AND meta.dbid = jur.dbid
+AND jur.EndTime >= "2013-06-01"
+AND jur.EndTime < "2013-09-15"
+AND (CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100 > 2500
+
+   order by
+     dbid
+;
+
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+| dbid       | CpuSystemDuration | CpuUserDuration | WallDuration | Processors | Wall_w_Cores | Efficiency |
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+| 1068015773 |                 6 |            1634 |           20 |          1 |           20 |       8200 | 
+| 1075275831 |                 4 |            4922 |          142 |          1 |          142 |       3469 | 
+| 1078029319 |        2147483648 |           41668 |        49652 |          1 |        49652 |    4325154 | 
+| 1078037746 |        2147483648 |           40004 |        50965 |          1 |        50965 |    4213722 | 
+| 1078037771 |        2147483648 |           42189 |        50431 |          1 |        50431 |    4258345 | 
+| 1078709948 |        2147483648 |           35796 |        42302 |          1 |        42302 |    5076638 | 
+| 1080839917 |                10 |             454 |            3 |          1 |            3 |      15467 | 
+| 1084167989 |        2147483648 |            2992 |         5651 |          1 |         5651 |   38001887 | 
+| 1086343034 |        2147483648 |            3924 |        20166 |          1 |        20166 |   10649051 | 
+| 1088246801 |        2147483648 |           11602 |        49333 |          1 |        49333 |    4353060 | 
+| 1089411851 |        2147483648 |           62125 |        72919 |          1 |        72919 |    2945111 | 
+| 1089439675 |        2147483648 |           21680 |        50879 |          1 |        50879 |    4220809 | 
+| 1094924430 |        2147483648 |           35356 |        49092 |          1 |        49092 |    4374479 | 
+| 1096898990 |        2147483648 |           39897 |        48877 |          1 |        48877 |    4393730 | 
+| 1098062362 |        2147483648 |           59309 |        63383 |          1 |        63383 |    3388200 | 
+| 1100325485 |        2147483648 |           55253 |        67028 |          1 |        67028 |    3203943 | 
+| 1107593099 |        2147483648 |           14404 |        16524 |          1 |        16524 |   12996236 | 
+| 1112879582 |                 0 |             291 |           11 |          1 |           11 |       2645 | 
+| 1112879617 |                 0 |             222 |            3 |          1 |            3 |       7400 | 
+| 1112879673 |                 0 |             291 |            9 |          1 |            9 |       3233 | 
+| 1117377112 |        2147483648 |           14750 |        18309 |          1 |        18309 |   11729195 | 
+| 1120235085 |        2147483648 |            3861 |         7877 |          1 |         7877 |   27262759 | 
+| 1120566225 |        2147483648 |           11900 |        19988 |          1 |        19988 |   10743924 | 
+| 1120566343 |        2147483648 |            1282 |         3721 |          1 |         3721 |   57712575 | 
+| 1120843006 |        2147483648 |            1025 |         2544 |          1 |         2544 |   84413706 | 
+| 1122399232 |        2147483648 |            9846 |        18400 |          1 |        18400 |   11671160 | 
+| 1122426193 |        2147483648 |           24923 |        29535 |          1 |        29535 |    7271063 | 
+| 1122426216 |        2147483648 |           16659 |        23190 |          1 |        23190 |    9260458 | 
+| 1122447982 |        2147483648 |           18042 |        25071 |          1 |        25071 |    8565680 | 
+| 1122476088 |        2147483648 |           17506 |        23281 |          1 |        23281 |    9224265 | 
+| 1122476171 |        2147483648 |           14352 |        21425 |          1 |        21425 |   10023328 | 
+| 1122490602 |        2147483648 |           18096 |        30336 |          1 |        30336 |    7079054 | 
+| 1122490604 |        2147483648 |           18071 |        30833 |          1 |        30833 |    6964946 | 
+| 1122554170 |        2147483648 |           19460 |        29228 |          1 |        29228 |    7347417 | 
+| 1122562838 |        2147483648 |           33998 |        40645 |          1 |        40645 |    5283596 | 
+| 1122571008 |        2147483648 |            6913 |         9993 |          1 |         9993 |   21489949 | 
+| 1122577935 |        2147483648 |           21879 |        32791 |          1 |        32791 |    6549070 | 
+| 1122775096 |        2147483648 |           10127 |        16678 |          1 |        16678 |   12876207 | 
+| 1122793533 |        2147483648 |            8036 |        10286 |          1 |        10286 |   20877811 | 
+| 1122884679 |        2147483648 |            1721 |        18141 |          1 |        18141 |   11837745 | 
+| 1122981559 |        2147483648 |            2943 |        27836 |          1 |        27836 |    7714782 | 
+| 1122987006 |        2147483648 |            3905 |        39280 |          1 |        39280 |    5467127 | 
+| 1124505363 |        2147483648 |            2742 |         4927 |          1 |         4927 |   43586085 | 
+| 1124622833 |        2147483648 |            8286 |        11014 |          1 |        11014 |   19497839 | 
+| 1124777248 |        2147483648 |            9145 |        12447 |          1 |        12447 |   17253095 | 
+| 1124777287 |        2147483648 |            7914 |        13056 |          1 |        13056 |   16448312 | 
+| 1125136827 |        2147483648 |           14545 |        23818 |          1 |        23818 |    9016283 | 
+| 1125208629 |        2147483648 |            2691 |        22131 |          1 |        22131 |    9703521 | 
+| 1125231022 |        2147483648 |           15587 |        19967 |          1 |        19967 |   10755242 | 
+| 1125231034 |        2147483648 |           17837 |        24561 |          1 |        24561 |    8743543 | 
+| 1125231067 |        2147483648 |           17088 |        20534 |          1 |        20534 |   10458268 | 
+| 1125385401 |        2147483648 |           12772 |        18802 |          1 |        18802 |   11421638 | 
+| 1125385447 |        2147483648 |           23487 |        37076 |          1 |        37076 |    5792176 | 
+| 1125385455 |        2147483648 |           15268 |        20523 |          1 |        20523 |   10463865 | 
+| 1125397707 |        2147483648 |           12735 |        22107 |          1 |        22107 |    9714101 | 
+| 1125397720 |        2147483648 |           33043 |        43253 |          1 |        43253 |    4965012 | 
+| 1125423527 |        2147483648 |           16952 |        24043 |          1 |        24043 |    8931916 | 
+| 1125423529 |        2147483648 |           26869 |        44950 |          1 |        44950 |    4777554 | 
+| 1125543893 |        2147483648 |           29917 |        46071 |          1 |        46071 |    4661313 | 
+| 1136996704 |        2147483648 |           10579 |        15545 |          1 |        15545 |   13814694 | 
+| 1137176635 |        2147483648 |           37719 |        50077 |          1 |        50077 |    4288439 | 
+| 1137190458 |        2147483648 |           16348 |        42222 |          1 |        42222 |    5086211 | 
+| 1137310365 |        2147483648 |           32005 |        53616 |          1 |        53616 |    4005363 | 
+| 1137382371 |        2147483648 |           16160 |        26002 |          1 |        26002 |    8258979 | 
+| 1137418100 |        2147483648 |           49978 |        68029 |          1 |        68029 |    3156791 | 
+| 1137759547 |        2147483648 |           54265 |        76151 |          1 |        76151 |    2820105 | 
+| 1137759625 |        2147483648 |           17129 |        27787 |          1 |        27787 |    7728437 | 
+| 1137798389 |        2147483648 |            2719 |         4324 |          1 |         4324 |   49664347 | 
+| 1137818148 |        2147483648 |           25137 |        30169 |          1 |        30169 |    7118263 | 
+| 1137829024 |        2147483648 |           14833 |        30737 |          1 |        30737 |    6986689 | 
+| 1137868467 |        2147483648 |           23368 |        31848 |          1 |        31848 |    6742989 | 
+| 1137910931 |        2147483648 |           46950 |        59977 |          1 |        59977 |    3580590 | 
+| 1137910936 |        2147483648 |           29132 |        35976 |          1 |        35976 |    5969293 | 
+| 1137965771 |        2147483648 |           47745 |        58448 |          1 |        58448 |    3674260 | 
+| 1137965907 |        2147483648 |           44966 |        64754 |          1 |        64754 |    3316442 | 
+| 1137996699 |        2147483648 |           44941 |        51928 |          1 |        51928 |    4135589 | 
+| 1138068307 |        2147483648 |           27742 |        49349 |          1 |        49349 |    4351682 | 
+| 1138083457 |        2147483648 |           24301 |        46270 |          1 |        46270 |    4641253 | 
+| 1138118365 |        2147483648 |           40717 |        57953 |          1 |        57953 |    3705631 | 
+| 1138126012 |        2147483648 |           35420 |        56248 |          1 |        56248 |    3817947 | 
+| 1138175434 |        2147483648 |           31891 |        50436 |          1 |        50436 |    4257902 | 
+| 1139383163 |        2147483648 |           28113 |        39853 |          1 |        39853 |    5388582 | 
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+
+-- ------------------------------------
+-- Probe: condor:uct2-gk.mwt2.org
+-- ------------------------------------
+call del_JUR_from_summary(1068015773);
+call del_JUR_from_summary(1075275831);
+call del_JUR_from_summary(1078029319);
+call del_JUR_from_summary(1078037746);
+call del_JUR_from_summary(1078037771);
+call del_JUR_from_summary(1078709948);
+call del_JUR_from_summary(1080839917);
+call del_JUR_from_summary(1084167989);
+call del_JUR_from_summary(1086343034);
+call del_JUR_from_summary(1088246801);
+call del_JUR_from_summary(1089411851);
+call del_JUR_from_summary(1089439675);
+call del_JUR_from_summary(1094924430);
+call del_JUR_from_summary(1096898990);
+call del_JUR_from_summary(1098062362);
+call del_JUR_from_summary(1100325485);
+call del_JUR_from_summary(1107593099);
+call del_JUR_from_summary(1112879582);
+call del_JUR_from_summary(1112879617);
+call del_JUR_from_summary(1112879673);
+call del_JUR_from_summary(1117377112);
+call del_JUR_from_summary(1120235085);
+call del_JUR_from_summary(1120566225);
+call del_JUR_from_summary(1120566343);
+call del_JUR_from_summary(1120843006);
+call del_JUR_from_summary(1122399232);
+call del_JUR_from_summary(1122426193);
+call del_JUR_from_summary(1122426216);
+call del_JUR_from_summary(1122447982);
+call del_JUR_from_summary(1122476088);
+call del_JUR_from_summary(1122476171);
+call del_JUR_from_summary(1122490602);
+call del_JUR_from_summary(1122490604);
+call del_JUR_from_summary(1122554170);
+call del_JUR_from_summary(1122562838);
+call del_JUR_from_summary(1122571008);
+call del_JUR_from_summary(1122577935);
+call del_JUR_from_summary(1122775096);
+call del_JUR_from_summary(1122793533);
+call del_JUR_from_summary(1122884679);
+call del_JUR_from_summary(1122981559);
+call del_JUR_from_summary(1122987006);
+call del_JUR_from_summary(1124505363);
+call del_JUR_from_summary(1124622833);
+call del_JUR_from_summary(1124777248);
+call del_JUR_from_summary(1124777287);
+call del_JUR_from_summary(1125136827);
+call del_JUR_from_summary(1125208629);
+call del_JUR_from_summary(1125231022);
+call del_JUR_from_summary(1125231034);
+call del_JUR_from_summary(1125231067);
+call del_JUR_from_summary(1125385401);
+call del_JUR_from_summary(1125385447);
+call del_JUR_from_summary(1125385455);
+call del_JUR_from_summary(1125397707);
+call del_JUR_from_summary(1125397720);
+call del_JUR_from_summary(1125423527);
+call del_JUR_from_summary(1125423529);
+call del_JUR_from_summary(1125543893);
+call del_JUR_from_summary(1136996704);
+call del_JUR_from_summary(1137176635);
+call del_JUR_from_summary(1137190458);
+call del_JUR_from_summary(1137310365);
+call del_JUR_from_summary(1137382371);
+call del_JUR_from_summary(1137418100);
+call del_JUR_from_summary(1137759547);
+call del_JUR_from_summary(1137759625);
+call del_JUR_from_summary(1137798389);
+call del_JUR_from_summary(1137818148);
+call del_JUR_from_summary(1137829024);
+call del_JUR_from_summary(1137868467);
+call del_JUR_from_summary(1137910931);
+call del_JUR_from_summary(1137910936);
+call del_JUR_from_summary(1137965771);
+call del_JUR_from_summary(1137965907);
+call del_JUR_from_summary(1137996699);
+call del_JUR_from_summary(1138068307);
+call del_JUR_from_summary(1138083457);
+call del_JUR_from_summary(1138118365);
+call del_JUR_from_summary(1138126012);
+call del_JUR_from_summary(1138175434);
+call del_JUR_from_summary(1139383163);
+
+-- ------------------------------------
+-- Probe: condor:uct2-gk.mwt2.org
+-- ------------------------------------
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1068015773 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1075275831 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1078029319 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1078037746 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1078037771 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1078709948 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1080839917 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1084167989 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1086343034 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1088246801 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1089411851 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1089439675 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1094924430 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1096898990 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1098062362 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1100325485 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1107593099 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1112879582 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1112879617 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1112879673 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1117377112 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1120235085 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1120566225 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1120566343 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1120843006 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122399232 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122426193 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122426216 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122447982 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122476088 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122476171 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122490602 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122490604 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122554170 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122562838 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122571008 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122577935 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122775096 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122793533 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122884679 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122981559 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1122987006 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1124505363 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1124622833 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1124777248 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1124777287 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125136827 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125208629 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125231022 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125231034 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125231067 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125385401 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125385447 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125385455 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125397707 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125397720 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125423527 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125423529 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1125543893 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1136996704 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137176635 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137190458 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137310365 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137382371 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137418100 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137759547 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137759625 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137798389 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137818148 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137829024 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137868467 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137910931 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137910936 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137965771 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137965907 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137996699 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138068307 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138083457 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138118365 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138126012 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138175434 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1139383163 ;

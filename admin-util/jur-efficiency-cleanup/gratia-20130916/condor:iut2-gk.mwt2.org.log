@@ -1,0 +1,98 @@
+
+#=============================================================
+#  JobUsageRecords for the Probes with ridiculous efficiency 
+#  Start: Sat Sep 14 19:16:21 CDT 2013
+#  Probe: condor:iut2-gk.mwt2.org
+#=============================================================
+
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+   SELECT
+      jur.dbid as dbid
+     ,CpuSystemDuration 
+     ,CpuUserDuration
+     ,WallDuration
+     ,Processors
+     ,(WallDuration * IFNULL(Processors,1)) as Wall_w_Cores
+     ,round((CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100,0) as Efficiency
+   FROM
+      JobUsageRecord_Meta meta
+     ,JobUsageRecord jur
+   WHERE
+    meta.ProbeName = "condor:iut2-gk.mwt2.org"
+AND meta.ServerDate >= "2013-06-01"
+-- AND meta.ServerDate <  "2013-09-15"
+AND meta.dbid = jur.dbid
+AND jur.EndTime >= "2013-06-01"
+AND jur.EndTime < "2013-09-15"
+AND (CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100 > 2500
+
+   order by
+     dbid
+;
+
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+| dbid       | CpuSystemDuration | CpuUserDuration | WallDuration | Processors | Wall_w_Cores | Efficiency |
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+| 1089419919 |        2147483648 |           38593 |        53021 |          1 |        53021 |    4050324 | 
+| 1090888993 |        2147483648 |           11352 |        28260 |          1 |        28260 |    7599062 | 
+| 1095439836 |        2147483648 |           42043 |        59769 |          1 |        59769 |    3593043 | 
+| 1097091594 |        2147483648 |           11111 |        22195 |          1 |        22195 |    9675579 | 
+| 1109364005 |        2147483648 |           53055 |        53835 |          1 |        53835 |    3989109 | 
+| 1132487854 |        2147483648 |           38561 |        49560 |          1 |        49560 |    4333176 | 
+| 1132512357 |        2147483648 |           39328 |        50732 |          1 |        50732 |    4233074 | 
+| 1136736779 |        2147483648 |           30221 |        50873 |          1 |        50873 |    4221323 | 
+| 1137432340 |        2147483648 |           14941 |        27084 |          1 |        27084 |    7929030 | 
+| 1138049355 |        2147483648 |           16090 |        49428 |          1 |        49428 |    4344703 | 
+| 1138118990 |        2147483648 |           19385 |        50122 |          1 |        50122 |    4284552 | 
+| 1138161458 |        2147483648 |           27720 |        50777 |          1 |        50777 |    4229299 | 
+| 1138161678 |        2147483648 |           25910 |        50903 |          1 |        50903 |    4218827 | 
+| 1138171559 |        2147483648 |           25163 |        55184 |          1 |        55184 |    3891542 | 
+| 1138182189 |        2147483648 |           22264 |        56135 |          1 |        56135 |    3825610 | 
+| 1138182226 |        2147483648 |           23621 |        55977 |          1 |        55977 |    3836410 | 
+| 1138249054 |        2147483648 |           23537 |        53085 |          1 |        53085 |    4045412 | 
+| 1138264114 |        2147483648 |           33044 |        63458 |          1 |        63458 |    3384154 | 
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+
+-- ------------------------------------
+-- Probe: condor:iut2-gk.mwt2.org
+-- ------------------------------------
+call del_JUR_from_summary(1089419919);
+call del_JUR_from_summary(1090888993);
+call del_JUR_from_summary(1095439836);
+call del_JUR_from_summary(1097091594);
+call del_JUR_from_summary(1109364005);
+call del_JUR_from_summary(1132487854);
+call del_JUR_from_summary(1132512357);
+call del_JUR_from_summary(1136736779);
+call del_JUR_from_summary(1137432340);
+call del_JUR_from_summary(1138049355);
+call del_JUR_from_summary(1138118990);
+call del_JUR_from_summary(1138161458);
+call del_JUR_from_summary(1138161678);
+call del_JUR_from_summary(1138171559);
+call del_JUR_from_summary(1138182189);
+call del_JUR_from_summary(1138182226);
+call del_JUR_from_summary(1138249054);
+call del_JUR_from_summary(1138264114);
+
+-- ------------------------------------
+-- Probe: condor:iut2-gk.mwt2.org
+-- ------------------------------------
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1089419919 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1090888993 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1095439836 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1097091594 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1109364005 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1132487854 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1132512357 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1136736779 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1137432340 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138049355 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138118990 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138161458 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138161678 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138171559 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138182189 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138182226 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138249054 ;
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1138264114 ;
