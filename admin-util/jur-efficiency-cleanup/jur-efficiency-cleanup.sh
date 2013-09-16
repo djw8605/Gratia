@@ -332,7 +332,7 @@ UPDATE_JUR_FILE=update_jur_records
 
 START_TIME="$(date +'%Y-%m')-01"
 END_TIME="2020-01-01"
-THRESHOLD=1000
+THRESHOLD=2500
 
 DATABASE=gratia 
 
