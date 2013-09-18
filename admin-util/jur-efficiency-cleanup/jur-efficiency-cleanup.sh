@@ -1,11 +1,12 @@
 #!/bin/bash
 ###################################################################
-# John Weigand (12/30/11)
+# John Weigand (11//18/13)
 #
-# This script should be used to analyse VO names that can be
-# removed from the Gratia database summary tables and VO tables.
+# This script is intended to find JobUsageRecord with a 
+# ridiculously high CPU being recorded.  It is crude.
 ###################################################################
 function logit {
+  [ ! -d "$OUTPUTDIR" ] && return
   echo "$1" >>$OUTPUTDIR/$LOGFILE
 }
 #----------------
@@ -40,6 +41,13 @@ function find_probes {
 #  Probes with ridiculous efficiency 
 #  Start: $(date)
 #=========================================================
+#
+# NOTE: The purpose of these queries (going against the summary tables) is
+#        is to narrow down the queries against the JobUsageRecord table.
+#        It gives a ballpark estimation of the probes causing the problem.
+#        The number of Jobs shown is NOT an indicationn of the actual
+#        number of jobs with ridiculous CPU.
+#
 "
   whereClause="WHERE
        EndTime >= \"$START_TIME\"
@@ -51,7 +59,8 @@ function find_probes {
 #-- summary by probe/vo   ---
 #----------------------------"
   cat >$SQLFILE <<EOF
-SELECT   ProbeName
+SELECT  x.ProbeName
+        ,SiteName
         ,VOName
         ,Jobs
         ,CPU_Hrs
@@ -69,6 +78,10 @@ $whereClause
 group by ProbeName
         ,VOName
 ) x
+   ,Probe p
+   ,Site s
+where x.ProbeName = p.probename
+and p.siteid    = s.siteid
 EOF
   set_mysql_cmd "--table"
   run_mysql  
@@ -118,13 +131,17 @@ FROM VOProbeSummary
 $whereClause
 EOF
   set_mysql_cmd "--skip-column-names"
-##set_mysql_cmd "--silent --skip-column-names"
   run_mysql  
   PROBES="$(cat $TMPFILE |egrep -v '^#')" 
 }
 #----------------
 function find_jur_records {
   local main_logfile=$LOGFILE
+  if [ -z "$PROBES" ];then
+    logit;logit "No problem probes found."
+    rm -rf $OUTPUTDIR
+    return
+  fi
   for PROBE in $PROBES
   do
     LOGFILE=$PROBE.log
@@ -132,7 +149,7 @@ function find_jur_records {
 
     whereClause="WHERE
     meta.ProbeName = \"$PROBE\"
-AND meta.ServerDate >= \"$START_TIME\"
+-- AND meta.ServerDate >= \"$START_TIME\"  ## May miss some as Server is usually > End
 -- AND meta.ServerDate <  \"$END_TIME\"
 AND meta.dbid = jur.dbid
 AND jur.EndTime >= \"$START_TIME\"
@@ -147,7 +164,7 @@ AND (CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) 
 #  Probe: $PROBE
 #=============================================================
 "
-    cat >$SQLFILE <<EOF
+  cat >$SQLFILE <<EOF
    SELECT
       jur.dbid as dbid
      ,CpuSystemDuration 
@@ -181,21 +198,16 @@ EOF
 }
 #---------------------------------------
 function create_sqlcmds {
-  local deljur_file=$OUTPUTDIR/$PROBE.$DEL_JUR_SUMMARY
-  local updjur_file=$OUTPUTDIR/$PROBE.$UPDATE_JUR_FILE
   local probehdr="
 -- ------------------------------------
 -- Probe: $PROBE
 -- ------------------------------------"
-  echo  "$probehdr" >>$deljur_file
-  echo  "$probehdr" >>$updjur_file
+  logit  "$probehdr" 
   for dbid in $DBIDS
   do
-    echo "call del_JUR_from_summary($dbid);" >>$deljur_file
-    echo "update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = $dbid ;" >>$updjur_file
+    logit "call del_JUR_from_summary($dbid);" 
+    logit "update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = $dbid;" 
   done
-  logit "$(cat $deljur_file)"
-  logit "$(cat $updjur_file)"
 }
 #----------------
 function validate_environ {
@@ -307,13 +319,11 @@ tables accordingly.  A log file is also created.
    Shows all the queries and results used.  It is best to review this
    before applying the adjustments.
 
-./DATABASE/PROBE_NAME.del_JUR_from_summary
    Contains the following procedure call for each dbid
       call del_JUR_from_summary(DBID);
    This called procedure will remove the current values for that specific
    JobUsageRecord from the summary tables.
 
-./DATABASE/PROBE_NAME.update_jur_records
    Contains the sql update statements for each dbid to zeroe out the 
    user/system cpu time and the wall time on those specific records.  
    This is done to insure that one does not accidently run the 
@@ -327,8 +337,6 @@ DIR=`dirname $0`
 TMPFILE=tmpfile
 SQLFILE=query.sql
 LOGFILE=analysis.log
-DEL_JUR_SUMMARY=del_JUR_from_summary
-UPDATE_JUR_FILE=update_jur_records
 
 START_TIME="$(date +'%Y-%m')-01"
 END_TIME="2020-01-01"
@@ -336,7 +344,8 @@ THRESHOLD=2500
 
 DATABASE=gratia 
 
-OUTPUTDIR=$DIR/$DATABASE
+OUTPUTDIR=$DIR/$DATABASE-$(date +'%Y%m%d')
+make_dir $OUTPUTDIR
 STARTING_LOG_TIME="$(date)"
 logit "
 #================================
@@ -351,6 +360,7 @@ find_probes
 find_jur_records 
 
 LOGFILE=analysis.log
+remove_file $TMPFILE
 logit "
 #================================
 # Database: $DATABASE
