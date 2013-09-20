@@ -1,0 +1,60 @@
+
+#=============================================================
+#  JobUsageRecords for the Probes with ridiculous efficiency 
+#  Start: Tue Sep 17 20:16:47 CDT 2013
+#  Probe: pbs:ce.grid.unesp.br
+#=============================================================
+
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+   SELECT
+      jur.dbid as dbid
+     ,CpuSystemDuration 
+     ,CpuUserDuration
+     ,WallDuration
+     ,Processors
+     ,(WallDuration * IFNULL(Processors,1)) as Wall_w_Cores
+     ,round((CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100,0) as Efficiency
+   FROM
+      JobUsageRecord_Meta meta
+     ,JobUsageRecord jur
+   WHERE
+    meta.ProbeName = "pbs:ce.grid.unesp.br"
+-- AND meta.ServerDate >= "2013-09-15"  ## May miss some as Server is usually > End
+-- AND meta.ServerDate <  "2020-01-01"
+AND meta.dbid = jur.dbid
+AND jur.EndTime >= "2013-09-15"
+AND jur.EndTime < "2020-01-01"
+AND (CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100 > 2500
+
+   order by
+     dbid
+;
+
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+| dbid       | CpuSystemDuration | CpuUserDuration | WallDuration | Processors | Wall_w_Cores | Efficiency |
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+| 1140553551 |                 0 |     18451324344 |       576265 |          1 |       576265 |    3201882 | 
+| 1140563583 |                 0 |     18455835503 |      1173958 |          1 |      1173958 |    1572104 | 
+| 1141758017 |                 0 |     18458502253 |      1525476 |          1 |      1525476 |    1210016 | 
+| 1141855652 |                 0 |     18459189253 |      1610048 |          1 |      1610048 |    1146499 | 
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+
+-- ------------------------------------
+-- Probe: pbs:ce.grid.unesp.br
+-- ------------------------------------
+call del_JUR_from_summary(1140553551);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140553551;
+call del_JUR_from_summary(1140563583);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140563583;
+call del_JUR_from_summary(1141758017);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1141758017;
+call del_JUR_from_summary(1141855652);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1141855652;
+
+#=============================================================
+#  JobUsageRecords for the Probes with ridiculous efficiency 
+#  Start: Tue Sep 17 20:16:47 CDT 2013
+#    End: Tue Sep 17 20:30:05 CDT 2013
+#  Probe: pbs:ce.grid.unesp.br
+#=============================================================
+

@@ -1,0 +1,136 @@
+
+#
+#=========================================================
+#  Probes with ridiculous efficiency 
+#  Start: Tue Sep 17 18:41:25 CDT 2013
+#=========================================================
+#
+# NOTE: The purpose of these queries (going against the summary tables) is
+#        is to narrow down the queries against the JobUsageRecord table.
+#        It gives a ballpark estimation of the probes causing the problem.
+#        The number of Jobs shown is NOT an indicationn of the actual
+#        number of jobs with ridiculous CPU.
+#
+
+
+#----------------------------
+#-- summary by probe/vo   ---
+#----------------------------
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+SELECT  x.ProbeName
+        ,SiteName
+        ,VOName
+        ,Jobs
+        ,CPU_Hrs
+        ,Wall_hrs
+        ,round((CPU_Hrs/Wall_Hrs)*100,0) as Efficiency
+FROM 
+(
+SELECT ProbeName 
+     ,VOName
+     ,sum(NJobs) as Jobs
+     ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
+     ,round(sum(WallDuration)/3600,0) as Wall_Hrs
+FROM VOProbeSummary
+WHERE
+       EndTime >= "2013-09-15"
+   and EndTime <  "2020-01-01"
+   and ((CpuSystemDuration + CpuUserDuration)/WallDuration) * 100 > 2500
+
+group by ProbeName
+        ,VOName
+) x
+   ,Probe p
+   ,Site s
+where x.ProbeName = p.probename
+and p.siteid    = s.siteid
+
++------------------------------+-------------------+-----------+-------+----------+----------+------------+
+| ProbeName                    | SiteName          | VOName    | Jobs  | CPU_Hrs  | Wall_hrs | Efficiency |
++------------------------------+-------------------+-----------+-------+----------+----------+------------+
+| condor:iut2-gk.mwt2.org      | MWT2_CE_IU        | osg       |  2587 |  7195355 |    42119 |      17083 | 
+| condor:osg-xsede.grid.iu.edu | OSG-XSEDE         | osg       | 10322 | 76878905 |    29682 |     259009 | 
+| condor:uct2-gk.mwt2.org      | MWT2_CE_UC        | osg       |  3775 |  4209106 |    43526 |       9670 | 
+| pbs:ce.grid.unesp.br         | GridUNESP_CENTRAL | gridunesp |     4 | 20506903 |     1357 |    1511194 | 
++------------------------------+-------------------+-----------+-------+----------+----------+------------+
+
+#-------------------------------
+#-- summary by probe/vo/date ---
+#-------------------------------
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+SELECT   ProbeName
+        ,VOName
+        ,EndTime
+        ,Jobs
+        ,CPU_Hrs
+        ,Wall_hrs
+        ,round((CPU_Hrs/Wall_Hrs)*100,0) as Efficiency
+FROM 
+(
+SELECT
+      ProbeName
+     ,VOName
+     ,date_format(EndTime,'%Y-%m-%d') as EndTime
+     ,sum(NJobs) as Jobs
+     ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
+     ,round(sum(WallDuration)/3600,0) as Wall_Hrs
+   FROM
+      VOProbeSummary
+  WHERE
+       EndTime >= "2013-09-15"
+   and EndTime <  "2020-01-01"
+   and ((CpuSystemDuration + CpuUserDuration)/WallDuration) * 100 > 2500
+
+   group by
+     ProbeName
+    ,VOName
+    ,EndTime
+) x
+;
+
++------------------------------+-----------+------------+------+----------+----------+------------+
+| ProbeName                    | VOName    | EndTime    | Jobs | CPU_Hrs  | Wall_hrs | Efficiency |
++------------------------------+-----------+------------+------+----------+----------+------------+
+| condor:iut2-gk.mwt2.org      | osg       | 2013-09-15 | 1228 |  2999702 |    19115 |      15693 | 
+| condor:iut2-gk.mwt2.org      | osg       | 2013-09-16 |  532 |  2394232 |     9440 |      25363 | 
+| condor:iut2-gk.mwt2.org      | osg       | 2013-09-17 |  827 |  1801420 |    13565 |      13280 | 
+| condor:osg-xsede.grid.iu.edu | osg       | 2013-09-15 | 6021 | 51250417 |    15319 |     334555 | 
+| condor:osg-xsede.grid.iu.edu | osg       | 2013-09-16 | 4301 | 25628488 |    14363 |     178434 | 
+| condor:uct2-gk.mwt2.org      | osg       | 2013-09-15 | 2089 |  3597147 |    23673 |      15195 | 
+| condor:uct2-gk.mwt2.org      | osg       | 2013-09-16 | 1686 |   611958 |    19853 |       3082 | 
+| pbs:ce.grid.unesp.br         | gridunesp | 2013-09-15 |    2 | 10251989 |      486 |    2109463 | 
+| pbs:ce.grid.unesp.br         | gridunesp | 2013-09-17 |    2 | 10254914 |      871 |    1177372 | 
++------------------------------+-----------+------------+------+----------+----------+------------+
+   
+#========================================================
+#  Distinct Probes with ridiculous efficiency 
+#  Start: Tue Sep 17 18:41:25 CDT 2013
+#=========================================================
+
+mysql --skip-column-names --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+SELECT distinct(ProbeName) 
+FROM VOProbeSummary
+WHERE
+       EndTime >= "2013-09-15"
+   and EndTime <  "2020-01-01"
+   and ((CpuSystemDuration + CpuUserDuration)/WallDuration) * 100 > 2500
+
+condor:uct2-gk.mwt2.org
+condor:iut2-gk.mwt2.org
+condor:osg-xsede.grid.iu.edu
+pbs:ce.grid.unesp.br
+... condor:uct2-gk.mwt2.org (condor:uct2-gk.mwt2.org.log) - start Tue Sep 17 18:41:26 CDT 2013
+... condor:uct2-gk.mwt2.org (condor:uct2-gk.mwt2.org.log) -   end Tue Sep 17 19:06:34 CDT 2013
+... condor:iut2-gk.mwt2.org (condor:iut2-gk.mwt2.org.log) - start Tue Sep 17 19:06:34 CDT 2013
+... condor:iut2-gk.mwt2.org (condor:iut2-gk.mwt2.org.log) -   end Tue Sep 17 19:33:20 CDT 2013
+... condor:osg-xsede.grid.iu.edu (condor:osg-xsede.grid.iu.edu.log) - start Tue Sep 17 19:33:20 CDT 2013
+... condor:osg-xsede.grid.iu.edu (condor:osg-xsede.grid.iu.edu.log) -   end Tue Sep 17 20:16:47 CDT 2013
+... pbs:ce.grid.unesp.br (pbs:ce.grid.unesp.br.log) - start Tue Sep 17 20:16:47 CDT 2013
+... pbs:ce.grid.unesp.br (pbs:ce.grid.unesp.br.log) -   end Tue Sep 17 20:30:05 CDT 2013
+
+#================================
+# Database: gratia
+# Started: Tue Sep 17 18:41:25 CDT 2013
+#     End: Tue Sep 17 20:30:05 CDT 2013
+#================================
+

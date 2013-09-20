@@ -1,0 +1,85 @@
+
+#=============================================================
+#  JobUsageRecords for the Probes with ridiculous efficiency 
+#  Start: Tue Sep 17 19:33:20 CDT 2013
+#  Probe: condor:osg-xsede.grid.iu.edu
+#=============================================================
+
+mysql --table --unbuffered --host=gr-osg-mysql-reports.opensciencegrid.org --port=3306 -u reader -preader gratia
+   SELECT
+      jur.dbid as dbid
+     ,CpuSystemDuration 
+     ,CpuUserDuration
+     ,WallDuration
+     ,Processors
+     ,(WallDuration * IFNULL(Processors,1)) as Wall_w_Cores
+     ,round((CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100,0) as Efficiency
+   FROM
+      JobUsageRecord_Meta meta
+     ,JobUsageRecord jur
+   WHERE
+    meta.ProbeName = "condor:osg-xsede.grid.iu.edu"
+-- AND meta.ServerDate >= "2013-09-15"  ## May miss some as Server is usually > End
+-- AND meta.ServerDate <  "2020-01-01"
+AND meta.dbid = jur.dbid
+AND jur.EndTime >= "2013-09-15"
+AND jur.EndTime < "2020-01-01"
+AND (CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100 > 2500
+
+   order by
+     dbid
+;
+
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+| dbid       | CpuSystemDuration | CpuUserDuration | WallDuration | Processors | Wall_w_Cores | Efficiency |
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+| 1140271758 |       18446744476 |           30975 |        34140 |       NULL |        34140 |   54032734 | 
+| 1140297735 |       18446744305 |            1487 |         3451 |       NULL |         3451 |  534533347 | 
+| 1140325757 |       18446744489 |             447 |         5156 |       NULL |         5156 |  357772400 | 
+| 1140326891 |       18446744146 |              94 |          568 |       NULL |          568 | 3247666239 | 
+| 1140354089 |       18446744461 |            1752 |         5293 |       NULL |         5293 |  348512114 | 
+| 1140471648 |       18446744426 |            1388 |         7307 |       NULL |         7307 |  252453070 | 
+| 1140519133 |       18446744502 |           10671 |        14249 |       NULL |        14249 |  129459998 | 
+| 1140655640 |       18446744177 |             938 |         2030 |       NULL |         2030 |  908706656 | 
+| 1140671577 |       18446744517 |           12848 |        18350 |       NULL |        18350 |  100527288 | 
+| 1140678693 |       18446744637 |           30509 |        35259 |       NULL |        35259 |   52317919 | 
+| 1140801318 |       18446744441 |           12271 |        14820 |       NULL |        14820 |  124472043 | 
+| 1140801788 |       18446744620 |           25815 |        33046 |       NULL |        33046 |   55821493 | 
+| 1140852176 |       18446744593 |           34549 |        39039 |       NULL |        39039 |   47252182 | 
+| 1140925901 |       18446744372 |            4229 |         6682 |       NULL |         6682 |  276066277 | 
+| 1141008111 |       18446744293 |             831 |         4037 |       NULL |         4037 |  456941915 | 
++------------+-------------------+-----------------+--------------+------------+--------------+------------+
+
+-- ------------------------------------
+-- Probe: condor:osg-xsede.grid.iu.edu
+-- ------------------------------------
+call del_JUR_from_summary(1140271758);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140271758;
+call del_JUR_from_summary(1140297735);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140297735;
+call del_JUR_from_summary(1140325757);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140325757;
+call del_JUR_from_summary(1140326891);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140326891;
+call del_JUR_from_summary(1140354089);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140354089;
+call del_JUR_from_summary(1140471648);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140471648;
+call del_JUR_from_summary(1140519133);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140519133;
+call del_JUR_from_summary(1140655640);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140655640;
+call del_JUR_from_summary(1140671577);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140671577;
+call del_JUR_from_summary(1140678693);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140678693;
+call del_JUR_from_summary(1140801318);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140801318;
+call del_JUR_from_summary(1140801788);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140801788;
+call del_JUR_from_summary(1140852176);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140852176;
+call del_JUR_from_summary(1140925901);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1140925901;
+call del_JUR_from_summary(1141008111);
+update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = 1141008111;
