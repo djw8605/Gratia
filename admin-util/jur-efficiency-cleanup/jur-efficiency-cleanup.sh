@@ -149,7 +149,7 @@ function find_jur_records {
 
     whereClause="WHERE
     meta.ProbeName = \"$PROBE\"
--- AND meta.ServerDate >= \"$START_TIME\"  ## May miss some as Server is usually > End
+AND meta.ServerDate >= \"$START_TIME\"  
 -- AND meta.ServerDate <  \"$END_TIME\"
 AND meta.dbid = jur.dbid
 AND jur.EndTime >= \"$START_TIME\"
@@ -340,7 +340,7 @@ LOGFILE=analysis.log
 
 START_TIME="$(date +'%Y-%m')-01"
 END_TIME="2020-01-01"
-THRESHOLD=2500
+THRESHOLD=1000
 
 DATABASE=gratia 
 
