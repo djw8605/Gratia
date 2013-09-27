@@ -569,6 +569,13 @@ DJUR:BEGIN
         AND ProjectNameCorrid = n_ProjectNameCorrid
         AND Njobs <= 0;
 
+    -- Set JobUsageRecord values to zero to prevent accidental double processing
+    UPDATE JobUsageRecord
+    SET Njobs = 0,
+        TransferSize = 0,
+        TransferDuration = 0
+    WHERE dbid = inputDbid;
+
     LEAVE DJUR; -- Done
   END IF;
 
@@ -632,6 +639,14 @@ DJUR:BEGIN
     AND Cores = n_Cores
     AND ProjectNameCorrid = n_ProjectNameCorrid
     AND Njobs <= 0;
+
+  -- Set JobUsageRecord values to zero to prevent accidental double processing
+  UPDATE JobUsageRecord
+  SET Njobs = 0,
+      WallDuration = 0,
+      CpuUserDuration = 0,
+      CpuSystemDuration = 0
+  WHERE dbid = inputDbid;
 
   -- NodeSumary
   select cdr into wantNodeSummary from SystemProplist
