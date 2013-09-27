@@ -10,6 +10,8 @@ CREATE PROCEDURE add_JUR_to_summary(inputDbid BIGINT(20))
 SQL SECURITY INVOKER
 DETERMINISTIC
 AJUR:BEGIN
+  -- for trace table description
+  DECLARE x_Description LONGTEXT;
   -- Main
   DECLARE n_ProbeName VARCHAR(255);
   DECLARE n_CommonName VARCHAR(255);
@@ -134,27 +136,35 @@ AJUR:BEGIN
   WHERE J.dbid = inputDbid;
 
   -- Basic data checks
+  IF n_ResourceType IS NOT NULL AND
+     n_ResourceType NOT IN ('Batch', 'BatchPilot', 'GridMonitor', 'RawCPU', 'Backfill', 'Storage', 'Transfer') THEN
+     SET x_Description = CONCAT("ERROR: Unsupported ResourceType: ",n_ResourceType);
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, x_Description);
+     LEAVE AJUR;
+  END IF;
+
   IF n_ProbeName IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null ProbeName');
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'ERROR: Failed due to null ProbeName');
      LEAVE AJUR;
   END IF;
 
   IF n_VOcorrid IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null VOcorrid');
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'ERROR: Failed due to null VOcorrid');
      LEAVE AJUR;
   END IF;
 
   IF n_ProjectNameCorrid IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null ProjectNameCorrid');
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'ERROR: due to null ProjectNameCorrid');
      LEAVE AJUR;
   END IF;
 
   IF n_Njobs IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null Njobs');
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'ERROR: Failed due to null Njobs');
      LEAVE AJUR;
   END IF;
 
@@ -162,7 +172,7 @@ AJUR:BEGIN
 
     IF n_StartTime IS NULL THEN
       INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null StartTime');
+       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'ERROR: MasterTransferSummary: Failed due to null StartTime');
       LEAVE AJUR;
     END IF;
 
@@ -189,7 +199,7 @@ AJUR:BEGIN
 
     IF n_Protocol IS NULL THEN
       INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null Protocol');
+       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'ERROR: MasterTransferSummary: Failed due to null Protocol');
       LEAVE AJUR;
     END IF;
 
@@ -225,25 +235,25 @@ AJUR:BEGIN
 
   IF n_WallDuration IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null WallDuration');
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'ERROR: MasterSummaryData: Failed due to null WallDuration');
      LEAVE AJUR;
   END IF;
 
   IF n_CpuUserDuration IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null CpuUserDuration');
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'ERROR: MasterSummaryData: Failed due to null CpuUserDuration');
      LEAVE AJUR;
   END IF;
 
   IF n_CpuSystemDuration IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to null CpuSystemDuration');
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'ERROR: MasterSummaryData: Failed due to null CpuSystemDuration');
      LEAVE AJUR;
   END IF;
 
   IF n_EndTime < n_StartTime THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Failed due to EndTime < StartTime');
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'ERROR: MasterSummaryData: Failed due to EndTime < StartTime');
      LEAVE AJUR;
   END IF;
 
@@ -251,8 +261,9 @@ AJUR:BEGIN
   SET t_TotalWall = n_WallDuration * n_Cores;
   SET t_TotalCPU  = n_CpuUserDuration + n_CpuSystemDuration;
   IF t_TotalCPU > t_TotalWall THEN
+     SET x_Description = CONCAT("WARNING: MasterSummaryData: CPU exceeds Wall: Njobs ",n_Njobs," WallDuration ",n_WallDuration," Cores ",n_Cores," Wall_w_Cores ",t_TotalWall," CpuUserDuration ",n_CpuUserDuration," CpuSystemDuration ",n_CpuSystemDuration);
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, 'Warning due to CPU exceeding Wall');
+      VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, x_Description);
      -- LEAVE AJUR; -- currently just a warning. MasterSummaryData will be updated
   END IF;
 
@@ -333,6 +344,8 @@ CREATE PROCEDURE del_JUR_from_summary(inputDbid BIGINT(20))
 SQL SECURITY INVOKER
 DETERMINISTIC
 DJUR:BEGIN
+  -- for trace table description
+  DECLARE x_Description LONGTEXT;
   -- Main
   DECLARE n_ProbeName VARCHAR(255);
   DECLARE n_CommonName VARCHAR(255);
@@ -402,8 +415,9 @@ DJUR:BEGIN
          M.ServerDate,
          J.StartTime,
          J.EndTime,
-         IF(ResourceType = 'Batch', DATE(J.EndTime),
-            DATE(J.StartTime)),
+         IF(ResourceType IN ('Storage', 'RawCPU', 'Transfer'),
+            DATE(J.StartTime),
+            DATE(J.EndTime)),
          M.Grid,
          IFNULL(J.Processors, 1),
          PNC.ProjectNameCorrid
@@ -452,39 +466,42 @@ DJUR:BEGIN
 
   -- Basic data checks
   IF n_ResourceType IS NOT NULL AND
-     n_ResourceType NOT IN ('Batch', 'RawCPU', 'Storage') THEN
-     -- Very common case: no message necessary
+     n_ResourceType NOT IN ('Batch', 'BatchPilot', 'GridMonitor', 'RawCPU', 'Backfill', 'Storage', 'Transfer') THEN
+     SET x_Description = CONCAT("ERROR: Unsupported ResourceType: ",n_ResourceType);
+     INSERT INTO trace(eventtime, procName, p1, sqlQuery)
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, x_Description);
      LEAVE DJUR;
   END IF;
 
   IF n_ProbeName IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null ProbeName');
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'ERROR: Failed due to null ProbeName');
      LEAVE DJUR;
   END IF;
 
   IF n_VOcorrid IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null VOcorrid');
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'ERROR: Failed due to null VOcorrid');
      LEAVE DJUR;
   END IF;
 
   IF n_ProjectNameCorrid IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null ProjectNameCorrid');
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'ERROR: Failed due to null ProjectNameCorrid');
      LEAVE DJUR;
   END IF;
 
   IF n_Njobs IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null Njobs');
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'ERROR: Failed due to null Njobs');
      LEAVE DJUR;
   END IF;
 
-  IF n_ResourceType = 'Storage' THEN
+  IF n_ResourceType IN ('Storage', 'Transfer') THEN
+
     IF n_StartTime IS NULL THEN
       INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null StartTime');
+       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'ERROR: MasterTransferSummary: Failed due to null StartTime');
       LEAVE DJUR;
     END IF;
 
@@ -509,9 +526,20 @@ DJUR:BEGIN
                  PhaseUnit as TransferDuration,
                  `Value` as TransferSize
           FROM Network where dbid = inputDbid limit 1) N
-    WHERE R.dbid = inputDbid;
+    WHERE R.dbid = inputDbid
+    LIMIT 1;
+
+    IF n_Protocol IS NULL THEN
+      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
+       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'ERROR: MasterTransferSummary: Failed due to null Protocol');
+      LEAVE DJUR;
+    END IF;
 
     -- Update MasterTransferSummary
+    SET x_Description = CONCAT("MasterTransferSummary: Njobs ",n_Njobs," TransferSize ",n_TransferSize," TransferDuration ",n_TransferDuration);
+    INSERT INTO trace(eventtime, procName, p1, sqlQuery)
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, x_Description);
+
     UPDATE MasterTransferSummary
     SET Njobs = Njobs - n_Njobs,
         TransferSize = TransferSize - n_TransferSize,
@@ -546,29 +574,33 @@ DJUR:BEGIN
 
   IF n_WallDuration IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null WallDuration');
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'ERROR: MasterSummaryData: Failed due to null WallDuration');
      LEAVE DJUR;
   END IF;
 
   IF n_CpuUserDuration IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null CpuUserDuration');
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'ERROR: MasterSummaryData: Failed due to null CpuUserDuration');
      LEAVE DJUR;
   END IF;
 
   IF n_CpuSystemDuration IS NULL THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to null CpuSystemDuration');
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'ERROR: MasterSummaryData: Failed due to null CpuSystemDuration');
      LEAVE DJUR;
   END IF;
 
   IF n_EndTime < n_StartTime THEN
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
-      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'Failed due to EndTime < StartTime');
+      VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, 'ERROR: MasterSummaryData: Failed due to EndTime < StartTime');
      LEAVE DJUR;
   END IF;
 
   -- MasterSummaryData
+  SET x_Description = CONCAT("MasterSummaryData: Njobs ",n_Njobs," WallDuration ",n_WallDuration," CpuUserDuration ",n_CpuUserDuration," CpuSystemDuration ",n_CpuSystemDuration);
+  INSERT INTO trace(eventtime, procName, p1, sqlQuery)
+    VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, x_Description);
+
   UPDATE MasterSummaryData
   SET Njobs = Njobs - n_Njobs,
       WallDuration = WallDuration - n_WallDuration,
@@ -643,7 +675,7 @@ DJUR:BEGIN
   end if; -- wantNodeSummary
 
 END;
-||
+-- ||
 
 -- Local Variables:
 -- mode: sql
