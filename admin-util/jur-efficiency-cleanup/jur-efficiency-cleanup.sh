@@ -69,6 +69,7 @@ where t.eventtime >= \"$START_TIME\"
   and procName   = 'add_JUR_to_summary'
   and t.sqlQuery like '%MasterSummaryData: CPU exceeds Wall%'
   and t.p1                 = jur.dbid
+  and jur.ResourceType in ('Batch', 'BatchPilot', 'GridMonitor', 'RawCPU', 'Backfill')
   and jur.Njobs        > 0
   and jur.WallDuration > 0
   and jur.dbid             = jurm.dbid
