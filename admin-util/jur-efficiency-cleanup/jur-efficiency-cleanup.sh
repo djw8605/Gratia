@@ -1,9 +1,15 @@
 #!/bin/bash
 ###################################################################
-# John Weigand (11//18/13)
+# John Weigand (10/03/13)
 #
 # This script is intended to find JobUsageRecord with a 
-# ridiculously high CPU being recorded.  It is crude.
+# excessively high CPU being recorded.  It is based on using the
+# trace table entries created by the add_JUR_to_summary stored
+# procedure which was modified and implemented around 10/1/13
+# to create a record for each JobUsageRecord where CPU exceeded
+# Wall time. 
+#
+# See usage for more details.
 ###################################################################
 function logit {
   [ ! -d "$OUTPUTDIR" ] && return
@@ -20,9 +26,11 @@ function set_mysql_cmd {
 }
 #----------------
 function run_mysql {
-  logit "$cmd
+  if [ "$SHOWSQL" = "yes" ];then
+    logit "$cmd
 $(cat $SQLFILE)
 "
+  fi
   $cmd <$SQLFILE >$TMPFILE;rtn=$?
   if [ "$rtn" != "0" ];then
     logit  "$(cat $SQLFILE)"
@@ -34,101 +42,111 @@ $(cat $TMPFILE)
   remove_file $SQLFILE
 }
 #----------------
+function set_subselect {
+  SUBSELECT="select
+   SiteName
+  ,jurm.ProbeName
+  ,vo.VOName
+  ,jur.ResourceType
+  ,jur.CommonName
+  ,jur.EndTime
+  ,jur.dbid
+  ,jur.Njobs
+  ,jur.CpuSystemDuration
+  ,jur.CpuuserDuration
+  ,jur.WallDuration
+  ,IFNULL(jur.Processors,1) as Processors
+  ,round(((jur.CpuSystemDuration + jur.CpuUserDuration)/(IF(jur.WallDuration>0,jur.WallDuration,1) * IFNULL(jur.Processors,1)) * 100),2)  as CpuEfficiency
+from trace               t
+    ,JobUsageRecord      jur
+    ,JobUsageRecord_Meta jurm
+    ,Probe               p
+    ,Site                s
+    ,VONameCorrection    voc
+    ,VO                  vo
+where t.eventtime >= \"$START_TIME\"
+  and t.eventtime <  \"$END_TIME\"
+  and procName   = 'add_JUR_to_summary'
+  and t.sqlQuery like '%MasterSummaryData: CPU exceeds Wall%'
+  and t.p1                 = jur.dbid
+  and jur.Njobs        > 0
+  and jur.WallDuration > 0
+  and jur.dbid             = jurm.dbid
+  and jurm.ProbeName       = p.probename
+  and p.siteid             = s.siteid
+  and (jur.ReportableVOName = voc.ReportableVOName
+       and
+       jur.VOName          = voc.VOName )
+  and voc.VOid             = vo.VOid
+order by
+   SiteName
+  ,ProbeName
+  ,VOName
+  ,jur.ResourceType
+  ,jur.CommonName
+  ,Endtime
+  ,jur.dbid"
+}
+#----------------
 function find_probes {
   logit "
-#
 #=========================================================
-#  Probes with ridiculous efficiency 
-#  Start: $(date)
+#  Probes with efficiencies > $THRESHOLD 
+#  for $START_TIME to $END_TIME
 #=========================================================
 #
-# NOTE: The purpose of these queries (going against the summary tables) is
-#        is to narrow down the queries against the JobUsageRecord table.
-#        It gives a ballpark estimation of the probes causing the problem.
-#        The number of Jobs shown is NOT an indicationn of the actual
-#        number of jobs with ridiculous CPU.
+# NOTE: The purpose of these queries is to go against the trace table
+# which now logs JobUsageRecords with efficiencies > 100%.
 #
-"
-  whereClause="WHERE
-       EndTime >= \"$START_TIME\"
-   and EndTime <  \"$END_TIME\"
-   and ((CpuSystemDuration + CpuUserDuration)/WallDuration) * 100 > $THRESHOLD
-"
-  logit "
-#----------------------------
-#-- summary by probe/vo   ---
-#----------------------------"
+# Key columns:
+# procName: add_JUR_to_summary
+# p1      : dbid of JobUsageRecord
+# sqlQuery:  WARNING: MasterSummaryData: CPU exceeds Wall: Njobs 1 
+#            WallDuration 0 Cores 6 Wall_w_Cores 0 
+#            CpuUserDuration 77777777 CpuSystemDuration 0
+#
+#--------------------------------------
+#-- summary by site/probe/vo/date   ---
+#--------------------------------------"
   cat >$SQLFILE <<EOF
-SELECT  x.ProbeName
-        ,SiteName
-        ,VOName
-        ,Jobs
-        ,CPU_Hrs
-        ,Wall_hrs
-        ,round((CPU_Hrs/Wall_Hrs)*100,0) as Efficiency
-FROM 
-(
-SELECT ProbeName 
-     ,VOName
-     ,sum(NJobs) as Jobs
-     ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
-     ,round(sum(WallDuration)/3600,0) as Wall_Hrs
-FROM VOProbeSummary
-$whereClause
-group by ProbeName
-        ,VOName
+select
+  x.SiteName                              as SiteName
+ ,x.VOName                                as VOName
+ ,x.ProbeName                             as ProbeName
+ ,date_format(x.EndTime,"%Y-%m-%d")       as Period
+ ,x.CommonName                            as CommonName
+ ,x.ResourceType                          as ResourceType
+ ,sum(x.Njobs)                            as Jobs
+ ,round(sum(x.CpuSystemDuration)/3600,2)  as CpuSystemHrs
+ ,round(sum(x.CpuuserDuration)/3600,2)    as CpuUserHrs
+ ,round((sum(x.WallDuration * x.Processors))/3600,2) as WallHrs
+ ,round((sum((x.CpuSystemDuration + x.CpuUserDuration))/sum(if(x.WallDuration>0,x.WallDuration,1) * x.Processors)) * 100,0) as CpuEfficiency
+from (
+$SUBSELECT
 ) x
-   ,Probe p
-   ,Site s
-where x.ProbeName = p.probename
-and p.siteid    = s.siteid
+where x.CpuEfficiency > $THRESHOLD
+group by
+   SiteName
+  ,VOName
+  ,ProbeName
+  ,Period
+  ,CommonName
+  ,ResourceType
 EOF
   set_mysql_cmd "--table"
   run_mysql  
 
-  logit "
-#-------------------------------
-#-- summary by probe/vo/date ---
-#-------------------------------"
-  cat >$SQLFILE <<EOF
-SELECT   ProbeName
-        ,VOName
-        ,EndTime
-        ,Jobs
-        ,CPU_Hrs
-        ,Wall_hrs
-        ,round((CPU_Hrs/Wall_Hrs)*100,0) as Efficiency
-FROM 
-(
-SELECT
-      ProbeName
-     ,VOName
-     ,date_format(EndTime,'%Y-%m-%d') as EndTime
-     ,sum(NJobs) as Jobs
-     ,round(sum((CpuSystemDuration + CpuUserDuration))/3600,0) as CPU_Hrs
-     ,round(sum(WallDuration)/3600,0) as Wall_Hrs
-   FROM
-      VOProbeSummary
-  $whereClause
-   group by
-     ProbeName
-    ,VOName
-    ,EndTime
-) x
-;
-EOF
-  set_mysql_cmd "--table"
-  run_mysql  
   logit "   
-#========================================================
-#  Distinct Probes with ridiculous efficiency 
-#  Start: $(date)
-#=========================================================
-"
+#----------------------------------------------------
+#  Distinct Probes with efficiencies > $THRESHOLD 
+#----------------------------------------------------"
   cat >$SQLFILE <<EOF
-SELECT distinct(ProbeName) 
-FROM VOProbeSummary
-$whereClause
+SELECT distinct(x.ProbeName) as ProbeName
+FROM (
+$SUBSELECT
+) x
+where x.CpuEfficiency > $THRESHOLD
+order by ProbeName
 EOF
   set_mysql_cmd "--skip-column-names"
   run_mysql  
@@ -142,71 +160,67 @@ function find_jur_records {
     rm -rf $OUTPUTDIR
     return
   fi
+  echo "
+#-------------------
+#-- Probe files   --
+#-------------------" >>$OUTPUTDIR/$main_logfile
   for PROBE in $PROBES
   do
     LOGFILE=$PROBE.log
-    echo  "... $PROBE ($LOGFILE) - start $(date)" >> $OUTPUTDIR/$main_logfile
-
-    whereClause="WHERE
-    meta.ProbeName = \"$PROBE\"
-AND meta.ServerDate >= \"$START_TIME\"  
--- AND meta.ServerDate <  \"$END_TIME\"
-AND meta.dbid = jur.dbid
-AND jur.EndTime >= \"$START_TIME\"
-AND jur.EndTime < \"$END_TIME\"
-AND (CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100 > $THRESHOLD
-"
-    start_time=$(date)
+    echo  "$OUTPUTDIR/$LOGFILE" >> $OUTPUTDIR/$main_logfile
     logit "
 #=============================================================
-#  JobUsageRecords for the Probes with ridiculous efficiency 
-#  Start: $start_time
+#  JobUsageRecords for the Probes with efficiencies > $THRESHOLD 
+#  for $START_TIME to $END_TIME
 #  Probe: $PROBE
-#=============================================================
-"
+#============================================================="
   cat >$SQLFILE <<EOF
-   SELECT
-      jur.dbid as dbid
-     ,CpuSystemDuration 
-     ,CpuUserDuration
-     ,WallDuration
-     ,Processors
-     ,(WallDuration * IFNULL(Processors,1)) as Wall_w_Cores
-     ,round((CpuSystemDuration + CpuUserDuration)/(WallDuration * IFNULL(Processors,1)) * 100,0) as Efficiency
-   FROM
-      JobUsageRecord_Meta meta
-     ,JobUsageRecord jur
-   $whereClause
-   order by
-     dbid
-;
+select
+  x.SiteName                              as SiteName
+ ,x.VOName                                as VOName
+ ,x.ProbeName                             as ProbeName
+ ,date_format(x.EndTime,"%Y-%m-%d")       as Period
+ ,x.ResourceType                          as ResourceType
+ ,x.dbid
+ ,x.Njobs                           
+ ,x.CpuSystemDuration 
+ ,x.CpuUserDuration
+ ,x.WallDuration
+ ,x.Processors
+ ,round(((x.CpuSystemDuration + x.CpuUserDuration)/(if(x.WallDuration>0,x.WallDuration,1) * x.Processors)) * 100,0) as CpuEfficiency
+from (
+$SUBSELECT
+) x
+where x.CpuEfficiency > $THRESHOLD
+  and x.ProbeName = "$PROBE"
+order by 
+   SiteName
+  ,ProbeName
+  ,VOName
+  ,Period
+  ,ResourceType
 EOF
     set_mysql_cmd "--table"
     run_mysql 
-    DBIDS="$(cat $TMPFILE | egrep -v '^#|^$' | awk -F'|' '{ if ( NR < 4 ) {next}; print $2}')"
-    create_sqlcmds
-    echo  "... $PROBE ($LOGFILE) -   end $(date)" >> $OUTPUTDIR/$main_logfile
+    DBIDS="$(cat $TMPFILE | egrep -v '^#|^$' | awk -F'|' '{ if ( NR < 4 ) {next}; print $7}')"
+    create_del_summary_commands
+    #-- Inserting sql comment characters into probe log file --
+    #-- Doing this so entire file can be read in from stdin if needed --
+    awk '{ if ($1 == "call") { print $0 } else {print "--",$0}}' $OUTPUTDIR/$LOGFILE >$OUTPUTDIR/$LOGFILE.tmp
+    mv $OUTPUTDIR/$LOGFILE.tmp $OUTPUTDIR/$LOGFILE 
   done
-  logit "
-#=============================================================
-#  JobUsageRecords for the Probes with ridiculous efficiency 
-#  Start: $start_time
-#    End: $(date)
-#  Probe: $PROBE
-#=============================================================
-"
 }
 #---------------------------------------
-function create_sqlcmds {
-  local probehdr="
+function create_del_summary_commands {
+  logit "
 -- ------------------------------------
 -- Probe: $PROBE
+-- JobsUsageRecords: $(echo $DBIDS | wc -w)
 -- ------------------------------------"
   logit  "$probehdr" 
   for dbid in $DBIDS
   do
     logit "call del_JUR_from_summary($dbid);" 
-    logit "update JobUsageRecord set WallDuration=0, CpuUserDuration=0, CpuSystemDuration=0 where dbid = $dbid;" 
   done
 }
 #----------------
@@ -239,19 +253,21 @@ function validate_args {
   while [ $# -gt 0 ]
   do
     case $1 in
-      "--db"    | "-db"    ) DATABASE=$2;   shift   ;;
-      "--start" | "-start" ) START_TIME=$2; shift   ;;
-      "--end"   | "-end"   ) END_TIME=$2;   shift   ;;
-      "--help"  | "-help"  | "--h" | "-h" ) usage;exit 1 ;;
-      * ) echo  "ERROR: Invalid command line argument" ; usage; exit 1 ;;
+      "--db"       | "-db"        ) DATABASE=$2;   shift   ;;
+      "--start"    | "-start"     ) START_TIME=$2; shift   ;;
+      "--end"      | "-end"       ) END_TIME=$2;   shift   ;;
+      "--threshold"| "-threshold" ) THRESHOLD=$2;  shift   ;;
+      "--showsql"  | "-showsql"   ) SHOWSQL="yes"; shift   ;;
+      "--help"     | "-help"  | "--h" | "-h" ) usage;exit 1 ;;
+      * ) usage;echo  "ERROR: Invalid command line argument" ; exit 1 ;;
     esac
     shift
   done
   if [ "$(date -d $START_TIME &>/dev/null;echo $?)" != "0" ];then
-      logerr "Invalid --start date. Format is YYYY-MM-DD"
+      echo "ERROR: Invalid --start date. Format is YYYY-MM-DD";exit 1
   fi
   if [ "$(date -d $END_TIME &>/dev/null;echo $?)" != "0" ];then
-      logerr "Invalid --end date. Format is YYYY-MM-DD"
+      echo "ERROR: Invalid --end date. Format is YYYY-MM-DD";exit 1
   fi
   set_db_parameters
 }
@@ -261,15 +277,16 @@ function set_db_parameters {
   PSWD="-preader"
   case $DATABASE in
     "gratia"    ) 
-                  HOST=gr-osg-mysql-reports.opensciencegrid.org
+                  HOST=gr-osg-mysql-collector.opensciencegrid.org
                   PORT=3306
                   ;;
     "gratia_osg_daily"    ) 
-                  HOST=gr-osg-mysql-reports.opensciencegrid.org
+                  HOST=gr-osg-mysql-collector.opensciencegrid.org
                   PORT=3306
                   ;;
-     *          ) logerr "Invalid data base: $DATABASE. 
+     *          ) echo"ERROR: Invalid data base: $DATABASE. 
 Script supports gratia, gratia_osg_daily"
+                  exit 1
                   ::
   esac
 }
@@ -293,42 +310,53 @@ function remove_all_files {
 #----------------
 function usage {
   echo "\
-Usage: $PGM [--db dbname] [--start YYYY-MM-DD --end YYYY-MM-DD]
+Usage: $PGM [--db dbname] [--start YYYY-MM-DD] [--end YYYY-MM-DD] 
+            [--threshold PERCENT] [--showsql]
 
 Optiions:
- --db   
-     Allows you to restrict the analysis to a specific database.
-     These are supported: gratia, gratia_osg_daily
-     DEFAULT: gratia
+ --db   Allows you to restrict the analysis to a specific database.
+        These are supported: gratia, gratia_osg_daily DEFAULT: $DATABASE
 
---start YYYY-MM-DD --end   YYYY-MM-DD
-     This restricts you to a certain time period.  This is IMPORTANT.
-     Make the interval no more than one month.  You can but you may wait 
-     forever for the script to end.
-     DEFAULT: start- $START_TIME  end- $END_TIME
+--start This restricts the query to a certain time period.  
+--end   DEFAULT: start- $START_TIME  end- $END_TIME
 
-This scripts queries the VOProbeSummary table with the time period specified
-for probes where the CPU time exceeds Wall time by more than ${THRESHOLD}%.
+--threshold  Restricts the jobs select to only those that exceed a specified 
+             percent.  DEFAULT: $THRESHOLD
+
+--showsql Displays the sql statements in the various log files.
+          By default, it will not display them
+
+In October 2013, the add_JUR_to_summary stored procedure was modified to 
+insert a record in the trace table for any jobs where CPU exceed Wall times.
+The trace table is an internal table that functions pretty much like an 
+error/warning log internally in the Gratia database.
+
+This script queries the trace table for the time period specified searching
+for entries with a 
+- procName = 'add_JUR_to_summary' 
+- and a sqlQuery like '%MasterSummaryData: CPU exceeds Wall%'
 
 For those probes, it then searches the JobUsageRecord table for the
 specific records exceeding that threshold.  It will then create two
 files with sql commands to zero out those records and adjust the summary
 tables accordingly.  A log file is also created.
 
-./DATABASE/analysis.log
+./<DATABASE>-YYYMMDD/analysis.log
    Shows all the queries and results used.  It is best to review this
-   before applying the adjustments.
+   before applying any adjustments.
 
-   Contains the following procedure call for each dbid
+./<DATABASE>-YYYMMDD/<ProbeName>.log
+   Contains the following sql procedure call for each dbid
       call del_JUR_from_summary(DBID);
    This called procedure will remove the current values for that specific
-   JobUsageRecord from the summary tables.
+   JobUsageRecord from the summary tables and set all CPU, Wall and Njobs
+   values to zero to avoid accidently removing the values twice.
 
-   Contains the sql update statements for each dbid to zeroe out the 
-   user/system cpu time and the wall time on those specific records.  
-   This is done to insure that one does not accidently run the 
-   del_JUR_from_summary procedure calls more than once for a dbid thus really 
-   screwing up the summaries.
+NOTE: If no records are found, the program will remove the <DATABASE>-YYMMDD
+      directory and files.
+
+VERY IMPORTANT:  The del_JUR_from_summary statements MUST be applied against
+                 the PRIMARY Gratia database and NOT the replica.
 "
 }
 #### MAIN ###############################################
@@ -338,24 +366,25 @@ TMPFILE=tmpfile
 SQLFILE=query.sql
 LOGFILE=analysis.log
 
+#-- default command line arg values --
 START_TIME="$(date +'%Y-%m')-01"
 END_TIME="2020-01-01"
-THRESHOLD=1000
-
+THRESHOLD=500
 DATABASE=gratia 
+SHOWSQL="no"
 
+validate_args $*
 OUTPUTDIR=$DIR/$DATABASE-$(date +'%Y%m%d')
 make_dir $OUTPUTDIR
-STARTING_LOG_TIME="$(date)"
+clean_all_directories
 logit "
 #================================
+# PGM: $PGM
 # Database: $DATABASE
-# Start: $(date)
-#================================
-"
-validate_args $*
-clean_all_directories
+# for $START_TIME to $END_TIME
+#================================"
 validate_environ
+set_subselect
 find_probes 
 find_jur_records 
 
@@ -363,10 +392,10 @@ LOGFILE=analysis.log
 remove_file $TMPFILE
 logit "
 #================================
+# PGM: $PGM
 # Database: $DATABASE
-# Started: $STARTING_LOG_TIME
-#     End: $(date)
-#================================
-"
+# for $START_TIME to $END_TIME
+# DONE
+#================================"
 exit 0
 
