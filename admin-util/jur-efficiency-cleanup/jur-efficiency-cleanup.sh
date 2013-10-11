@@ -180,6 +180,7 @@ select
   x.SiteName                              as SiteName
  ,x.VOName                                as VOName
  ,x.ProbeName                             as ProbeName
+ ,x.CommonName                            as CommonName
  ,date_format(x.EndTime,"%Y-%m-%d")       as Period
  ,x.ResourceType                          as ResourceType
  ,x.dbid
@@ -196,14 +197,15 @@ where x.CpuEfficiency > $THRESHOLD
   and x.ProbeName = "$PROBE"
 order by 
    SiteName
-  ,ProbeName
   ,VOName
+  ,ProbeName
+  ,CommonName
   ,Period
   ,ResourceType
 EOF
     set_mysql_cmd "--table"
     run_mysql 
-    DBIDS="$(cat $TMPFILE | egrep -v '^#|^$' | awk -F'|' '{ if ( NR < 4 ) {next}; print $7}')"
+    DBIDS="$(cat $TMPFILE | egrep -v '^#|^$' | awk -F'|' '{ if ( NR < 4 ) {next}; print $8}')"
     create_del_summary_commands
     #-- Inserting sql comment characters into probe log file --
     #-- Doing this so entire file can be read in from stdin if needed --
