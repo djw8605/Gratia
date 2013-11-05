@@ -135,8 +135,6 @@ CONNECTOR_PORT=$TOMCAT_PORT
 ## end of Gratia options
 ##--------------------------------------------------
 #
-#Change ulimit
-ulimit -n 8192
 EOF
 
   logit
