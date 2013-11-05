@@ -356,6 +356,10 @@ fi
 
 
 %changelog
+* Tue Nov 05 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.11-1
+pre-production release:
+ant build
+fixes for Logging and Admin Interface (GRATIA-512)
 * Tue May 14 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.10-1
 pre-proudction release, add verify not for configuration files.
 Hyunwoo fixes for SiteMgmt.java
