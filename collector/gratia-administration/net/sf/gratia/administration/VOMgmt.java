@@ -21,25 +21,34 @@ import java.sql.*;
 
 import java.util.regex.*;
 
-public class VOMgmt extends HttpServlet {
-    XP xp = new XP();
+// HK-New
+import java.util.HashMap;
+import java.util.Map;
+
+public class VOMgmt extends GrAdminHttpServlet {
+    // moved up
+    //XP xp = new XP();
+
     //
     // database related
     //
-    String driver = "";
-    String url = "";
-    String user = "";
-    String password = "";
-    Connection connection;
+    //String driver = "";
+    //String url = "";
+    //String user = "";
+    //String password = "";
+    //Connection connection;
+
     Statement statement;
     ResultSet resultSet;
     //
     // processing related
-    //
-    String html = "";
-    String row = "";
-    Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
-    Matcher m = null;
+
+    // moved up
+    //String html = "";
+    //String row = "";
+    //Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
+    //Matcher m = null;
+
     StringBuffer buffer = new StringBuffer();
     //
     // globals
@@ -51,9 +60,16 @@ public class VOMgmt extends HttpServlet {
     String dq = "\"";
     String comma = ",";
     String cr = "\n";
-    Hashtable table = new Hashtable();
     String newname = "<New VO Name>";
 
+    // moved up
+    //Hashtable table = new Hashtable();
+
+    public String getPagename() {
+	return "vo.html";
+    }
+
+    /*
     public void init(ServletConfig config) throws ServletException 
     {
     }
@@ -138,6 +154,7 @@ public class VOMgmt extends HttpServlet {
                     }
             }
     }
+    */
 
     public void process()
     {
@@ -193,12 +210,16 @@ public class VOMgmt extends HttpServlet {
             {
                 key = "index:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+
+                //newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key);
                 if (oldvalue == null)
                     break;
                 key = "voname:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+                //newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key);
+
                 if (oldvalue.equals(newvalue))
                     continue;
                 if (oldvalue.equals(newname))
@@ -213,8 +234,10 @@ public class VOMgmt extends HttpServlet {
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement(command);
-            statement.setString(1, request.getParameter("voname:" + index));
-            statement.setInt(2, Integer.parseInt(request.getParameter("void:" + index)));
+            //statement.setString(1, request.getParameter("voname:" + index));
+	    statement.setString(1, nggetquerystring(request, "voname:" + index )  );
+            //statement.setInt(2, Integer.parseInt(request.getParameter("void:" + index)));
+	    statement.setInt(2,   Integer.parseInt( nggetquerystring(request, "void:" + index )       )  );
             statement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -231,7 +254,8 @@ public class VOMgmt extends HttpServlet {
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement(command);
-            statement.setString(1, request.getParameter("voname:" + index));
+            //statement.setString(1, request.getParameter("voname:" + index));
+	    statement.setString(1, nggetquerystring(request, "voname:" + index )  );
             statement.executeUpdate();
             // connection.commit();
         } catch (Exception e) {

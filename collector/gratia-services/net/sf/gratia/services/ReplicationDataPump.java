@@ -244,8 +244,9 @@ public class ReplicationDataPump extends Thread {
          HibernateWrapper.closeSession(session);
          replicationLog(LogLevel.WARNING,
                         "Problem encountered obtaining list of records to replicate",e);
-         exitflag = true;
-         return;
+	 // removed by HK
+         //exitflag = true;
+         //return;
       }
       
       //

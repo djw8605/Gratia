@@ -25,25 +25,28 @@ import java.sql.*;
 import java.text.*;
 import java.util.regex.*;
 
-public class ProbeTable extends HttpServlet {
-    XP xp = new XP();
+//public class ProbeTable extends HttpServlet {
+public class ProbeTable extends GrAdminHttpServlet {
+    //XP xp = new XP();
     //
     // database related
     //
-    String driver = "";
-    String url = "";
-    String user = "";
-    String password = "";
-    Connection connection;
+    //String driver = "";
+    //String url = "";
+    //String user = "";
+    //String password = "";
+    //Connection connection;
+
     Statement statement;
     ResultSet resultSet;
     //
     // processing related
     //
-    String html = "";
-    String row = "";
-    Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
-    Matcher m = null;
+    //String html = "";
+    //String row = "";
+    //Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
+    //Matcher m = null;
+
     StringBuffer buffer = new StringBuffer();
     //
     // globals
@@ -55,25 +58,23 @@ public class ProbeTable extends HttpServlet {
     String dq = "\"";
     String comma = ",";
     String cr = "\n";
-    Hashtable table = new Hashtable();
-    Hashtable sitebyid = new Hashtable();
-    Hashtable sitebyname = new Hashtable();
     String newname = "<New Probe Name>";
-    TreeSet siteList = new TreeSet();
+
+    //Hashtable table = new Hashtable();
+    Hashtable sitebyid   = new Hashtable();
+    Hashtable sitebyname = new Hashtable();
+    TreeSet   siteList   = new TreeSet();
 
     Boolean hibernateInitialized = false;
 
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-
-        // initialize logging
-        Logging.initialize("administration");
+    public String getPagename() {
+        return "probetable.html";
     }
 
     void initHibernate() {
         if (hibernateInitialized) return;
         Properties p = Configuration.getProperties();
-
+	
         while (true) {
             // Wait until JMS service is up
             try { 
@@ -98,6 +99,14 @@ public class ProbeTable extends HttpServlet {
         hibernateInitialized = true;
     }
 
+
+
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        Logging.initialize("administration"); // initialize logging
+    }
+
+    /*
     public void openConnection() {
         try {
             Properties p = Configuration.getProperties();
@@ -125,6 +134,7 @@ public class ProbeTable extends HttpServlet {
             e.printStackTrace();
         }
     }
+    */
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
@@ -151,7 +161,12 @@ public class ProbeTable extends HttpServlet {
         if (LoginChecker.checkLogin(request, response)) {
             openConnection();
             table = (Hashtable) request.getSession().getAttribute("table");
-            String activeFilter = (String) request.getParameter("activeFilter");
+
+	    ngmap = null;
+
+            //String activeFilter = (String) request.getParameter("activeFilter");
+	    String activeFilter = (String) nggetquerystring(request, "activeFilter");
+
             if (activeFilter == null) {
                 activeFilter = "none";
             }
@@ -161,6 +176,7 @@ public class ProbeTable extends HttpServlet {
         }
     }
 
+    /*
     public void setup(HttpServletRequest request) throws IOException {
         html = xp.get(request.getRealPath("/") + "probetable.html");
         m = p.matcher(html);
@@ -172,12 +188,17 @@ public class ProbeTable extends HttpServlet {
             }
         }
     }
+    */
+
+
+    public void process() {
+    }
 
     public void process(HttpServletRequest request) {
         int index = 0;
         String command = "";
-        buffer = new StringBuffer();
-        sitebyid = new Hashtable();
+        buffer     = new StringBuffer();
+        sitebyid   = new Hashtable();
         sitebyname = new Hashtable();
         int activeFlag = 0;
 
@@ -204,7 +225,7 @@ public class ProbeTable extends HttpServlet {
             resultSet = statement.executeQuery(command);
 
             while(resultSet.next()) {
-                String id = resultSet.getString(1);
+                String id   = resultSet.getString(1);
                 String name = resultSet.getString(2);
                 sitebyid.put(id,name);
                 sitebyname.put(name,id);
@@ -230,19 +251,19 @@ public class ProbeTable extends HttpServlet {
             resultSet = statement.executeQuery(command);
 
             while(resultSet.next()) {
-                String newrow = new String(row);
+                String newrow    = new String(row);
                 String probename = resultSet.getString(3);
-                String siteid = resultSet.getString(2);
-                String nRecords = resultSet.getString(7);
+                String siteid    = resultSet.getString(2);
+                String nRecords  = resultSet.getString(7);
                 if (nRecords == null) {
                     nRecords = "0";
                 }
                 Timestamp timestamp = resultSet.getTimestamp(8);
 
                 newrow = xp.replaceAll(newrow,"#index#","" + index);
-                table.put("index:" + index,"" + index);
+                table.put("index:" + index, "" + index);
                 newrow = xp.replaceAll(newrow,"#dbid#",resultSet.getString(1));
-                table.put("dbid:" + index,resultSet.getString(1));
+                table.put("dbid:" + index, resultSet.getString(1));
 
                 newrow = xp.replaceAll(newrow,"#probename#",probename);
                 newrow = xp.replaceAll(newrow, "#nRecords#", nRecords);
@@ -316,9 +337,9 @@ public class ProbeTable extends HttpServlet {
                         catch (Exception ignore) {
                         }
                     } 
-                }
+                } // end of if
                 ++index;
-            }
+            } // end of while
             resultSet.close();
             statement.close();
         }
@@ -328,21 +349,23 @@ public class ProbeTable extends HttpServlet {
 
         for (int j = 0; j < 5; j++) {
             String newrow = new String(row);
-            newrow = xp.replaceAll(newrow,"#lastcontact#","");
-            newrow = xp.replaceAll(newrow,"#index#","" + index);
-            newrow = xp.replace(newrow,"#probename#",newname);
-            newrow = xp.replace(newrow,"#reporthh#","24");
-            newrow = xp.replace(newrow,"#reportmm#","0");
-            newrow = xp.replaceAll(newrow, "#nRecords#", "0");
+            newrow = xp.replaceAll(newrow, "#lastcontact#", "");
+            newrow = xp.replaceAll(newrow, "#index#",       "" + index);
+            newrow = xp.replace(newrow,    "#probename#",   newname);
+            newrow = xp.replace(newrow,    "#reporthh#",    "24");
+            newrow = xp.replace(newrow,    "#reportmm#",    "0");
+            newrow = xp.replaceAll(newrow, "#nRecords#",    "0");
             newrow = celist(index,newrow,"xxx");
-            table.put("index:" + index,"" + index);
-            table.put("probename:" + index,newname);
+            table.put("index:" + index,     "" + index);
+            table.put("probename:" + index, newname);
             ++index;
             buffer.append(newrow);
         }
         html = xp.replace(html,row,buffer.toString());
+	//System.out.println("HK New HTMP : " + html );
     }
 
+    // called by process
     public String celist(int index,String input,String current) {
         Pattern p = Pattern.compile("<sel.*#cename#.*?</select>",Pattern.MULTILINE + Pattern.DOTALL);
         Matcher m = p.matcher(input);
@@ -373,6 +396,7 @@ public class ProbeTable extends HttpServlet {
         return output;
     }
 
+    // called by process
     public String activelist(int index,String input,String current) {
         Pattern p = Pattern.compile("<select name=\"active:.*?</select>",Pattern.MULTILINE + Pattern.DOTALL);
         Matcher m = p.matcher(input);
@@ -404,26 +428,20 @@ public class ProbeTable extends HttpServlet {
         String oldvalue = "";
         String newvalue = "";
 
-        /*
-          Enumeration x = request.getParameterNames();
-          while(x.hasMoreElements()) {
-          key = (String) x.nextElement();
-          String value = (String) request.getParameter(key);
-          System.out.println("key: " + key + " value: " + value);
-          }
-        */
-
         for (index = 0; index < 1000; index++) {
             key = "index:" + index;
             oldvalue = (String) table.get(key);
-            newvalue = (String) request.getParameter(key);
+            //newvalue = (String) request.getParameter(key); //HKMOD
+	    newvalue = (String) nggetquerystring(request, key);
             if (oldvalue == null)
                 break;
 
             key = "probename:" + index;
             oldvalue = (String) table.get(key);
-            newvalue = (String) request.getParameter(key);
-
+            //newvalue = (String) request.getParameter(key); //HKMOD
+	    newvalue = (String) nggetquerystring(request, key);
+	    // HK Comment : It only allows a new name to be inserted
+	    // It does not allow an existing name to be modified.
             if ((oldvalue != null) && (oldvalue.equals(newname)) && (! oldvalue.equals(newvalue))) {
                 insert(index, request);
                 continue;
@@ -433,7 +451,8 @@ public class ProbeTable extends HttpServlet {
 
             key = "cename:" + index;
             oldvalue = (String) table.get(key);
-            newvalue = (String) request.getParameter(key);
+            //newvalue = (String) request.getParameter(key); // HKMOD
+	    newvalue = (String) nggetquerystring(request, key);
             if (! oldvalue.equals(newvalue)) {
                 update(index, request);
                 continue;
@@ -441,37 +460,27 @@ public class ProbeTable extends HttpServlet {
 
             key = "active:" + index;
             oldvalue = (String) table.get(key);
-            newvalue = (String) request.getParameter(key);
+	    //newvalue = (String) request.getParameter(key); // HKMOD
+	    newvalue = (String) nggetquerystring(request, key);
             if (! oldvalue.equals(newvalue)) {
                 update(index, request);
                 continue;
             }
 
-            /*
-              key = "reporthh:" + index;
-              oldvalue = (String) table.get(key);
-              newvalue = (String) request.getParameter(key);
-              if (! oldvalue.equals(newvalue)) {
-              update(index);
-              continue;
-              }
-
-              key = "reportmm:" + index;
-              oldvalue = (String) table.get(key);
-              newvalue = (String) request.getParameter(key);
-              if (! oldvalue.equals(newvalue)) {
-              update(index);
-              continue;
-              }
-            */
         }
     }
 
     public void update(int index, HttpServletRequest request) {
-        int dbid = Integer.parseInt(request.getParameter("dbid:" + index));
-        String cename = request.getParameter("cename:" + index);
-        int ceid = Integer.parseInt((String) sitebyname.get(cename));
-        String activeString = request.getParameter("active:" + index);
+        //int dbid            = Integer.parseInt(request.getParameter("dbid:" + index));
+        //String cename       = request.getParameter("cename:" + index);
+        //String activeString = request.getParameter("active:" + index);
+
+        int dbid            = Integer.parseInt( nggetquerystring(request,"dbid:" + index) );
+        String cename       = nggetquerystring(request, "cename:" + index);
+        String activeString = nggetquerystring(request, "active:" + index);
+
+        int ceid            = Integer.parseInt((String) sitebyname.get(cename));
+
         int active = 0;
         if (activeString.equals("Yes"))
             active = 1;
@@ -499,25 +508,20 @@ public class ProbeTable extends HttpServlet {
     }
 
     public void insert(int index, HttpServletRequest request) {
-        String cename = (String) request.getParameter("cename:" + index);
-        int ceid = Integer.parseInt((String) sitebyname.get(cename));
-        String activeString = (String) request.getParameter("active:" + index);
+        //String cename       = (String) request.getParameter("cename:" + index);
+        //String activeString = (String) request.getParameter("active:" + index);
+
+        String cename       = nggetquerystring(request, "cename:" + index);
+        String activeString = nggetquerystring(request, "active:" + index);
+
+        int ceid            = Integer.parseInt( (String) sitebyname.get(cename) );
+
         int active = 0;
         if (activeString.equals("Yes"))
             active = 1;
 
-        String probename = (String) request.getParameter("probename:" + index);
-
-        /*
-          String reporthh = (String) request.getParameter("reporthh:" + index);
-          String reportmm = (String) request.getParameter("reportmm:" + index);
-        */
-
-        /*
-          String command = 
-          "insert into Probe (siteid,probename,active,reporthh,reportmm) values(" + 
-          ceid + comma + dq + probename + dq + comma + active + comma + reporthh + comma + reportmm + ")";
-        */
+	// HKMOD
+        String probename = (String) nggetquerystring(request, "probename:" + index);
 
         String command = "insert into Probe (siteid,probename,active) values(?, ?, ?);";
         PreparedStatement statement = null;
@@ -542,4 +546,7 @@ public class ProbeTable extends HttpServlet {
             }
         }
     }
+
+
+
 }

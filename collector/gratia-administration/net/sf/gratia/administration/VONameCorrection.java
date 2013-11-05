@@ -23,25 +23,38 @@ import java.sql.*;
 import java.text.*;
 import java.util.regex.*;
 
-public class VONameCorrection extends HttpServlet {
-    XP xp = new XP();
+
+// HK-New
+import java.util.HashMap;
+import java.util.Map;
+
+
+public class VONameCorrection extends GrAdminHttpServlet {
+
+    // moved up
+    // XP xp = new XP();
+
     //
     // database related
-    //
-    String driver = "";
-    String url = "";
-    String user = "";
-    String password = "";
-    Connection connection;
+
+    // moved up
+    //String driver = "";
+    //String url = "";
+    //String user = "";
+    //String password = "";
+    //Connection connection;
+
     Statement statement;
     ResultSet resultSet;
     //
     // processing related
-    //
-    String html = "";
-    String row = "";
-    Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
-    Matcher m = null;
+
+    // moved up
+    //String html = "";
+    //String row = "";
+    //Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
+    //Matcher m = null;
+
     StringBuffer buffer = new StringBuffer();
     //
     // globals
@@ -53,11 +66,18 @@ public class VONameCorrection extends HttpServlet {
     String dq = "\"";
     String comma = ",";
     String cr = "\n";
-    Hashtable table = new Hashtable();
+
+    // moved up
+    //Hashtable table = new Hashtable();
     Hashtable vobyid = new Hashtable();
     Hashtable vobyname = new Hashtable();
     String newname = "<New VOName>";
 
+    public String getPagename() {
+	return "vonamecorrection.html";
+    }
+
+    /*
     public void init(ServletConfig config) throws ServletException 
     {
     }
@@ -97,7 +117,9 @@ public class VONameCorrection extends HttpServlet {
                 e.printStackTrace();
             }
     }
+    */
 
+    /*
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         if (LoginChecker.checkLogin(request, response)) {
@@ -142,6 +164,7 @@ public class VONameCorrection extends HttpServlet {
                     }
             }
     }
+    */
 
     public void process()
     {
@@ -195,8 +218,12 @@ public class VONameCorrection extends HttpServlet {
                             newrow = xp.replaceAll(newrow,"#reportablevoname#",reportablevoname);
                             table.put("reportablevoname:" + index, reportablevoname);
                         } else {
+			    // HK debug May 31 2013
                             newrow = xp.replaceAll(newrow,"#reportablevoname#","");
                             table.put("reportablevoname:" + index, "");
+			    // HK debug June 29 2013 back to original because GrAdminHttpServlet can now handle empty strings
+                            //newrow = xp.replaceAll(newrow,"#reportablevoname#","null");
+                            //table.put("reportablevoname:" + index, "null");
                         }
                         String actualname = (String) vobyid.get(resultSet.getString(4));
                         newrow = volist(index,newrow,actualname);
@@ -220,9 +247,12 @@ public class VONameCorrection extends HttpServlet {
                 newrow = xp.replaceAll(newrow,"#index#","" + index);
                 newrow = xp.replace(newrow,"#voname#",newname);
                 newrow = xp.replace(newrow,"#reportablevoname#","");
+		// HK debug June 29 2013 back to original because GrAdminHttpServlet can now handle empty strings
+                //newrow = xp.replace(newrow,"#reportablevoname#",newname);
                 newrow = volist(index,newrow,"xxx");
                 table.put("index:" + index,"" + index);
                 table.put("voname:" + index,newname);
+                table.put("reportablevoname:" + index, newname);
                 index++;
                 buffer.append(newrow);
             }
@@ -313,13 +343,13 @@ public class VONameCorrection extends HttpServlet {
 
                 key = "index:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key); //newvalue = (String) request.getParameter(key); //HK
                 if (oldvalue == null)
                     break;
 
                 key = "voname:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key); //newvalue = (String) request.getParameter(key); // HK
 
                 if ((oldvalue != null) && (oldvalue.equals(newname)) && (! oldvalue.equals(newvalue)))
                     {
@@ -331,8 +361,8 @@ public class VONameCorrection extends HttpServlet {
 
                 key = "actualname:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
-                if (! oldvalue.equals(newvalue))
+                newvalue = (String) nggetquerystring(request, key); //newvalue = (String) request.getParameter(key); // HK
+                if (! oldvalue.equals(newvalue))//if ( (newvalue != null) && (! oldvalue.equals(newvalue)) )
                     {
                         update(index, request);
                         continue;
@@ -340,8 +370,8 @@ public class VONameCorrection extends HttpServlet {
 
                 key = "reportablevoname:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
-                if (! oldvalue.equals(newvalue))
+                newvalue = (String) nggetquerystring(request, key); //newvalue = (String) request.getParameter(key); // HK
+                if (! oldvalue.equals(newvalue))//if ( (newvalue != null) && (! oldvalue.equals(newvalue)) )
                     {
                         update(index, request);
                         continue;
@@ -352,11 +382,19 @@ public class VONameCorrection extends HttpServlet {
 
     public void update(int index, HttpServletRequest request)
     {
-        int corrid = Integer.parseInt(request.getParameter("corrid:" + index));
-        String actualname =  request.getParameter("actualname:" + index);
+        //int corrid = Integer.parseInt(request.getParameter("corrid:" + index));
+        int corrid = Integer.parseInt(nggetquerystring(request, "corrid:" + index));
+
+        //String actualname =  request.getParameter("actualname:" + index);
+        String actualname =  nggetquerystring(request, "actualname:" + index);
+
         int VOid = Integer.parseInt((String) vobyname.get(actualname));
-        String voname = (String) request.getParameter("voname:" + index);
-        String reportablevoname = (String) request.getParameter("reportablevoname:" + index);
+
+        //String voname = (String) request.getParameter("voname:" + index);
+        String voname = (String) nggetquerystring(request, "voname:" + index);
+
+        //String reportablevoname = (String) request.getParameter("reportablevoname:" + index);
+        String reportablevoname = (String) nggetquerystring(request, "reportablevoname:" + index);
 
         String command = "update VONameCorrection set VOid = ?, VOName = ?, ReportableVOName = ? where corrid = ?;";
         PreparedStatement statement = null;
@@ -393,10 +431,13 @@ public class VONameCorrection extends HttpServlet {
 
     public void insert(int index, HttpServletRequest request)
     {
-        String actualname = (String) request.getParameter("actualname:" + index);
+        //String actualname = (String) request.getParameter("actualname:" + index);
+        String actualname =  nggetquerystring(request, "actualname:" + index);
         int VOid = Integer.parseInt((String) vobyname.get(actualname));
-        String voname = (String) request.getParameter("voname:" + index);
-        String reportablevoname = (String) request.getParameter("reportablevoname:" + index);
+        //String voname = (String) request.getParameter("voname:" + index);
+        String voname = (String) nggetquerystring(request, "voname:" + index);
+        //String reportablevoname = (String) request.getParameter("reportablevoname:" + index);
+        String reportablevoname = (String) nggetquerystring(request, "reportablevoname:" + index);
 
         String command = 
             "insert into VONameCorrection (VOid,VOName,ReportableVOName) values(?,?,?);";

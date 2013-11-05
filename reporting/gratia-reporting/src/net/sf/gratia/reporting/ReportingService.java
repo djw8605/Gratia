@@ -11,9 +11,11 @@ public class ReportingService implements ServletContextListener {
 
    public ReportingService() {
       Logging.initialize("reporting");
+
       // Set default timezone.
-      Logging.info("ReportingService: setting default time zone to GMT.");
-      TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+      // HK: Commented out as we now do the TimeZone setting direclty in Logging.java
+      //Logging.info("ReportingService: setting default time zone to GMT.");
+      //TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
    }
 
    public void contextInitialized(ServletContextEvent sce) {

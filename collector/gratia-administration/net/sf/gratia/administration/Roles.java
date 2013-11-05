@@ -21,25 +21,34 @@ import java.sql.*;
 
 import java.util.regex.*;
 
-public class Roles extends HttpServlet {
-    XP xp = new XP();
+// HK-New
+//import java.util.HashMap;
+//import java.util.Map;
+
+//public class Roles extends HttpServlet {
+public class Roles extends GrAdminHttpServlet {
+    // moved up   
+    //XP xp = new XP();
     //
     // database related
     //
-    String driver = "";
-    String url = "";
-    String user = "";
-    String password = "";
-    Connection connection;
+    //String driver = "";
+    //String url = "";
+    //String user = "";
+    //String password = "";
+    //Connection connection;
+
     Statement statement;
     ResultSet resultSet;
     //
     // processing related
     //
-    String html = "";
-    String row = "";
-    Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
-    Matcher m = null;
+    // moved up
+    //String html = "";
+    //String row = "";
+    //Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
+    //Matcher m = null;
+
     StringBuffer buffer = new StringBuffer();
     //
     // globals
@@ -51,11 +60,19 @@ public class Roles extends HttpServlet {
     String dq = "\"";
     String comma = ",";
     String cr = "\n";
-    Hashtable table = new Hashtable();
-    Hashtable sitebyid = new Hashtable();
-    Hashtable sitebyname = new Hashtable();
     String newname = "<New Probe Name>";
 
+    // moved up
+    //Hashtable table = new Hashtable();
+
+    Hashtable sitebyid = new Hashtable();
+    Hashtable sitebyname = new Hashtable();
+
+    public String getPagename() {
+        return "roles.html";
+    }
+
+    /*
     public void init(ServletConfig config) throws ServletException 
     {
     }
@@ -95,6 +112,7 @@ public class Roles extends HttpServlet {
                 e.printStackTrace();
             }
     }
+    */
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
@@ -120,6 +138,7 @@ public class Roles extends HttpServlet {
         }
     }
 
+    /*
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
     {
         if (LoginChecker.checkLogin(request, response)) {
@@ -145,6 +164,7 @@ public class Roles extends HttpServlet {
                     }
             }
     }
+    */
 
     public void process()
     {
@@ -177,6 +197,18 @@ public class Roles extends HttpServlet {
                         table.put("subtitle:" + index,subtitle);
 
                         String where = resultSet.getString("whereclause");
+			//if ( where == null    ) where = "NULL";
+			//if ( where.equals("") ) where = "emptystring";
+			/* HK Comments : getString can return two special values
+			   1. the field can have an empty string. From mysql command, we will see a blank 
+			      getString will return ""
+			   2. the field can have NULL.            From mysql command, we will see a string NULL
+			      getString will return null, not "null
+			      i.e. in this case, where == null is true and where.equals( "null" ) is false
+			      This means we can NOT save where in this case, i.e. don't expect where to be saved as "null"
+			      ProjectNameCorrection has a speical case
+			 */
+
                         newrow = xp.replaceAll(newrow,"#where#",where);
                         table.put("where:" + index,where);
 
@@ -194,8 +226,10 @@ public class Roles extends HttpServlet {
         String newrow = new String(row);
         newrow = xp.replaceAll(newrow,"#index#","" + index);
         newrow = xp.replace(newrow,"#role#","New Role");
+
         newrow = xp.replace(newrow,"#subtitle#","");
         newrow = xp.replace(newrow,"#where#","");
+
         table.put("index:" + index,"" + index);
         table.put("role:" + index,"New Role");
         buffer.append(newrow);
@@ -210,22 +244,13 @@ public class Roles extends HttpServlet {
         String oldvalue = "";
         String newvalue = "";
 
-        /*
-          Enumeration x = request.getParameterNames();
-          while(x.hasMoreElements())
-          {
-          key = (String) x.nextElement();
-          String value = (String) request.getParameter(key);
-          System.out.println("key: " + key + " value: " + value);
-          }
-        */
-
         for (index = 0; index < 1000; index++)
             {
 
                 key = "index:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+                //newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key);
                 if (oldvalue == null)
                     {
                         break;
@@ -233,7 +258,8 @@ public class Roles extends HttpServlet {
 
                 key = "role:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+                //newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key);
 
                 if ((oldvalue != null) && (oldvalue.equals("New Role")) &&
                     (! oldvalue.equals(newvalue))) {
@@ -245,7 +271,8 @@ public class Roles extends HttpServlet {
 
                 key = "subtitle:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+                //newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key);
                 if (! oldvalue.equals(newvalue))
                     {
                         update(index, request);
@@ -254,7 +281,8 @@ public class Roles extends HttpServlet {
 
                 key = "where:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+                //newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key);
                 if (! oldvalue.equals(newvalue))
                     {
                         update(index, request);
@@ -266,10 +294,17 @@ public class Roles extends HttpServlet {
 
     public void update(int index, HttpServletRequest request)
     {
-        int roleid = Integer.parseInt(request.getParameter("roleid:" + index));
-        String role = request.getParameter("role:" + index);
+        //int roleid = Integer.parseInt(request.getParameter("roleid:" + index));
+        int roleid = Integer.parseInt( nggetquerystring( request, "roleid:" + index ) );
+	/*
+        String role     = request.getParameter("role:" + index);
         String subtitle = request.getParameter("subtitle:" + index);
-        String where = request.getParameter("where:" + index);
+        String where    = request.getParameter("where:" + index);
+	*/
+
+        String role     = nggetquerystring( request, "role:" + index);
+        String subtitle = nggetquerystring( request, "subtitle:" + index);
+        String where    = nggetquerystring( request, "where:" + index);
 
         String command = "update Role set role = ?, subtitle = ?, whereclause = ? where roleid = ?;";
         PreparedStatement statement = null;
@@ -301,9 +336,15 @@ public class Roles extends HttpServlet {
 
     public void insert(int index, HttpServletRequest request)
     {
+	/*
         String role = request.getParameter("role:" + index);
         String subtitle = request.getParameter("subtitle:" + index);
         String where = request.getParameter("where:" + index);
+	*/
+
+        String role     = nggetquerystring( request, "role:" + index);
+        String subtitle = nggetquerystring( request, "subtitle:" + index);
+        String where    = nggetquerystring( request, "where:" + index);
 
         String command = "insert into Role(role,subtitle,whereclause) values(?, ?, ?);";
         PreparedStatement statement = null;
@@ -339,7 +380,9 @@ public class Roles extends HttpServlet {
 
         try
             {
-                int roleid = Integer.parseInt(request.getParameter("roleid"));
+		//int roleid = Integer.parseInt(request.getParameter("roleid"));
+                int roleid = Integer.parseInt( nggetquerystring(request, "roleid") );
+
                 command = "delete from Role where roleid = ?;";
                 PreparedStatement statement = connection.prepareStatement(command);
                 statement.setInt(1, roleid);

@@ -1,7 +1,7 @@
 Name: gratia
 Summary: Gratia OSG accounting system
 Group: Applications/System
-Version: 1.13.10
+Version: 1.13.11
 Release: 1%{?dist}
 License: GPL
 Group: Applications/System
@@ -10,6 +10,7 @@ URL: http://sourceforge.net/projects/gratia/
 # svn export https://gratia.svn.sourceforge.net/svnroot/gratia/branches/dev/v1_10_rpm gratia-1.11
 # tar zcf gratia-1.11.tar.gz gratia-1.11
 Source0: gratia-%{version}.tar.gz
+BuildRequires: ant-contrib
 
 %description
 Gratia OSG accounting system
@@ -107,8 +108,9 @@ Gratia web reporting service
 
 %build
 pushd build-scripts
-sed -i 's|^version_default.*=*|version_default = v%{version}-%{release}|' Makefile
-make
+#sed -i 's|^version_default.*=*|version_default = v%{version}-%{release}|' Makefile
+#make
+ant -Dgratia.release='v%{version}-%{release}' -v
 popd
 
 %install

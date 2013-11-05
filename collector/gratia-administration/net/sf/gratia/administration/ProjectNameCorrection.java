@@ -21,25 +21,35 @@ import java.sql.*;
 
 import java.util.regex.*;
 
-public class ProjectNameCorrection extends HttpServlet {
-    XP xp = new XP();
+// HK-New                                                                                                                                                                                            
+import java.util.HashMap;
+import java.util.Map;
+
+public class ProjectNameCorrection extends GrAdminHttpServlet {
+
+    // moved up
+    //XP xp = new XP();
     //
     // database related
     //
-    String driver = "";
-    String url = "";
-    String user = "";
-    String password = "";
-    Connection connection;
+    // moved up
+    //String driver = "";
+    //String url = "";
+    //String user = "";
+    //String password = "";
+    //Connection connection;
+
     Statement statement;
     ResultSet resultSet;
     //
     // processing related
     //
-    String html = "";
-    String row = "";
-    Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
-    Matcher m = null;
+    // moved up
+    //String html = "";
+    //String row = "";
+    //Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
+    //Matcher m = null;
+
     StringBuffer buffer = new StringBuffer();
     //
     // globals
@@ -51,9 +61,16 @@ public class ProjectNameCorrection extends HttpServlet {
     String dq = "\"";
     String comma = ",";
     String cr = "\n";
-    Hashtable table = new Hashtable();
+
+    // moved up
+    //Hashtable table = new Hashtable();
     String newname = "<New VO Name>";
 
+    public String getPagename() {
+        return "projectnamecorrection.html";
+    }
+
+    /*
     public void init(ServletConfig config) throws ServletException 
     {
     }
@@ -138,6 +155,7 @@ public class ProjectNameCorrection extends HttpServlet {
                     }
             }
     }
+    */
 
     public void process()
     {
@@ -157,10 +175,14 @@ public class ProjectNameCorrection extends HttpServlet {
                         newrow = xp.replace(newrow,"#corrid#","" + resultSet.getInt(1));
 			String pn=resultSet.getString(2);
 			if (pn != null) {
-                        	newrow = xp.replace(newrow,"#projectname#",resultSet.getString(2));
+			    newrow = xp.replace(newrow,"#projectname#",resultSet.getString(2));
 			} else {
-				newrow = xp.replaceAll(newrow,"#projectname#","");
-				pn="";
+			    // HK hack, empty string causes a problem with my new hash table
+			    //newrow = xp.replaceAll(newrow,"#projectname#","");
+			    //newrow = xp.replaceAll(newrow,"#projectname#","null");
+			    newrow = xp.replaceAll(newrow,"#projectname#",""); // HK back to the original
+			    // I believe this is based on the assumption or fact that getParameter will return "" for this parameter which has "" assigned
+			    pn="";
 			}
                         newrow = xp.replace(newrow,"#reportableprojectname#",resultSet.getString(3));
                         table.put("index:" + index,"" + index);
@@ -191,12 +213,14 @@ public class ProjectNameCorrection extends HttpServlet {
             {
                 key = "index:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+                //newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key);
                 if (oldvalue == null)
                     break;
                 key = "reportableprojectname:" + index;
                 oldvalue = (String) table.get(key);
-                newvalue = (String) request.getParameter(key);
+                //newvalue = (String) request.getParameter(key);
+                newvalue = (String) nggetquerystring(request, key);
                 if (oldvalue.equals(newvalue))
                     continue;
                 update(index, request);
@@ -208,8 +232,13 @@ public class ProjectNameCorrection extends HttpServlet {
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement(command);
-            statement.setString(1, request.getParameter("reportableprojectname:" + index));
-            statement.setInt(2, Integer.parseInt(request.getParameter("corrid:" + index)));
+            //statement.setString(1, request.getParameter("reportableprojectname:" + index));
+            //statement.setInt(2, Integer.parseInt(request.getParameter("corrid:" + index)));
+
+            statement.setString(1,                nggetquerystring(request, "reportableprojectname:" + index)  );
+            statement.setInt(2, Integer.parseInt( nggetquerystring(request, "corrid:" + index)   ));
+
+
             statement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();

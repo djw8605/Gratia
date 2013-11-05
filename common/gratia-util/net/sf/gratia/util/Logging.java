@@ -25,6 +25,11 @@ public class Logging {
     public static synchronized void initialize(String logDomain) {
         if (initialized)
             return;
+
+	// HK: This seems to be the ultimate solution
+	// HK: All other uses of TimeZone.setDefault should be removed to clear confusions..
+	TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+
         screenFormat.setTimeZone(TimeZone.getDefault());
         Properties p = net.sf.gratia.util.Configuration.getProperties();
 

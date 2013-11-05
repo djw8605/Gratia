@@ -17,8 +17,9 @@ public class ServletService implements ServletContextListener {
       Logging.initialize("rmiservlet");
 
       // Set default timezone.
-      Logging.info("ServletService: setting default time zone to GMT.");
-      TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+      // HK: Commented out after we do the TimeZone setting directly in Logging.java
+      //Logging.info("ServletService: setting default time zone to GMT.");
+      //TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
    }
 
    public void contextInitialized(ServletContextEvent sce) {

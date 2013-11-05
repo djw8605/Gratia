@@ -152,7 +152,7 @@ public class CollectorService implements ServletContextListener {
       // initialize logging
       //
       p = net.sf.gratia.util.Configuration.getProperties();
-      
+
       Logging.initialize("service");
       
       Enumeration iter = System.getProperties().propertyNames();
@@ -160,6 +160,7 @@ public class CollectorService implements ServletContextListener {
       while (iter.hasMoreElements()) {
          String key = (String)iter.nextElement();
          if (key.endsWith(".password")) continue;
+         if (key.endsWith(".rootpassword")) continue;
          String value = (String)System.getProperty(key);
          Logging.log(LogLevel.CONFIG,
                      "Key: " + key + " value: " + value);
@@ -171,6 +172,7 @@ public class CollectorService implements ServletContextListener {
       while (iter.hasMoreElements()) {
          String key = (String)iter.nextElement();
          if (key.endsWith(".password")) continue;
+         if (key.endsWith(".rootpassword")) continue;
          String value = (String)p.getProperty(key);
          Logging.log(LogLevel.CONFIG, "Key: " + key + " value: " + value);
       }
@@ -234,8 +236,8 @@ public class CollectorService implements ServletContextListener {
          //
          // set default timezone
          //
-         
-         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+         // HK: removed after we put the same line in Logging.java
+         //TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
          
          //
          // start rmi

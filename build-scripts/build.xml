@@ -1,0 +1,569 @@
+<project name="gratia-service" default="gratia" basedir=".">
+	<description> Gratia build file </description>
+    <taskdef resource="net/sf/antcontrib/antlib.xml"/> 
+	
+	<!-- Commenting out gratia.release variable. The expectation is to pass in through the command line as follows:
+	ant -Dgratia.release="1.16.11" -v > ~/build_output.txt 2>&1
+	<property name="gratia.release" value="1.13.10"/>
+	-->
+	<property name="base" location="${basedir}/.." /> <!--added location attribute to convert relative to absolute path-->
+	<property name="target.dir" value="${base}/target"/>
+	<property name="ext.dirs" value="${base}/common/lib" /> <!--Third Party Libraries-->
+	<property name="config.dir" value="${base}/common/configuration"/>
+	<property name="output.dir" value="${base}/build-scripts/output-dir"/>
+	<property name="classes.dir" value="${output.dir}/classes" />
+	<property name="birt.reporting.dir" value="${classes.dir}/birt-reporting" />
+	<property name="reporting.dir" value="${output.dir}/wars/reporting" />
+
+	<path id="webapps.class.path">
+		<fileset dir="${ext.dirs}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	
+	<target name="release_data" description="create gratia release data" depends="clean">
+		<mkdir dir="${target.dir}"/>
+		<!-- Example output is as follows:
+		Gratia release: v1.13-1 Build date: Wed Jun 12 14:35:11 CDT 2013 Build host: fermicloud331.fnal.gov Build path: /root/ant_build Builder: uid=0(root)
+		-->
+		<shellscript shell="sh" dir="${base}">
+			echo "Gratia release: ${gratia.release} Build date: `date` Build host: `hostname -f` Build path: ${base} Builder: `id |cut -d\" \" -f1`" > ${target.dir}/gratia-release
+		</shellscript>
+	</target>
+	
+	<target name="util" description="compile gratia-util" depends="clean">
+		<mkdir dir="${classes.dir}"/>
+		<mkdir dir="${target.dir}"/>
+		<javac srcdir="${base}/common/gratia-util/" destdir="${classes.dir}"
+           includes="net/sf/gratia/util/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+		<jar jarfile="${target.dir}/gratia-util.jar" 
+			basedir="${classes.dir}"
+			includes="net/sf/gratia/util/*.class"/>
+	</target>
+	
+	<target name="security" description="compile gratia-security" depends="util, services">
+		<mkdir dir="${classes.dir}"/>
+		<mkdir dir="${target.dir}"/>
+		<javac srcdir="${base}/common/gratia-security/" destdir="${classes.dir}"
+           includes="net/sf/gratia/vomsSecurity/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+		<javac srcdir="${base}/common/gratia-security/" destdir="${classes.dir}"
+	          includes="org/glite/security/trustmanager/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+		<javac srcdir="${base}/common/gratia-security/" destdir="${classes.dir}"
+	          includes="net/sf/gratia/trustmanager/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+		<jar jarfile="${target.dir}/gratiaSecurity.jar" 
+			basedir="${classes.dir}"
+			includes="	net/sf/gratia/util/*.class, 
+						net/sf/gratia/vomsSecurity/*.class, 
+						net/sf/gratia/trustmanager/*.class, 
+						org/glite/security/trustmanager/*.class, 
+						net/sf/gratia/services/JMS*.class" />
+	</target>
+	
+	<target name="registration" description="compile gratia-registration related classes" depends="clean">
+		<mkdir dir="${classes.dir}"/>
+		<mkdir dir="${target.dir}"/>
+		<javac srcdir="${base}/collector/gratia-registration/" destdir="${classes.dir}"
+           includes="net/sf/gratia/registration/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+	</target>
+	
+	<target name="administration" description="compile gratia-administration related classes" depends="clean, util, services">
+		<mkdir dir="${classes.dir}"/>
+		<mkdir dir="${target.dir}"/>
+		<javac srcdir="${base}/collector/gratia-administration/" destdir="${classes.dir}"
+           includes="net/sf/gratia/administration/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+	</target>
+	
+	<target name="services" description="compile gratia-services" depends="util">
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${classes.dir}"/>
+		<shellscript shell="sh" dir="${base}"><!--Dynamically create a Versions.java file-->
+			echo ${base}
+			file=${base}/collector/gratia-services/net/sf/gratia/services/Versions.java
+			touch /var/tmp/versions.$$.java
+			echo "package net.sf.gratia.services;
+
+			public class Versions {
+			private static final String fgPackageVersionString = \""${gratia.release}"\";
+			public static String GetPackageVersionString() { return fgPackageVersionString; }
+			};" > /var/tmp/versions.$$.java
+
+			if [ ! -e $file ] ;  then
+			   mv /var/tmp/versions.$$.java $file
+			else
+			   diff $file /var/tmp/versions.$$.java > /dev/null
+			   result=$?
+			   if [ $result -eq 0 ] ; then
+			      rm /var/tmp/versions.$$.java
+			   else
+			      mv /var/tmp/versions.$$.java $file
+			   fi
+			fi
+		</shellscript>
+		<!-- Compile the java code into ${classes.dir} -->
+		<javac srcdir="${base}/collector/gratia-services/" destdir="${classes.dir}"
+           includes="net/sf/gratia/storage/*.java,net/sf/gratia/services/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+		<rmic base="${classes.dir}" classname="net.sf.gratia.services.JMSProxyImpl" stubversion="compat">
+			<classpath refid="webapps.class.path"/>
+		</rmic>
+	</target>
+	
+	<target name="servlets" description="compile gratia servlets" depends="services">
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${classes.dir}"/>
+		<!-- Compile the java code into ${classes.dir} -->
+		<javac srcdir="${base}/collector/gratia-servlets/" destdir="${classes.dir}"
+           includes="net/sf/gratia/servlets/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+	</target>
+	
+	<target name="soap" description="compile gratia soap" depends="services">
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${classes.dir}"/>
+		<!-- Compile the java code into ${classes.dir} -->
+		<javac srcdir="${base}/collector/gratia-soap/" destdir="${classes.dir}"
+           includes="net/sf/gratia/soap/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+	</target>
+
+	<target name="birt-reporting" description=	"compile birt-reporting" depends="clean">
+		<shellscript shell="sh" dir="${base}"><!--Dynamically create a Versions.java file-->
+			file=${base}/reporting/gratia-reporting/src/net/sf/gratia/reporting/Versions.java
+			touch /var/tmp/versions.$$.java
+			echo "package net.sf.gratia.reporting;
+			
+			public class Versions {
+			private static final String fgPackageVersionString = \""${gratia.release}"\";
+			public static String GetPackageVersionString() { return fgPackageVersionString; }
+			};" > /var/tmp/versions.$$.java
+
+			if [ ! -e $file ] ;  then
+			   mv /var/tmp/versions.$$.java $file
+			else
+			   diff $file /var/tmp/versions.$$.java > /dev/null
+			   result=$?
+			   if [ $result -eq 0 ] ; then
+			      rm /var/tmp/versions.$$.java
+			   else
+			      mv /var/tmp/versions.$$.java $file
+			   fi
+			fi
+		</shellscript>
+		  
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${birt.reporting.dir}"/>
+		<mkdir dir="${target.dir}"/>
+
+		<!-- Compile the java code into ${classes.dir} -->
+		<javac srcdir="${base}/common/gratia-util/" destdir="${birt.reporting.dir}"
+           includes="net/sf/gratia/util/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+		<javac srcdir="${base}/reporting/gratia-reporting/src/" destdir="${birt.reporting.dir}"
+           includes="net/sf/gratia/reporting/exceptions/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+		<javac srcdir="${base}/reporting/gratia-reporting/src/" destdir="${birt.reporting.dir}"
+           includes="net/sf/gratia/reporting/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+		<javac srcdir="${base}/reporting/gratia-reporting/src/" destdir="${birt.reporting.dir}"
+           includes="net/sf/gratia/administration/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+		<jar jarfile="${target.dir}/gratiaReporting.jar" 
+			basedir="${birt.reporting.dir}"
+			includes="
+			net/sf/gratia/util/*.class, 
+			net/sf/gratia/reporting/exceptions/*.class, 
+			net/sf/gratia/reporting/*.class, 
+			net/sf/gratia/administration/*.class 
+			"/>
+	</target>
+	
+	<target name="testtimeout" description="compile testtimeout" depends="util">
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${classes.dir}"/>
+		<!-- Compile the java code into ${classes.dir} -->
+		<javac srcdir="${base}/collector/gratia-testtimeout/" destdir="${classes.dir}"
+           includes="net/sf/gratia/testtimeout/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+	</target>
+	
+	<target name="testtimeout_war" description="generate the testtimeout distribution" depends="testtimeout, release_data">
+			<mkdir dir="${target.dir}"/>
+			<war destfile="${target.dir}/gratia-testtimeout.war" webxml="${base}/collector/gratia-testtimeout/net/sf/gratia/testtimeout/web.xml">
+				<lib dir="${target.dir}">
+					<include name="gratia-util.jar"/>
+				</lib>
+				<classes dir="${classes.dir}" >
+					<include name="net/sf/gratia/testtimeout/*.class"/>
+					<include name="net/sf/gratia/util/Logging.class"/>
+				</classes>
+				<zipfileset dir="${target.dir}" includes="gratia-release"/>
+			</war>
+	</target>
+	
+	<target name="testbacklog" description="compile testbacklog" depends="util, services, servlets ">
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${classes.dir}"/>
+		<!-- Compile the java code into ${classes.dir} -->
+		<javac srcdir="${base}/collector/gratia-testbacklog/" destdir="${classes.dir}"
+           includes="net/sf/gratia/testbacklog/*.java">
+			<classpath refid="webapps.class.path"/>
+		</javac>
+	</target>
+	
+	<target name="testbacklog_war" description="generate the testbacklog distribution" depends="testbacklog, release_data">
+			<mkdir dir="${target.dir}"/>
+			<war destfile="${target.dir}/gratia-testbacklog.war" webxml="${base}/collector/gratia-testbacklog/net/sf/gratia/testbacklog/web.xml">
+				<lib dir="${target.dir}">
+					<include name="gratia-util.jar"/>
+				</lib>
+				<classes dir="${classes.dir}" >
+					<include name="net/sf/gratia/testbacklog/*.class"/>
+					<include name="net/sf/gratia/servlets/*.class"/>
+					<include name="net/sf/gratia/services/*Skel.class"/>
+					<include name="net/sf/gratia/services/*Stub.class"/>
+					<include name="net/sf/gratia/services/JMS*.class"/>
+					<include name="net/sf/gratia/services/AccessException.class"/>
+					<include name="net/sf/gratia/util/Logging.class"/>
+				</classes>
+				<zipfileset dir="${target.dir}" includes="gratia-release"/>
+			</war>
+	</target>
+	
+	<target name="reporting" description="Create gratia-reporting.war" depends="birt-reporting, release_data, administration">
+		<mkdir dir="${reporting.dir}/documents"/>
+		<mkdir dir="${reporting.dir}/WEB-INF/attachments"/>
+		<copy file="${target.dir}/gratia-release" todir="${reporting.dir}"/>
+		<copy file="${base}/reporting/birt-wars/birt-v261.war" todir="${reporting.dir}"/>
+		<unjar src="${reporting.dir}/birt-v261.war" dest="${reporting.dir}"/>
+		<delete file="${reporting.dir}/birt-v261.war"/>
+		<delete file="${reporting.dir}/test.rptdesign"/>
+		<delete file="${reporting.dir}/test1.rptdesign"/>
+		<exec executable="${basedir}/ant_edit_web_xml.sh">
+			<arg line='${reporting.dir}/WEB-INF'/>
+		</exec>
+		<copy file="${base}/reporting/gratia-reporting/WebContent/urlrewrite.xml" todir="${reporting.dir}/WEB-INF"/>
+		<copy file="${target.dir}/gratiaReporting.jar" todir="${reporting.dir}/WEB-INF/lib"/>
+		<copy file="${target.dir}/gratiaReporting.jar" todir="${reporting.dir}/scriptlib"/>
+		<copy file="${base}/common/lib/dom4j-1.6.1.jar" todir="${reporting.dir}/WEB-INF/lib"/>
+		<copy todir="${reporting.dir}/WEB-INF/lib">
+				<fileset dir="${base}/common/lib">
+					<include name="commons-lang-*.jar"/>
+				</fileset>
+		</copy>
+		<copy file="${base}/common/lib/urlrewritefilter-4.0.3.jar" todir="${reporting.dir}/WEB-INF/lib"/>
+		<copy todir="${reporting.dir}">
+				<fileset dir="${base}/reporting/gratia-reporting/WebContent/">
+					<include name="*.jsp"/>
+					<include name="*.xml"/>
+					<include name="*.html"/>
+					<include name="*.css"/>
+				</fileset>
+		</copy>	
+		<!--don't need urlrewrite.xml here , it is in WEB-INF-->
+		<delete file="${reporting.dir}/urlrewrite.xml"/>
+		<exec executable="cp">
+			<arg line='-R ${base}/reporting/gratia-reporting/WebContent/calendar ${reporting.dir}'/>
+		</exec>
+		<exec executable="cp">
+			<arg line='-R ${base}/reporting/gratia-reporting/WebContent/images ${reporting.dir}'/>
+		</exec>
+		<exec executable="cp">
+			<arg line='-R ${base}/reporting/gratia-reporting/WebContent/tooltip ${reporting.dir}'/>
+		</exec>
+		<!--Had to resort to shell copy below due to the wildcard character in the jar name. It wasn't working well with Ant cp task-->
+		<shellscript shell="sh" dir="${base}">
+			#####Execute Copy#####
+			cp -p ${base}/common/lib/mysql-connector-java-*-bin.jar ${reporting.dir}/WEB-INF/lib/.
+			cp -p ${base}/common/lib/mysql-connector-java-*-bin.jar ${reporting.dir}/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
+			#####Find and Remove SVN directories#####
+			find ${reporting.dir} -depth -type d -name .svn -exec rm -rf {} \;
+		</shellscript>
+		<mkdir dir="${reporting.dir}/WEB-INF/classes/net/sf/gratia/administration"/>
+		<copy todir="${reporting.dir}/WEB-INF/classes/net/sf/gratia/administration">
+			<fileset dir="${classes.dir}/net/sf/gratia/administration">
+				<include name="MonitorStatus*.class"/>
+			</fileset>
+		</copy>
+		<jar destfile="${target.dir}/gratia-reporting.war" basedir="${reporting.dir}"></jar>
+		<delete dir="${reporting.dir}"/>
+	</target>
+	
+	<target name="webapps" description="generate the  webapps distribution" depends="servlets, reporting, soap, registration, administration, security, release_data">
+		<mkdir dir="${target.dir}"/>
+		<war destfile="${target.dir}/gratia-services.war" webxml="${base}/collector/gratia-services/net/sf/gratia/services/web.xml">
+			<lib dir="${ext.dirs}">
+				<exclude name="servlet-api.jar"/>
+				<exclude name="log4j*.jar"/>
+				<exclude name="*.m2.settings"/>
+				<exclude name="*.README"/>
+				<exclude name="*.patch"/>	
+				<exclude name="c3p0.license.txt"/>	
+			</lib>
+			<lib dir="${target.dir}">
+				<include name="gratia-util.jar"/>
+			</lib>
+			<classes dir="${classes.dir}" >
+				<include name="net/sf/gratia/storage/*.class"/>
+				<include name="net/sf/gratia/services/*.class"/>
+			</classes>
+			<classes dir="${base}/collector/gratia-services/">
+				<include name="c3p0.properties"/>
+				<include name="ehcache.xml"/>
+			</classes>
+			<zipfileset dir="${target.dir}" includes="gratia-release"/>
+		</war>
+		<war destfile="${target.dir}/gratia-servlets.war" webxml="${base}/collector/gratia-servlets/net/sf/gratia/servlets/web.xml">
+			<lib dir="${target.dir}">
+				<include name="gratia-util.jar"/>
+			</lib>
+			<classes dir="${classes.dir}" >
+				<include name="net/sf/gratia/util/Logging.class"/>
+				<include name="net/sf/gratia/services/JMS*.class"/>
+				<include name="net/sf/gratia/services/AccessException.class"/>
+				<include name="net/sf/gratia/services/*Skel.class"/>
+				<include name="net/sf/gratia/services/*Stub.class"/>
+				<include name="net/sf/gratia/servlets/*.class"/>
+			</classes>
+			<zipfileset dir="${target.dir}" includes="gratia-release"/>
+		</war>
+		<war destfile="${target.dir}/gratia-soap.war" webxml="${base}/collector/gratia-soap/net/sf/gratia/soap/web.xml">
+			<lib dir="${ext.dirs}">
+				<include name="axis*.jar"/>
+				<include name="commons-discovery*.jar"/>
+				<include name="jaxrpc*.jar"/>
+				<include name="saaj*.jar"/>
+				<include name="wsdl*.jar"/>
+			</lib>
+			<classes dir="${classes.dir}" >
+				<include name="net/sf/gratia/soap/*.class"/>
+				<include name="net/sf/gratia/services/*Skel.class"/>
+				<include name="net/sf/gratia/services/*Stub.class"/>
+				<include name="net/sf/gratia/services/JMS*.class"/>				
+			</classes>
+			<webinf dir="${base}/collector/gratia-soap/net/sf/gratia/soap">
+				<include name="server-config.wsdd"/>
+			</webinf>
+			<zipfileset dir="${base}/collector/gratia-soap/net/sf/gratia/soap/" includes="collector.wsdl" prefix="wsdl"/>
+			<zipfileset dir="${target.dir}" includes="gratia-release"/>
+		</war>
+		<war destfile="${target.dir}/gratia-registration.war" webxml="${base}/collector/gratia-registration/net/sf/gratia/registration/web.xml">
+			<lib dir="${ext.dirs}">
+				<include name="mysql*.jar"/>
+			</lib>
+			<lib dir="${target.dir}">
+				<include name="gratia-util.jar"/>
+			</lib>
+			<classes dir="${classes.dir}" >
+				<include name="net/sf/gratia/registration/*.class"/>
+				<include name="net/sf/gratia/services/*Skel.class"/>
+				<include name="net/sf/gratia/services/*Stub.class"/>
+				<include name="net/sf/gratia/services/JMS*.class"/>
+				<include name="net/sf/gratia/services/AccessException.class"/>
+				<include name="net/sf/gratia/util/Logging.class"/>
+			</classes>
+			<zipfileset dir="${target.dir}" includes="gratia-release"/>
+		</war>
+		<war destfile="${target.dir}/gratia-administration.war" webxml="${base}/collector/gratia-administration/net/sf/gratia/administration/web.xml">
+			<lib dir="${ext.dirs}">
+				<exclude name="servlet-api.jar"/>
+				<exclude name="log4j*.jar"/>
+				<exclude name="*.settings"/>
+				<exclude name="*.README"/>
+				<exclude name="*.patch"/>
+				<exclude name="c3p0.license.txt"/>
+			</lib>
+			<lib dir="${target.dir}">
+				<include name="gratia-util.jar"/>
+				<include name="gratiaSecurity.jar"/>
+			</lib>
+			<classes dir="${classes.dir}" >
+				<include name="net/sf/gratia/administration/*.class"/>
+				<include name="net/sf/gratia/services/*.class"/>
+				<include name="net/sf/gratia/storage/*.class"/>
+				<include name="net/sf/gratia/util/Logging.class"/>
+			</classes>
+			<classes dir="${base}/collector/gratia-administration/">
+				<include name="c3p0.properties"/>
+				<include name="ehcache.xml"/>
+			</classes>
+			<zipfileset dir="${base}/collector/gratia-administration/WebContent" includes="*.html, *.css, *.jsp, *.js"/>
+			<zipfileset dir="${base}/collector/gratia-administration/WebContent/images" includes="*.gif" prefix="images"/>
+			<zipfileset dir="${target.dir}" includes="gratia-release"/>
+		</war>
+		<war destfile="${target.dir}/gratia-reports.war" webxml="${base}/reporting/gratia-reports/WebContent/WEB-INF/web.xml">
+			<lib dir="${target.dir}">
+				<include name="gratia-util.jar"/>
+			</lib>
+			<zipfileset dir="${base}/reporting/gratia-reports/WebContent/MenuConfig" includes="*.xml" prefix="MenuConfig"/>
+			<zipfileset dir="${base}/reporting/gratia-reports/WebContent/reports/production-osg" includes="*.rptdesign, *.rptlibrary" prefix="reports"/>
+			<zipfileset dir="${base}/reporting/gratia-reports/WebContent/reports/production-fermi" includes="*.rptdesign, *.rptlibrary" prefix="reports"/>
+			<zipfileset dir="${base}/reporting/gratia-reports/WebContent/reports/production-osgdaily" includes="*.rptdesign, *.rptlibrary" prefix="reports"/>
+			<zipfileset dir="${target.dir}" includes="gratia-release"/>	
+		</war>
+	</target>
+	
+	<target name="common_lib" description="create common_lib.tar">
+		<mkdir dir="${target.dir}"/>
+		<tar destfile="${target.dir}/common_lib.tar">
+			 <tarfileset dir="${base}/common/lib" >
+				<include name="log4j-*.jar"/>
+				<include name="commons-logging-1*.jar"/>
+			  </tarfileset>
+		</tar>
+	</target>
+	
+	<target name="server_lib" description="create server_lib.tar" depends="security">
+		<mkdir dir="${target.dir}"/>
+		<tar destfile="${target.dir}/server_lib.tar">
+			<tarfileset dir="${base}/common/lib">
+				<include name="glite-security-trustmanager*.jar"/>
+				<include name="glite-security-util-java*.jar"/>
+				<include name="bcprov-*.jar"/>
+			</tarfileset>
+			<tarfileset dir="${target.dir}">
+				<include name="gratiaSecurity.jar"/>
+			</tarfileset>
+		</tar>
+	</target>
+	
+	<target name="common_classes" description="create common_classes.tar" depends="util">
+		<mkdir dir="${target.dir}"/>
+		<delete dir="tarball" /> 
+		<mkdir dir="tarball" />
+		<exec executable="${basedir}/ant_package_common_classes.sh">
+			<arg line="${classes.dir}"/>
+		</exec>
+		<tar destfile="${target.dir}/common_classes.tar" basedir="tarball"/>
+		<delete dir="tarball" /> 
+	</target>
+	
+	<target name="slf4j_lib" description="create slf4j_lib.tar">
+		<mkdir dir="${target.dir}"/>
+		<tar destfile="${target.dir}/slf4j_lib.tar">
+			 <tarfileset dir="${base}/common/lib" >
+				<include name="slf4j-api-1.5.8.jar"/>
+				<include name="slf4j-log4j12-1.5.8.jar"/>
+			  </tarfileset>
+		</tar>
+	</target>
+	
+	<target name="create_cleanup_lib" description="create clean up scripts">
+		<mkdir dir="${target.dir}"/>
+		<shellscript shell="sh" dir="${base}">
+			##### Create cleanup_common_lib #####
+			sed -e 's/%%%FILES%%%/ log4j-*.jar  commons-logging-1*.jar/' "${base}/common/configuration/cleanup_template" > "${base}/target/cleanup_common_lib"
+			chmod a+x "${base}/target/cleanup_common_lib"
+
+			##### Create cleanup_server_lib #####
+			sed -e 's/%%%FILES%%%/ glite-security-trustmanager*.jar  glite-security-util-java*.jar  bcprov-*.jar/' "${base}/common/configuration/cleanup_template" > "${base}/target/cleanup_server_lib"
+			chmod a+x "${base}/target/cleanup_server_lib"
+
+			##### Create cleanup_slf4j_lib #####
+			sed -e 's/%%%FILES%%%/ slf4j-api*.jar  slf4j-log4j12*.jar/' "${base}/common/configuration/cleanup_template" > "${base}/target/cleanup_slf4j_lib"
+			chmod a+x "${base}/target/cleanup_slf4j_lib"
+		</shellscript>
+	</target>
+
+	<target name="gratia" description="generate gratia.tar file" depends="webapps, common_lib, server_lib, common_classes, slf4j_lib, create_cleanup_lib">
+		<mkdir dir="${target.dir}"/>
+		<shellscript shell="sh" dir="${base}">
+			sed -e "s/^gratia.services.version.*=.*/gratia.services.version = v${gratia.release}/"  -e "s/^gratia.reporting.version.*=.*/gratia.reporting.version = v${gratia.release}/" ${base}/common/configuration/service-configuration.properties > ${target.dir}/service-configuration.properties
+			sed -e "s/^gratia.services.version.*=.*/gratia.services.version = v$1/"  -e "s/^gratia.reporting.version.*=.*/gratia.reporting.version = v${gratia.release}/" ${base}/common/configuration/service-authorization.properties > ${target.dir}/service-authorization.properties
+		</shellscript>
+		<tar destfile="${target.dir}/gratia.tar">
+			<tarfileset dir="${target.dir}" >
+				<include name="gratia-release"/>
+			</tarfileset>
+			<tarfileset dir="${base}/common/configuration">
+				<include name="UserVoMap.*"/>
+				<include name="*properties"/>
+				<include name="*sql"/>
+				<include name="*.sh"/>
+				<include name="*.template"/>
+				<include name="configure-*"/>
+				<include name="update-gratia-local"/>
+				<include name="truststore"/>
+				<include name="keystore"/>
+				<include name="cleanup_misc"/>
+				<include name="voms-servers"/>
+			</tarfileset>
+			<tarfileset dir="${base}/common/configuration"> 
+				<include name="hibernate/*"/>
+				<exclude name=".svn"/>
+			</tarfileset>
+			<tarfileset dir="${base}/common/gratia-security/scripts">
+				<include name="voms-server.cron"/>
+			</tarfileset>
+			<tarfileset dir="${target.dir}">
+				<include name="cleanup_common_lib"/>
+				<include name="cleanup_server_lib"/>
+				<include name="cleanup_slf4j_lib"/>
+			</tarfileset>
+			
+			<!--Some files and directories need explicit permissions and hence, are being included, separately, below-->
+			
+			<tarfileset dir="${base}/common/gratia-security/scripts" mode="744" username="root" group="root">
+				<include name="voms-server.sh"/>
+			</tarfileset>
+			<tarfileset dir="${base}/reporting/gratia-reporting/WebContent/staticReports" mode="755" username="root" group="root">
+				<include name="staticReports"/>
+			</tarfileset>
+			<tarfileset dir="${base}/common/configuration" mode="700" username="root" group="root">
+				<include name="post-install"/>
+				<include name="install-database"/>
+				<include name="configure_tomcat"/>
+				<include name="configure_urlredirect"/>
+			</tarfileset>
+			<tarfileset dir="${target.dir}" mode="600" username="root" group="root">
+				<include name="service-configuration.properties"/>
+			</tarfileset>
+			<tarfileset dir="${target.dir}" mode="600" username="root" group="root">
+				<include name="service-authorization.properties"/>
+			</tarfileset>
+		</tar>
+		<delete file="${target.dir}/service-configuration.properties"/>
+		<delete file="${target.dir}/service-authorization.properties"/>
+	</target>
+	
+	<!-- ************************************************** -->
+
+	<target name="clean">
+		<exec executable="find">
+			<arg line='${base} -name "*class" -delete'/>
+		</exec>
+		<exec executable="find">
+			<arg line='${base} -name "*~" -delete'/>
+		</exec>
+		<exec executable="find">
+			<arg line='${base} -name "*#" -delete'/>
+		</exec>
+		<exec executable="find">
+			<arg line='${base} -name "#*" -delete'/>
+		</exec>
+		<delete file="${config.dir}/build-stored-procedures.sql"/>
+		<delete file="${config.dir}/build-stored-procedures_debug.sql"/>
+		<delete dir="${classes.dir}"/>
+		<delete dir="${target.dir}"/>
+		<delete dir="${output.dir}"/>
+	</target>
+</project>

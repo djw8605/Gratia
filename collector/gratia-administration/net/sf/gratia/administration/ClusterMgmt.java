@@ -21,198 +21,214 @@ import java.sql.*;
 
 import java.util.regex.*;
 
+// HK-New
+//import java.util.HashMap;
+//import java.util.Map;
+
 public class ClusterMgmt extends HttpServlet 
 {
-	XP xp = new XP();
-	//
-	// database related
-	//
-	String driver = "";
-	String url = "";
-	String user = "";
-	String password = "";
-	Connection connection;
-	Statement statement;
-	ResultSet resultSet;
-	//
-	// processing related
-	//
-	String html = "";
-	String row = "";
-	Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
-	Matcher m = null;
-	StringBuffer buffer = new StringBuffer();
-	//
-	// globals
-	//
-	boolean initialized = false;
-	//
-	// support
-	//
-	String dq = "\"";
-	String comma = ",";
-	String cr = "\n";
-	Hashtable table = new Hashtable();
-	String newname = "<New Cluster Name>";
+    // moved up 
+    XP xp = new XP();
+    //
+    // database related
+    //
+    // moved up 
+    String driver = "";
+    String url = "";
+    String user = "";
+    String password = "";
+    Connection connection;
 
-	public void init(ServletConfig config) throws ServletException 
-	{
+    Statement statement;
+    ResultSet resultSet;
+    //
+    // processing related
+    //
+
+    // moved up 
+    String html = "";
+    String row = "";
+    Pattern p = Pattern.compile("<tr>.*?</tr>",Pattern.MULTILINE + Pattern.DOTALL);
+    Matcher m = null;
+
+    StringBuffer buffer = new StringBuffer();
+    //
+    // globals
+    //
+    boolean initialized = false;
+    //
+    // support
+    //
+    String dq = "\"";
+    String comma = ",";
+    String cr = "\n";
+    String newname = "<New Cluster Name>";
+
+    // moved up 
+    Hashtable table = new Hashtable();
+
+    //public String getPagename() {
+    //return "vo.html";
+    //}
+
+    public void init(ServletConfig config) throws ServletException 
+    {
+    }
+
+    public void openConnection()
+    {
+	try
+	    {
+		Properties p = Configuration.getProperties();
+		driver = p.getProperty("service.mysql.driver");
+		url = p.getProperty("service.mysql.url");
+		user = p.getProperty("service.mysql.user");
+		password = p.getProperty("service.mysql.password");
+	    }
+	catch (Exception ignore)
+	    {
+	    }
+	try
+	    {
+		Class.forName(driver).newInstance();
+		connection = DriverManager.getConnection(url,user,password);
+	    }
+	catch (Exception e)
+	    {
+		e.printStackTrace();
+	    }
+    }
+
+    public void closeConnection()
+    {
+	try
+	    {
+		connection.close();
+	    }
+	catch (Exception e)
+	    {
+		e.printStackTrace();
+	    }
+    }
+    
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+	throws ServletException, IOException {
+	if (false) { // Deactivated 2009/09/30 CG
+	    if (LoginChecker.checkLogin(request, response)) {
+		openConnection();
+		table = new Hashtable();
+		setup(request);
+		process();
+		response.setContentType("text/html");
+		response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+		response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+		request.getSession().setAttribute("table",table);
+		PrintWriter writer = response.getWriter();
+		writer.write(html);
+		writer.flush();
+		writer.close();
+		closeConnection();
+	    }
 	}
-
-	public void openConnection()
-	{
-		try
-		{
-			Properties p = Configuration.getProperties();
-			driver = p.getProperty("service.mysql.driver");
-			url = p.getProperty("service.mysql.url");
-			user = p.getProperty("service.mysql.user");
-			password = p.getProperty("service.mysql.password");
-		}
-		catch (Exception ignore)
-		{
-		}
-		try
-		{
-			Class.forName(driver).newInstance();
-			connection = DriverManager.getConnection(url,user,password);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+    }
+    
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+	throws ServletException, IOException {
+	if (false) { // Deactivated 2009/09/30 CG
+	    if (LoginChecker.checkLogin(request, response)) {
+		openConnection();
+		table = (Hashtable) request.getSession().getAttribute("table");
+		update(request);
+		closeConnection();
+		response.sendRedirect("vo.html");
+	    }
 	}
-
-	public void closeConnection()
-	{
-		try
-		{
-			connection.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
-      if (false) { // Deactivated 2009/09/30 CG
-          if (LoginChecker.checkLogin(request, response)) {
-              openConnection();
-              table = new Hashtable();
-              setup(request);
-              process();
-              response.setContentType("text/html");
-              response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-              response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-              request.getSession().setAttribute("table",table);
-              PrintWriter writer = response.getWriter();
-              writer.write(html);
-              writer.flush();
-              writer.close();
-              closeConnection();
-          }
-      }
-	}
-
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
-      if (false) { // Deactivated 2009/09/30 CG
-          if (LoginChecker.checkLogin(request, response)) {
-              openConnection();
-              table = (Hashtable) request.getSession().getAttribute("table");
-              update(request);
-              closeConnection();
-              response.sendRedirect("vo.html");
-          }
-      }
-  }
-
-	public void setup(HttpServletRequest request) throws IOException
-	{
-		html = xp.get(request.getRealPath("/") + "cluster.html");
-		m = p.matcher(html);
-		while (m.find())
-		{
-			String temp = m.group();
-			if (temp.indexOf("#index#") > 0)
-			{
-				row = temp;
-				break;
-			}
-		}
-	}
-
-	public void process()
-	{
-		int index = 0;
-		String command = "select clusterid, name from Cluster order by name";
-		buffer = new StringBuffer();
-
-		try
-		{
-			statement = connection.prepareStatement(command);
-			resultSet = statement.executeQuery(command);
-
-			while(resultSet.next())
-			{
-				String newrow = new String(row);
-				newrow = xp.replaceAll(newrow,"#index#","" + index);
-				newrow = xp.replace(newrow,"#clusterid#","" + resultSet.getInt(1));
-				newrow = xp.replace(newrow,"#name#",resultSet.getString(2));
-				table.put("index:" + index,"" + index);
-				table.put("clusterid:" + index,resultSet.getString(1));
-				table.put("name:" + index,resultSet.getString(2));
-				index++;
-				buffer.append(newrow);
-			}
-			resultSet.close();
-			statement.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		for (int j = 0; j < 5; j++)
-		{
+    }
+    
+    public void setup(HttpServletRequest request) throws IOException
+    {
+	html = xp.get(request.getRealPath("/") + "cluster.html");
+	m = p.matcher(html);
+	while (m.find())
+	    {
+		String temp = m.group();
+		if (temp.indexOf("#index#") > 0)
+		    {
+			row = temp;
+			break;
+		    }
+	    }
+    }
+    
+    public void process()
+    {
+	int index = 0;
+	String command = "select clusterid, name from Cluster order by name";
+	buffer = new StringBuffer();
+	
+	try
+	    {
+		statement = connection.prepareStatement(command);
+		resultSet = statement.executeQuery(command);
+		
+		while(resultSet.next())
+		    {
 			String newrow = new String(row);
 			newrow = xp.replaceAll(newrow,"#index#","" + index);
-			newrow = xp.replace(newrow,"#name#",newname);
+			newrow = xp.replace(newrow,"#clusterid#","" + resultSet.getInt(1));
+			newrow = xp.replace(newrow,"#name#",resultSet.getString(2));
 			table.put("index:" + index,"" + index);
-			table.put("name:" + index,newname);
+			table.put("clusterid:" + index,resultSet.getString(1));
+			table.put("name:" + index,resultSet.getString(2));
 			index++;
 			buffer.append(newrow);
-		}
-		html = xp.replace(html,row,buffer.toString());
-	}
-
-	public void update(HttpServletRequest request)
-	{
-		int index;
-		String key = "";
-		String oldvalue = "";
-		String newvalue = "";
-
-		for (index = 0; index < 1000; index++)
-		{
-			key = "index:" + index;
-			oldvalue = (String) table.get(key);
-			newvalue = (String) request.getParameter(key);
-			if (oldvalue == null)
-				break;
-			key = "name:" + index;
-			oldvalue = (String) table.get(key);
-			newvalue = (String) request.getParameter(key);
-			if (oldvalue.equals(newvalue))
-				continue;
-			if (oldvalue.equals(newname))
-          insert(index, request);
-			else
-          update(index, request);
-		}
-	}
-
+		    }
+		resultSet.close();
+		statement.close();
+	    }
+	catch (Exception e)
+	    {
+		e.printStackTrace();
+	    }
+	for (int j = 0; j < 5; j++)
+	    {
+		String newrow = new String(row);
+		newrow = xp.replaceAll(newrow,"#index#","" + index);
+		newrow = xp.replace(newrow,"#name#",newname);
+		table.put("index:" + index,"" + index);
+		table.put("name:" + index,newname);
+		index++;
+		buffer.append(newrow);
+	    }
+	html = xp.replace(html,row,buffer.toString());
+    }
+    
+    public void update(HttpServletRequest request)
+    {
+	int index;
+	String key = "";
+	String oldvalue = "";
+	String newvalue = "";
+	
+	for (index = 0; index < 1000; index++)
+	    {
+		key = "index:" + index;
+		oldvalue = (String) table.get(key);
+		newvalue = (String) request.getParameter(key);
+		if (oldvalue == null)
+		    break;
+		key = "name:" + index;
+		oldvalue = (String) table.get(key);
+		newvalue = (String) request.getParameter(key);
+		if (oldvalue.equals(newvalue))
+		    continue;
+		if (oldvalue.equals(newname))
+		    insert(index, request);
+		else
+		    update(index, request);
+	    }
+    }
+    
     public void update(int index, HttpServletRequest request)	{
         String command = "update VO set VOName = ? where VOid = ?;";
         PreparedStatement statement = null;
