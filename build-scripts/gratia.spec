@@ -19,8 +19,11 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildArch: noarch
 Summary: Gratia OSG accounting system
 Group: Applications/System
-Requires: java
+Requires: java7
 Requires: jpackage-utils
+# ensure these are present, from jpackage-utils or missing-java-1.7.0-dirs
+Requires: /usr/lib/java-1.7.0
+Requires: /usr/share/java-1.7.0
 #Requires: jsvc 
 %if 0%{?rhel} < 6
 Requires: fetch-crl3
@@ -42,27 +45,19 @@ Requires: grid-certificates
 # and not just the JDK which happens to provide it, but not in the right spot. 
 Requires: /usr/share/java/xml-commons-apis.jar
 
-%if 0%{?rhel} < 6
-BuildRequires: java-devel
+BuildRequires: java7-devel
 BuildRequires: jpackage-utils
-%endif
-
-%if 0%{?rhel} < 6
-%endif
-
-%if 0%{?rhel} == 6
-# Explicitly require these to avoid yum using gcj to satisfy the java-devel requirement.
-BuildRequires: jdk
-BuildRequires: java-1.6.0-sun-compat
-%endif
 
 %package reporting-web 
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildArch: noarch
 Summary: Gratia OSG reporting service 
 Group: Applications/System
-Requires: java
+Requires: java7
 Requires: jpackage-utils
+# ensure these are present, from jpackage-utils or missing-java-1.7.0-dirs
+Requires: /usr/lib/java-1.7.0
+Requires: /usr/share/java-1.7.0
 #Requires: jsvc 
 %if 0%{?rhel} < 6
 Requires: fetch-crl3 
@@ -80,19 +75,8 @@ Requires: osg-version
 # and not just the JDK which happens to provide it, but not in the right spot. 
 Requires: /usr/share/java/xml-commons-apis.jar
 
-%if 0%{?rhel} < 6
-BuildRequires: java-devel
+BuildRequires: java7-devel
 BuildRequires: jpackage-utils
-%endif
-
-%if 0%{?rhel} < 6
-%endif
-
-%if 0%{?rhel} == 6
-# Explicitly require these to avoid yum using gcj to satisfy the java-devel requirement.
-BuildRequires: jdk
-BuildRequires: java-1.6.0-sun-compat
-%endif
 
 %define _webapps /var/lib/%_tomcat/webapps
 
@@ -357,21 +341,34 @@ fi
 
 %changelog
 * Tue Nov 05 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.11-1
-pre-production release:
-ant build
-fixes for Logging and Admin Interface (GRATIA-512)
+- pre-production release:
+- ant build
+- fixes for Logging and Admin Interface (GRATIA-512)
+
+* Fri Aug 09 2013 Matyas Selmeci <matyas@cs.wisc.edu> - 1.13.10-1.1
+- rebuild with Java 7
+
 * Tue May 14 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.10-1
 pre-proudction release, add verify not for configuration files.
 Hyunwoo fixes for SiteMgmt.java
+
+* Tue May 07 2013 Carl Edquist <edquist@cs.wisc.edu> - 1.13.9-7
+- Require missing java dir names instead of workaround package
+
+* Wed Mar 27 2013 Carl Edquist <edquist@cs.wisc.edu> - 1.13.9-6
+- Merge fetch-crl changes into upcoming
+
+* Tue Mar 26 2013 Carl Edquist <edquist@cs.wisc.edu> - 1.13.9-5
+- Workaround: Require missing-java-1.7.0-dirs in el5
 
 * Tue Mar 05 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9-4
 fetch-crl3 is required for sl5
 
 * Mon Mar 04 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9-3
-has to change rpm version so will not conflict with koji release 
-
-* Mon Mar 04 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9-2
 added fetch-crl, fetch-crl3 dependencies 
+
+* Tue Feb 26 2013 Carl Edquist <edquist@cs.wisc.edu> - 1.13.9-2
+- Updates to build with OpenJDK 7; require java7-devel + jpackage-utils
 
 * Mon Feb 11 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.9-1
 Merged fermi branch and trunk; Changed version to 1.13.9 and rpm package to 1, according to OSG ST reqs
