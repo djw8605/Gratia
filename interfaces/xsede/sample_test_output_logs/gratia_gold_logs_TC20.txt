@@ -1,0 +1,5 @@
+[25100] [             main.py:  92] 2013-09-13 14:50:09,340   DEBUG:  Logger has been configured
+[25100] [          locking.py:  56] 2013-09-13 14:50:09,340   DEBUG:  Trying to acquire lock /tmp/gratia-gold-lock.txt.
+[25100] [          locking.py:  76] 2013-09-13 14:50:09,340   DEBUG:  Successfully acquired lock /tmp/gratia-gold-lock.txt.
+[25100] [             main.py: 137] 2013-09-13 14:50:09,341   ERROR:  Caught an exception and the detail is: 
+"'getpwnam(): name not found: srini2'" Exiting Now !

@@ -1,0 +1,48 @@
+[25185] [             main.py:  92] 2013-09-13 14:54:17,993   DEBUG:  Logger has been configured
+[25185] [          locking.py:  56] 2013-09-13 14:54:17,993   DEBUG:  Trying to acquire lock /tmp/gratia-gold-lock.txt.
+[25185] [          locking.py:  76] 2013-09-13 14:54:17,994   DEBUG:  Successfully acquired lock /tmp/gratia-gold-lock.txt.
+[25185] [GenericRulesModule.py:  43] 2013-09-13 14:54:17,995   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_rules.csv
+[25185] [GenericRulesModule.py:  64] 2013-09-13 14:54:17,996   DEBUG:  rulesfile length is: 6
+[25185] [GenericRulesModule.py:  66] 2013-09-13 14:54:17,996   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*MCB.*', 'TG-MCB090174', 'sjha', '2013-08-10', ' 7/10/2012', '3/31/2014']
+[25185] [GenericRulesModule.py:  66] 2013-09-13 14:54:17,996   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*', 'Fermi-Staff', 'srini', '', ' 7/10/2012', '3/31/2014']
+[25185] [GenericRulesModule.py:  66] 2013-09-13 14:54:17,996   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*OSG.*', 'OSG-Staff', 'rynge', '', ' 7/10/2012', '3/31/2014']
+[25185] [GenericRulesModule.py:  66] 2013-09-13 14:54:17,997   DEBUG:  rulesfile row is: ['submit1.bioinformatics.vt.edu', '', '', '', '', '', '']
+[25185] [GenericRulesModule.py:  66] 2013-09-13 14:54:17,997   DEBUG:  rulesfile row is: ['iplant-condor.tacc.utexas.edu', '', '', '', '', '', '']
+[25185] [GenericRulesModule.py:  66] 2013-09-13 14:54:17,997   DEBUG:  rulesfile row is: ['workflow.isi.edu', '', '', '', '', '']
+[25185] [GenericRulesModule.py:  43] 2013-09-13 14:54:17,997   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_blacklist.csv
+[25185] [GenericRulesModule.py:  64] 2013-09-13 14:54:17,998   DEBUG:  blacklist length is: 3
+[25185] [GenericRulesModule.py:  66] 2013-09-13 14:54:17,998   DEBUG:  blacklist row is: ['submit1.bioinformatics.vt.edu', '.*']
+[25185] [GenericRulesModule.py:  66] 2013-09-13 14:54:17,998   DEBUG:  blacklist row is: ['iplant-condor.tacc.utexas.edu', '.*']
+[25185] [GenericRulesModule.py:  66] 2013-09-13 14:54:17,999   DEBUG:  blacklist row is: ['workflow.isi.edu', '.*']
+[25185] [             main.py: 154] 2013-09-13 14:54:17,999   DEBUG:  blacklist_file_exists set to: True
+[25185] [GenericRulesModule.py: 165] 2013-09-13 14:54:17,999   DEBUG:  blacklist hosts_list is: ['submit1.bioinformatics.vt.edu', 'iplant-condor.tacc.utexas.edu', 'workflow.isi.edu']
+[25185] [GenericRulesModule.py: 166] 2013-09-13 14:54:18,000   DEBUG:  blacklist patterns_list is: []
+[25185] [GenericRulesModule.py:  43] 2013-09-13 14:54:18,000   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_whitelist.csv
+[25185] [GenericRulesModule.py:  64] 2013-09-13 14:54:18,001   DEBUG:  whitelist length is: 1
+[25185] [GenericRulesModule.py:  66] 2013-09-13 14:54:18,001   DEBUG:  whitelist row is: ['osg-xsede.grid.iu.edu', '.*']
+[25185] [             main.py: 163] 2013-09-13 14:54:18,001   DEBUG:  whitelist_file_exists set to: True
+[25185] [GenericRulesModule.py: 165] 2013-09-13 14:54:18,001   DEBUG:  whitelist hosts_list is: ['osg-xsede.grid.iu.edu']
+[25185] [GenericRulesModule.py: 166] 2013-09-13 14:54:18,002   DEBUG:  whitelist patterns_list is: []
+[25185] [             main.py: 108] 2013-09-13 14:54:18,002   DEBUG:  approved_hosts list is: ['gw68.quarry.iu.teragrid.org']
+[25185] [ QuarantineModule.py:  27] 2013-09-13 14:54:18,002   DEBUG:  quarantine directory is: /cloud/login/srini/gratia_gold_quarantine_directory
+
+[25185] [       HostModule.py:  60] 2013-09-13 14:54:18,003   DEBUG:  host: gw68.quarry.iu.teragrid.org host_regex_index_dict key is: .*MCB.* and value is: 0
+[25185] [GenericRulesModule.py:  86] 2013-09-13 14:54:18,003   DEBUG:  rules_row_index: 0 host: gw68.quarry.iu.teragrid.orgrules_row[1]: .*MCB.* rules_row_index: 0
+[25185] [GenericRulesModule.py:  82] 2013-09-13 14:54:18,003   DEBUG:  host: <gratia_gold.HostModule.Host object at 0x2b57bb1d4410> catch_all_re_defined_for_host is: True
+[25185] [GenericRulesModule.py:  83] 2013-09-13 14:54:18,003   DEBUG:  host: <gratia_gold.HostModule.Host object at 0x2b57bb1d4410>catch_all_re_index_for_host is: 1
+[25185] [       HostModule.py:  60] 2013-09-13 14:54:18,004   DEBUG:  host: gw68.quarry.iu.teragrid.org host_regex_index_dict key is: .*MCB.* and value is: 0
+[25185] [       HostModule.py:  60] 2013-09-13 14:54:18,004   DEBUG:  host: gw68.quarry.iu.teragrid.org host_regex_index_dict key is: .*OSG.* and value is: 2
+[25185] [GenericRulesModule.py:  86] 2013-09-13 14:54:18,004   DEBUG:  rules_row_index: 2 host: gw68.quarry.iu.teragrid.orgrules_row[1]: .*OSG.* rules_row_index: 2
+[25185] [       HostModule.py:  72] 2013-09-13 14:54:18,004   DEBUG:  str(self.hostname) is: gw68.quarry.iu.teragrid.org
+[25185] [       HostModule.py:  73] 2013-09-13 14:54:18,004   DEBUG:  str(whiteList.GetHostsList()) is: ['osg-xsede.grid.iu.edu']
+[25185] [       HostModule.py:  78] 2013-09-13 14:54:18,005   DEBUG:  gw68.quarry.iu.teragrid.org not in ['osg-xsede.grid.iu.edu']
+[25185] [       HostModule.py:  81] 2013-09-13 14:54:18,005   DEBUG:  hostname is: gw68.quarry.iu.teragrid.org isWhiteListed is: False
+[25185] [       HostModule.py:  87] 2013-09-13 14:54:18,005   DEBUG:  probename is: condor:gw68.quarry.iu.teragrid.org
+[25185] [           gratia.py: 162] 2013-09-13 14:54:18,014   DEBUG:  In initialize_txn method, probename is:condor:gw68.quarry.iu.teragrid.org
+[25185] [           gratia.py: 165] 2013-09-13 14:54:18,116   DEBUG:  cursor.fetchone row is:(938352682L, 1138773628L)
+[25185] [           gratia.py: 173] 2013-09-13 14:54:18,116   DEBUG:  minimum_dbid: 938352682 maximum_dbid: 1138773628
+[25185] [      transaction.py: 100] 2013-09-13 14:54:18,117   DEBUG:  *****start_txn, returning 0 value for: condor:gw68.quarry.iu.teragrid.org*****
+[25185] [           gratia.py: 191] 2013-09-13 14:54:18,117   DEBUG:  txn[probename] is:938352682
+[25185] [       HostModule.py:  94] 2013-09-13 14:54:18,118   ERROR:  Caught an exception and the detail is: 
+"Unable to open: /cloud/login/srini/nonwritable_directory/txn_id for writing."
+ Exiting now !

@@ -1,0 +1,38 @@
+This script is meant to synchronize and summarize job records from the OSG
+Gratia system into GOLD.
+
+To make a release:
+
+Execute the following, as root on your machine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+yum install -y rpm-build
+yum install -y redhat-rpm-config
+yum install -y rpmdevtools
+
+Execute the following as yourself (i.e. ksu <your_user_name>)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cd ~ (Home directory)
+rpmdev-setuptree
+
+Update versions in gratia-gold/config/gratia-gold.spec and gratia-gold/setup.py
+Update the changelog in gratia-gold/config/gratia-gold.spec
+Update gratia-gold/MANIFEST.in
+cd gratia-gold
+Run "python setup.py sdist" to generate the source tarball in dist/
+Copy the source tarball into ~/rpmbuild/SOURCES
+Run "rpmbuild -ba config/gratia-gold.spec" to create the RPM.
+
+Additional Comments by Srini:
+1. Refer to gratia-gold/documents/GratiaGoldDesign.doc to understand the enhanced design.
+
+2. Refer to gratia-gold/documents/Gratia_Gold_Use_Cases.xlsx to understand the potential
+   use cases and sample configuration file values, for each.
+
+3. Refer to gratia-gold/sample_test_output_logs directory to view the test output 
+   from a sample run (file name corresponds to the use case number in the Gratia_Gold_Use_Cases.xlsx
+   document).
+
+4. To execute gratia-gold, following packages need to be installed (as root):
+   yum install -y python-simplejson
+   yum install -y MySQL-python
+   yum install -y python-dateutil

@@ -1,0 +1,20 @@
+[24865] [             main.py:  92] 2013-09-13 14:35:23,833   DEBUG:  Logger has been configured
+[24865] [          locking.py:  56] 2013-09-13 14:35:23,833   DEBUG:  Trying to acquire lock /tmp/gratia-gold-lock.txt.
+[24865] [          locking.py:  76] 2013-09-13 14:35:23,834   DEBUG:  Successfully acquired lock /tmp/gratia-gold-lock.txt.
+[24865] [GenericRulesModule.py:  43] 2013-09-13 14:35:23,835   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_rules.csv
+[24865] [GenericRulesModule.py:  64] 2013-09-13 14:35:23,836   DEBUG:  rulesfile length is: 6
+[24865] [GenericRulesModule.py:  66] 2013-09-13 14:35:23,836   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*MCB.*', 'TG-MCB090174', 'sjha', '2013-07-05 12:01:00', ' 7/10/2012', '3/31/2014']
+[24865] [GenericRulesModule.py:  66] 2013-09-13 14:35:23,836   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*', 'OSG-Staff', 'srini', '2013-05-29 18:01:00', ' 7/10/2012', '3/31/2014']
+[24865] [GenericRulesModule.py:  66] 2013-09-13 14:35:23,836   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*OSG.*', 'OSG-Staff', 'rynge', '2013-05-29 18:01:00', ' 7/10/2012', '3/31/2014']
+[24865] [GenericRulesModule.py:  66] 2013-09-13 14:35:23,837   DEBUG:  rulesfile row is: ['submit1.bioinformatics.vt.edu', '', '', '', '', '', '']
+[24865] [GenericRulesModule.py:  66] 2013-09-13 14:35:23,837   DEBUG:  rulesfile row is: ['iplant-condor.tacc.utexas.edu', '', '', '', '', '', '']
+[24865] [GenericRulesModule.py:  66] 2013-09-13 14:35:23,837   DEBUG:  rulesfile row is: ['workflow.isi.edu', '', '', '', '', '', '']
+[24865] [GenericRulesModule.py:  43] 2013-09-13 14:35:23,837   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_blacklist.csv
+[24865] [GenericRulesModule.py:  64] 2013-09-13 14:35:23,838   DEBUG:  blacklist length is: 4
+[24865] [GenericRulesModule.py:  66] 2013-09-13 14:35:23,838   DEBUG:  blacklist row is: ['submit1.bioinformatics.vt.edu']
+[24865] [GenericRulesModule.py:  66] 2013-09-13 14:35:23,839   DEBUG:  blacklist row is: ['iplant-condor.tacc.utexas.edu']
+[24865] [GenericRulesModule.py:  66] 2013-09-13 14:35:23,839   DEBUG:  blacklist row is: ['workflow.isi.edu', '.*']
+[24865] [GenericRulesModule.py:  66] 2013-09-13 14:35:23,839   DEBUG:  blacklist row is: ['gw68.quarry.iu.teragrid.org', '.*MCB.*', '.*OSG.*']
+[24865] [             main.py: 154] 2013-09-13 14:35:23,839   DEBUG:  blacklist_file_exists set to: True
+[24865] [GenericRulesModule.py: 168] 2013-09-13 14:35:23,839   ERROR:  Please check your blacklist file syntax!. Exception detail is: 
+"list index out of range" Exiting Now !

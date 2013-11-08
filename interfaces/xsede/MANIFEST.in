@@ -1,0 +1,8 @@
+include config/gratia-gold.cfg
+include config/gratia_gold_rules.csv
+include config/gratia_gold_blacklist.csv
+include config/gratia_gold_whitelist.csv
+include config/gratia-gold.cron
+include config/gratia-gold.logrotate
+include config/gratia-gold.spec
+include src/gratia-gold

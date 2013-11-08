@@ -1,0 +1,5 @@
+[25028] [             main.py:  92] 2013-09-13 14:46:37,079   DEBUG:  Logger has been configured
+[25028] [          locking.py:  56] 2013-09-13 14:46:37,079   DEBUG:  Trying to acquire lock /tmp/gratia-gold-lock.txt.
+[25028] [          locking.py:  76] 2013-09-13 14:46:37,079   DEBUG:  Successfully acquired lock /tmp/gratia-gold-lock.txt.
+[25028] [             main.py: 143] 2013-09-13 14:46:37,080   ERROR:  Caught an exception and the detail is: 
+"No option 'home' in section: 'gold'" Exiting Now !

@@ -1,0 +1,80 @@
+[25368] [             main.py:  92] 2013-09-13 15:01:32,448   DEBUG:  Logger has been configured
+[25368] [          locking.py:  56] 2013-09-13 15:01:32,448   DEBUG:  Trying to acquire lock /tmp/gratia-gold-lock.txt.
+[25368] [          locking.py:  76] 2013-09-13 15:01:32,448   DEBUG:  Successfully acquired lock /tmp/gratia-gold-lock.txt.
+[25368] [GenericRulesModule.py:  43] 2013-09-13 15:01:32,449   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_rules.csv
+[25368] [GenericRulesModule.py:  64] 2013-09-13 15:01:32,450   DEBUG:  rulesfile length is: 6
+[25368] [GenericRulesModule.py:  66] 2013-09-13 15:01:32,450   DEBUG:  rulesfile row is: ['submit1.bioinformatics.vt.edu', '', '', '', '', '', '']
+[25368] [GenericRulesModule.py:  66] 2013-09-13 15:01:32,451   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*MCB.*', 'TG-MCB090174', 'sjha', '', ' 7/10/2012', '3/31/2014']
+[25368] [GenericRulesModule.py:  66] 2013-09-13 15:01:32,451   DEBUG:  rulesfile row is: ['iplant-condor.tacc.utexas.edu', '', '', '', '', '', '']
+[25368] [GenericRulesModule.py:  66] 2013-09-13 15:01:32,451   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*OSG.*', 'OSG-Staff', 'rynge', '', ' 7/10/2012', '3/31/2014']
+[25368] [GenericRulesModule.py:  66] 2013-09-13 15:01:32,451   DEBUG:  rulesfile row is: ['workflow.isi.edu', '', '', '', '', '', '']
+[25368] [GenericRulesModule.py:  66] 2013-09-13 15:01:32,452   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*', 'OSG-Staff', 'srini', '', ' 7/10/2012', '3/31/2014']
+[25368] [GenericRulesModule.py:  43] 2013-09-13 15:01:32,452   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_blacklist.csv
+[25368] [GenericRulesModule.py:  64] 2013-09-13 15:01:32,453   DEBUG:  blacklist length is: 3
+[25368] [GenericRulesModule.py:  66] 2013-09-13 15:01:32,453   DEBUG:  blacklist row is: ['submit1.bioinformatics.vt.edu', '.*']
+[25368] [GenericRulesModule.py:  66] 2013-09-13 15:01:32,453   DEBUG:  blacklist row is: ['iplant-condor.tacc.utexas.edu', '.*']
+[25368] [GenericRulesModule.py:  66] 2013-09-13 15:01:32,453   DEBUG:  blacklist row is: ['workflow.isi.edu', '.*']
+[25368] [             main.py: 154] 2013-09-13 15:01:32,453   DEBUG:  blacklist_file_exists set to: True
+[25368] [GenericRulesModule.py: 165] 2013-09-13 15:01:32,454   DEBUG:  blacklist hosts_list is: ['submit1.bioinformatics.vt.edu', 'iplant-condor.tacc.utexas.edu', 'workflow.isi.edu']
+[25368] [GenericRulesModule.py: 166] 2013-09-13 15:01:32,454   DEBUG:  blacklist patterns_list is: []
+[25368] [GenericRulesModule.py:  43] 2013-09-13 15:01:32,454   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_whitelist.csv
+[25368] [GenericRulesModule.py:  64] 2013-09-13 15:01:32,455   DEBUG:  whitelist length is: 1
+[25368] [GenericRulesModule.py:  66] 2013-09-13 15:01:32,455   DEBUG:  whitelist row is: ['osg-xsede.grid.iu.edu', '.*']
+[25368] [             main.py: 163] 2013-09-13 15:01:32,455   DEBUG:  whitelist_file_exists set to: True
+[25368] [GenericRulesModule.py: 165] 2013-09-13 15:01:32,456   DEBUG:  whitelist hosts_list is: ['osg-xsede.grid.iu.edu']
+[25368] [GenericRulesModule.py: 166] 2013-09-13 15:01:32,456   DEBUG:  whitelist patterns_list is: []
+[25368] [             main.py: 108] 2013-09-13 15:01:32,456   DEBUG:  approved_hosts list is: ['gw68.quarry.iu.teragrid.org']
+[25368] [ QuarantineModule.py:  27] 2013-09-13 15:01:32,456   DEBUG:  quarantine directory is: /cloud/login/srini/gratia_gold_quarantine_directory
+
+[25368] [       HostModule.py:  60] 2013-09-13 15:01:32,457   DEBUG:  host: gw68.quarry.iu.teragrid.org host_regex_index_dict key is: .*MCB.* and value is: 1
+[25368] [GenericRulesModule.py:  86] 2013-09-13 15:01:32,457   DEBUG:  rules_row_index: 1 host: gw68.quarry.iu.teragrid.orgrules_row[1]: .*MCB.* rules_row_index: 1
+[25368] [       HostModule.py:  60] 2013-09-13 15:01:32,457   DEBUG:  host: gw68.quarry.iu.teragrid.org host_regex_index_dict key is: .*MCB.* and value is: 1
+[25368] [       HostModule.py:  60] 2013-09-13 15:01:32,458   DEBUG:  host: gw68.quarry.iu.teragrid.org host_regex_index_dict key is: .*OSG.* and value is: 3
+[25368] [GenericRulesModule.py:  86] 2013-09-13 15:01:32,458   DEBUG:  rules_row_index: 3 host: gw68.quarry.iu.teragrid.orgrules_row[1]: .*OSG.* rules_row_index: 3
+[25368] [GenericRulesModule.py:  82] 2013-09-13 15:01:32,458   DEBUG:  host: <gratia_gold.HostModule.Host object at 0x2b5496887410> catch_all_re_defined_for_host is: True
+[25368] [GenericRulesModule.py:  83] 2013-09-13 15:01:32,458   DEBUG:  host: <gratia_gold.HostModule.Host object at 0x2b5496887410>catch_all_re_index_for_host is: 5
+[25368] [       HostModule.py:  72] 2013-09-13 15:01:32,459   DEBUG:  str(self.hostname) is: gw68.quarry.iu.teragrid.org
+[25368] [       HostModule.py:  73] 2013-09-13 15:01:32,459   DEBUG:  str(whiteList.GetHostsList()) is: ['osg-xsede.grid.iu.edu']
+[25368] [       HostModule.py:  78] 2013-09-13 15:01:32,459   DEBUG:  gw68.quarry.iu.teragrid.org not in ['osg-xsede.grid.iu.edu']
+[25368] [       HostModule.py:  81] 2013-09-13 15:01:32,459   DEBUG:  hostname is: gw68.quarry.iu.teragrid.org isWhiteListed is: False
+[25368] [       HostModule.py:  87] 2013-09-13 15:01:32,460   DEBUG:  probename is: condor:gw68.quarry.iu.teragrid.org
+[25368] [           gratia.py: 162] 2013-09-13 15:01:32,469   DEBUG:  In initialize_txn method, probename is:condor:gw68.quarry.iu.teragrid.org
+[25368] [           gratia.py: 165] 2013-09-13 15:01:32,471   DEBUG:  cursor.fetchone row is:(938352682L, 1138773628L)
+[25368] [           gratia.py: 173] 2013-09-13 15:01:32,472   DEBUG:  minimum_dbid: 938352682 maximum_dbid: 1138773628
+[25368] [           gratia.py: 191] 2013-09-13 15:01:32,473   DEBUG:  txn[probename] is:952703300
+[25368] [      transaction.py: 117] 2013-09-13 15:01:32,474   DEBUG:  Updating ... {'condor:gw68.quarry.iu.teragrid.org': 952703300}
+[25368] [       HostModule.py:  96] 2013-09-13 15:01:32,475   DEBUG:  From Gratia, gratia_min_dbid is 938352682 gratia_max_dbid is 1138773628
+[25368] [GenericRulesModule.py:  97] 2013-09-13 15:01:32,476   DEBUG:  DetermineRulesMinDBID, self.rules_rows is: [['submit1.bioinformatics.vt.edu', '', '', '', '', '', ''], ['gw68.quarry.iu.teragrid.org', '.*MCB.*', 'TG-MCB090174', 'sjha', '', ' 7/10/2012', '3/31/2014'], ['iplant-condor.tacc.utexas.edu', '', '', '', '', '', ''], ['gw68.quarry.iu.teragrid.org', '.*OSG.*', 'OSG-Staff', 'rynge', '', ' 7/10/2012', '3/31/2014'], ['workflow.isi.edu', '', '', '', '', '', ''], ['gw68.quarry.iu.teragrid.org', '.*', 'OSG-Staff', 'srini', '', ' 7/10/2012', '3/31/2014']]
+[25368] [GenericRulesModule.py: 103] 2013-09-13 15:01:32,476   DEBUG:  starttime is: None
+[25368] [GenericRulesModule.py: 117] 2013-09-13 15:01:32,476   DEBUG:  rules_min_dbid is: 0
+[25368] [      transaction.py: 184] 2013-09-13 15:01:32,477   DEBUG:  condor:gw68.quarry.iu.teragrid.org found in the quarantine dictionary.
+[25368] [       HostModule.py: 128] 2013-09-13 15:01:32,478   DEBUG:  Starting curr_dbid = 952703300
+[25368] [       HostModule.py: 140] 2013-09-13 15:01:32,478   DEBUG:  Current transaction: probe=condor:gw68.quarry.iu.teragrid.org DBID=952703300
+[25368] [       HostModule.py: 149] 2013-09-13 15:01:32,478   DEBUG:  Query_And_Process: setting gratia_query_txn...
+[25368] [           gratia.py:  87] 2013-09-13 15:01:32,480   DEBUG:  Successfully connected to database ...
+[25368] [           gratia.py:  97] 2013-09-13 15:01:32,480   DEBUG:  quarantine_dbid is: 952802350. setting Range_id to 1
+[25368] [       HostModule.py: 164] 2013-09-13 15:01:32,496   DEBUG:  jobs.length is: 2
+[25368] [       HostModule.py: 166] 2013-09-13 15:01:32,496   DEBUG:  Processing job: {'endtime': '2012-12-10 00:00:00', 'processors': 1L, 'dbid': 952784665L, 'project_name': 'TG-MCB090174', 'queue': 'condor', 'charge': None, 'machine_name': 'gw68.quarry.iu.teragrid.org', 'resource_type': 'BatchPilot', 'wall_duration': 3.0, 'node_count': 1L, 'njobs': 1L, 'cpu': 0.0, 'vo_name': 'osg', 'user': 'luckow'}
+[25368] [       HostModule.py: 167] 2013-09-13 15:01:32,496   DEBUG:  Befor:DBID:952784665:Project_Name:TG-MCB090174:User:luckow:Hostname:gw68.quarry.iu.teragrid.org
+[25368] [       HostModule.py: 176] 2013-09-13 15:01:32,497   DEBUG:  dbid: 952784665 is less than the quarantined dbid: 952802350 and hence, skipping it, since it would have been charged before.
+[25368] [       HostModule.py: 187] 2013-09-13 15:01:32,497   DEBUG:  After:DBID:952784665:Project_Name:TG-MCB090174:User:luckow:Hostname:gw68.quarry.iu.teragrid.org:skip_job:True:job_status_valid:True
+[25368] [       HostModule.py: 193] 2013-09-13 15:01:32,497   DEBUG:  job['dbid']= 952784665. max_id= 952784665
+[25368] [       HostModule.py: 195] 2013-09-13 15:01:32,498   DEBUG:  Query_And_Process: txn[probename] is: 952784665
+[25368] [       HostModule.py: 166] 2013-09-13 15:01:32,498   DEBUG:  Processing job: {'endtime': '2012-12-10 00:00:00', 'processors': 1L, 'dbid': 952802350L, 'project_name': None, 'queue': 'condor', 'charge': None, 'machine_name': 'gw68.quarry.iu.teragrid.org', 'resource_type': 'BatchPilot', 'wall_duration': 19.0, 'node_count': 1L, 'njobs': 6L, 'cpu': 0.0, 'vo_name': 'osg', 'user': 'luckow'}
+[25368] [       HostModule.py: 167] 2013-09-13 15:01:32,498   DEBUG:  Befor:DBID:952802350:Project_Name:None:User:luckow:Hostname:gw68.quarry.iu.teragrid.org
+[25368] [       HostModule.py: 245] 2013-09-13 15:01:32,498   DEBUG:  Validate_Job method is called - job['dbid'] is: 952802350
+
+[25368] [       HostModule.py: 249] 2013-09-13 15:01:32,499   DEBUG:  quarantine_job_dbid is: 952802350
+
+[25368] [       HostModule.py: 250] 2013-09-13 15:01:32,499   DEBUG:  job['dbid'] is: 952802350
+
+[25368] [GenericRulesModule.py: 179] 2013-09-13 15:01:32,499   DEBUG:  patterns_blacklist is empty for host: gw68.quarry.iu.teragrid.org
+[25368] [       HostModule.py: 287] 2013-09-13 15:01:32,500   DEBUG:  job['project_name'] set to: OSG-Staff
+[25368] [       HostModule.py: 288] 2013-09-13 15:01:32,500   DEBUG:  job['user'] set to: srini
+[25368] [       HostModule.py: 335] 2013-09-13 15:01:32,500   DEBUG:  Validation succeeded for job['dbid']: 952802350
+[25368] [ QuarantineModule.py:  46] 2013-09-13 15:01:32,501   DEBUG:  Got quarantine_dictionary from disk: {'condor:gw68.quarry.iu.teragrid.org': 952802350}
+
+[25368] [ QuarantineModule.py:  47] 2013-09-13 15:01:32,502   DEBUG:  Got previous_query_dictionary from disk: {'condor:gw68.quarry.iu.teragrid.org': 952703300}
+
+[25368] [ QuarantineModule.py:  58] 2013-09-13 15:01:32,502   ERROR:  Caught an exception and the detail is: 
+"Unable to open: /cloud/login/srini/gratia_gold_quarantine_directory/qt_id for writing" Exiting Now !

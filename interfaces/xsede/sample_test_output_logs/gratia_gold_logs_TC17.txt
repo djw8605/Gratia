@@ -1,0 +1,43 @@
+[24920] [             main.py:  92] 2013-09-13 14:38:16,504   DEBUG:  Logger has been configured
+[24920] [          locking.py:  56] 2013-09-13 14:38:16,505   DEBUG:  Trying to acquire lock /tmp/gratia-gold-lock.txt.
+[24920] [          locking.py:  76] 2013-09-13 14:38:16,505   DEBUG:  Successfully acquired lock /tmp/gratia-gold-lock.txt.
+[24920] [GenericRulesModule.py:  43] 2013-09-13 14:38:16,506   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_rules.csv
+[24920] [GenericRulesModule.py:  64] 2013-09-13 14:38:16,507   DEBUG:  rulesfile length is: 6
+[24920] [GenericRulesModule.py:  66] 2013-09-13 14:38:16,507   DEBUG:  rulesfile row is: ['submit1.bioinformatics.vt.edu', '', '', '', '', '', '']
+[24920] [GenericRulesModule.py:  66] 2013-09-13 14:38:16,507   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*MCB.*', 'TG-MCB090174', 'sjha', '', ' 7/10/2012', '3/31/2014']
+[24920] [GenericRulesModule.py:  66] 2013-09-13 14:38:16,508   DEBUG:  rulesfile row is: ['iplant-condor.tacc.utexas.edu', '', '', '', '', '', '']
+[24920] [GenericRulesModule.py:  66] 2013-09-13 14:38:16,508   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*OSG.*', 'OSG-Staff', 'rynge', '', ' 7/10/2012', '3/31/2014']
+[24920] [GenericRulesModule.py:  66] 2013-09-13 14:38:16,508   DEBUG:  rulesfile row is: ['workflow.isi.edu', '', '', '', '', '', '']
+[24920] [GenericRulesModule.py:  66] 2013-09-13 14:38:16,508   DEBUG:  rulesfile row is: ['gw68.quarry.iu.teragrid.org', '.*', 'OSG-Staff', 'srini', '', ' 7/10/2012', '3/31/2014']
+[24920] [GenericRulesModule.py:  43] 2013-09-13 14:38:16,509   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_blacklist.csv
+[24920] [GenericRulesModule.py:  64] 2013-09-13 14:38:16,509   DEBUG:  blacklist length is: 3
+[24920] [GenericRulesModule.py:  66] 2013-09-13 14:38:16,510   DEBUG:  blacklist row is: ['submit1.bioinformatics.vt.edu', '.*']
+[24920] [GenericRulesModule.py:  66] 2013-09-13 14:38:16,510   DEBUG:  blacklist row is: ['iplant-condor.tacc.utexas.edu', '.*']
+[24920] [GenericRulesModule.py:  66] 2013-09-13 14:38:16,510   DEBUG:  blacklist row is: ['workflow.isi.edu', '.*']
+[24920] [             main.py: 154] 2013-09-13 14:38:16,510   DEBUG:  blacklist_file_exists set to: True
+[24920] [GenericRulesModule.py: 165] 2013-09-13 14:38:16,511   DEBUG:  blacklist hosts_list is: ['submit1.bioinformatics.vt.edu', 'iplant-condor.tacc.utexas.edu', 'workflow.isi.edu']
+[24920] [GenericRulesModule.py: 166] 2013-09-13 14:38:16,511   DEBUG:  blacklist patterns_list is: []
+[24920] [GenericRulesModule.py:  43] 2013-09-13 14:38:16,511   DEBUG:  File to be read is: /cloud/login/srini/gratia-gold/config/gratia_gold_whitelist.csv
+[24920] [GenericRulesModule.py:  64] 2013-09-13 14:38:16,512   DEBUG:  whitelist length is: 1
+[24920] [GenericRulesModule.py:  66] 2013-09-13 14:38:16,513   DEBUG:  whitelist row is: ['osg-xsede.grid.iu.edu', '.*']
+[24920] [             main.py: 163] 2013-09-13 14:38:16,513   DEBUG:  whitelist_file_exists set to: True
+[24920] [GenericRulesModule.py: 165] 2013-09-13 14:38:16,513   DEBUG:  whitelist hosts_list is: ['osg-xsede.grid.iu.edu']
+[24920] [GenericRulesModule.py: 166] 2013-09-13 14:38:16,513   DEBUG:  whitelist patterns_list is: []
+[24920] [             main.py: 108] 2013-09-13 14:38:16,514   DEBUG:  approved_hosts list is: ['gw68.quarry.iu.teragrid.org']
+[24920] [ QuarantineModule.py:  27] 2013-09-13 14:38:16,514   DEBUG:  quarantine directory is: /cloud/login/srini/gratia_gold_quarantine_directory
+
+[24920] [       HostModule.py:  60] 2013-09-13 14:38:16,514   DEBUG:  host: gw68.quarry.iu.teragrid.org host_regex_index_dict key is: .*MCB.* and value is: 1
+[24920] [GenericRulesModule.py:  86] 2013-09-13 14:38:16,514   DEBUG:  rules_row_index: 1 host: gw68.quarry.iu.teragrid.orgrules_row[1]: .*MCB.* rules_row_index: 1
+[24920] [       HostModule.py:  60] 2013-09-13 14:38:16,514   DEBUG:  host: gw68.quarry.iu.teragrid.org host_regex_index_dict key is: .*MCB.* and value is: 1
+[24920] [       HostModule.py:  60] 2013-09-13 14:38:16,515   DEBUG:  host: gw68.quarry.iu.teragrid.org host_regex_index_dict key is: .*OSG.* and value is: 3
+[24920] [GenericRulesModule.py:  86] 2013-09-13 14:38:16,515   DEBUG:  rules_row_index: 3 host: gw68.quarry.iu.teragrid.orgrules_row[1]: .*OSG.* rules_row_index: 3
+[24920] [GenericRulesModule.py:  82] 2013-09-13 14:38:16,515   DEBUG:  host: <gratia_gold.HostModule.Host object at 0x2b8824888410> catch_all_re_defined_for_host is: True
+[24920] [GenericRulesModule.py:  83] 2013-09-13 14:38:16,515   DEBUG:  host: <gratia_gold.HostModule.Host object at 0x2b8824888410>catch_all_re_index_for_host is: 5
+[24920] [       HostModule.py:  72] 2013-09-13 14:38:16,516   DEBUG:  str(self.hostname) is: gw68.quarry.iu.teragrid.org
+[24920] [       HostModule.py:  73] 2013-09-13 14:38:16,516   DEBUG:  str(whiteList.GetHostsList()) is: ['osg-xsede.grid.iu.edu']
+[24920] [       HostModule.py:  78] 2013-09-13 14:38:16,516   DEBUG:  gw68.quarry.iu.teragrid.org not in ['osg-xsede.grid.iu.edu']
+[24920] [       HostModule.py:  81] 2013-09-13 14:38:16,516   DEBUG:  hostname is: gw68.quarry.iu.teragrid.org isWhiteListed is: False
+[24920] [       HostModule.py:  87] 2013-09-13 14:38:16,516   DEBUG:  probename is: condor:gw68.quarry.iu.teragrid.org
+[24920] [       HostModule.py:  94] 2013-09-13 14:38:16,523   ERROR:  Caught an exception and the detail is: 
+"Failed to connect to database. Following parameters were used to connect: {'passwd': 'reader', 'host': 'gr13x6.fnal.gov', 'db': 'gratia', 'user': 'reader', 'port': 3306}."
+ Exiting now !

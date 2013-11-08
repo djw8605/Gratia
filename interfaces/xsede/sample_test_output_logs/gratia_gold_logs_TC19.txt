@@ -1,0 +1,5 @@
+[25056] [             main.py:  92] 2013-09-13 14:47:33,972   DEBUG:  Logger has been configured
+[25056] [          locking.py:  56] 2013-09-13 14:47:33,972   DEBUG:  Trying to acquire lock /tmp/gratia-gold-lock.txt.
+[25056] [          locking.py:  76] 2013-09-13 14:47:33,972   DEBUG:  Successfully acquired lock /tmp/gratia-gold-lock.txt.
+[25056] [             main.py: 143] 2013-09-13 14:47:33,974   ERROR:  Caught an exception and the detail is: 
+"GOLD_HOME /cloud/login/srini2 does not exist!" Exiting Now !
