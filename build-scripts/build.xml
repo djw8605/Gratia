@@ -26,9 +26,9 @@
 		<!-- Example output is as follows:
 		Gratia release: v1.13-1 Build date: Wed Jun 12 14:35:11 CDT 2013 Build host: fermicloud331.fnal.gov Build path: /root/ant_build Builder: uid=0(root)
 		-->
-		<shellscript shell="sh" dir="${base}">
-			echo "Gratia release: ${gratia.release} Build date: `date` Build host: `hostname -f` Build path: ${base} Builder: `id |cut -d\" \" -f1`" > ${target.dir}/gratia-release
-		</shellscript>
+		<exec executable="${basedir}/ant_util.sh">
+			<arg line='update_gratia_release ${base} ${gratia.release} ${target.dir}'/>
+		</exec>
 	</target>
 	
 	<target name="util" description="compile gratia-util" depends="clean">
@@ -88,29 +88,9 @@
 	<target name="services" description="compile gratia-services" depends="util">
 		<!-- Create the build directory structure used by compile -->
 		<mkdir dir="${classes.dir}"/>
-		<shellscript shell="sh" dir="${base}"><!--Dynamically create a Versions.java file-->
-			echo ${base}
-			file=${base}/collector/gratia-services/net/sf/gratia/services/Versions.java
-			touch /var/tmp/versions.$$.java
-			echo "package net.sf.gratia.services;
-
-			public class Versions {
-			private static final String fgPackageVersionString = \""${gratia.release}"\";
-			public static String GetPackageVersionString() { return fgPackageVersionString; }
-			};" > /var/tmp/versions.$$.java
-
-			if [ ! -e $file ] ;  then
-			   mv /var/tmp/versions.$$.java $file
-			else
-			   diff $file /var/tmp/versions.$$.java > /dev/null
-			   result=$?
-			   if [ $result -eq 0 ] ; then
-			      rm /var/tmp/versions.$$.java
-			   else
-			      mv /var/tmp/versions.$$.java $file
-			   fi
-			fi
-		</shellscript>
+		<exec executable="${basedir}/ant_util.sh">
+			<arg line='create_versions_java ${base} collector'/>
+		</exec>
 		<!-- Compile the java code into ${classes.dir} -->
 		<javac srcdir="${base}/collector/gratia-services/" destdir="${classes.dir}"
            includes="net/sf/gratia/storage/*.java,net/sf/gratia/services/*.java">
@@ -142,29 +122,9 @@
 	</target>
 
 	<target name="birt-reporting" description=	"compile birt-reporting" depends="clean">
-		<shellscript shell="sh" dir="${base}"><!--Dynamically create a Versions.java file-->
-			file=${base}/reporting/gratia-reporting/src/net/sf/gratia/reporting/Versions.java
-			touch /var/tmp/versions.$$.java
-			echo "package net.sf.gratia.reporting;
-			
-			public class Versions {
-			private static final String fgPackageVersionString = \""${gratia.release}"\";
-			public static String GetPackageVersionString() { return fgPackageVersionString; }
-			};" > /var/tmp/versions.$$.java
-
-			if [ ! -e $file ] ;  then
-			   mv /var/tmp/versions.$$.java $file
-			else
-			   diff $file /var/tmp/versions.$$.java > /dev/null
-			   result=$?
-			   if [ $result -eq 0 ] ; then
-			      rm /var/tmp/versions.$$.java
-			   else
-			      mv /var/tmp/versions.$$.java $file
-			   fi
-			fi
-		</shellscript>
-		  
+	        <exec executable="${basedir}/ant_util.sh">
+	        	<arg line='create_versions_java ${base} reporting'/>
+	        </exec>
 		<!-- Create the build directory structure used by compile -->
 		<mkdir dir="${birt.reporting.dir}"/>
 		<mkdir dir="${target.dir}"/>
@@ -258,8 +218,8 @@
 		<delete file="${reporting.dir}/birt-v261.war"/>
 		<delete file="${reporting.dir}/test.rptdesign"/>
 		<delete file="${reporting.dir}/test1.rptdesign"/>
-		<exec executable="${basedir}/ant_edit_web_xml.sh">
-			<arg line='${reporting.dir}/WEB-INF'/>
+		<exec executable="${basedir}/ant_util.sh">
+			<arg line='edit_web_xml ${reporting.dir}/WEB-INF'/>
 		</exec>
 		<copy file="${base}/reporting/gratia-reporting/WebContent/urlrewrite.xml" todir="${reporting.dir}/WEB-INF"/>
 		<copy file="${target.dir}/gratiaReporting.jar" todir="${reporting.dir}/WEB-INF/lib"/>
@@ -281,23 +241,25 @@
 		</copy>	
 		<!--don't need urlrewrite.xml here , it is in WEB-INF-->
 		<delete file="${reporting.dir}/urlrewrite.xml"/>
-		<exec executable="cp">
-			<arg line='-R ${base}/reporting/gratia-reporting/WebContent/calendar ${reporting.dir}'/>
-		</exec>
-		<exec executable="cp">
-			<arg line='-R ${base}/reporting/gratia-reporting/WebContent/images ${reporting.dir}'/>
-		</exec>
-		<exec executable="cp">
-			<arg line='-R ${base}/reporting/gratia-reporting/WebContent/tooltip ${reporting.dir}'/>
-		</exec>
-		<!--Had to resort to shell copy below due to the wildcard character in the jar name. It wasn't working well with Ant cp task-->
-		<shellscript shell="sh" dir="${base}">
-			#####Execute Copy#####
-			cp -p ${base}/common/lib/mysql-connector-java-*-bin.jar ${reporting.dir}/WEB-INF/lib/.
-			cp -p ${base}/common/lib/mysql-connector-java-*-bin.jar ${reporting.dir}/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers/.
-			#####Find and Remove SVN directories#####
-			find ${reporting.dir} -depth -type d -name .svn -exec rm -rf {} \;
-		</shellscript>
+		<copy todir="${reporting.dir}">
+		      <fileset dir="${base}/reporting/gratia-reporting/WebContent/calendar"/>
+		      <fileset dir="${base}/reporting/gratia-reporting/WebContent/images"/>
+		      <fileset dir="${base}/reporting/gratia-reporting/WebContent/tooltip"/>
+		 </copy>
+		 <copy todir="${reporting.dir}/WEB-INF/lib">
+		      <fileset dir="${base}/common/lib/">
+		      	<include name="mysql-connector-java-*-bin.jar"/>
+		      </fileset>
+		 </copy>
+		 <copy todir="${reporting.dir}/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers">
+		 	<fileset dir="${base}/common/lib/">
+		        	<include name="mysql-connector-java-*-bin.jar"/>
+		        </fileset>
+		 </copy>
+		 <delete includeemptydirs="true">
+		     <fileset dir="${reporting.dir}" includes="**/.svn/" defaultexcludes="false"/>
+		 </delete>
+
 		<mkdir dir="${reporting.dir}/WEB-INF/classes/net/sf/gratia/administration"/>
 		<copy todir="${reporting.dir}/WEB-INF/classes/net/sf/gratia/administration">
 			<fileset dir="${classes.dir}/net/sf/gratia/administration">
@@ -450,8 +412,8 @@
 		<mkdir dir="${target.dir}"/>
 		<delete dir="tarball" /> 
 		<mkdir dir="tarball" />
-		<exec executable="${basedir}/ant_package_common_classes.sh">
-			<arg line="${classes.dir}"/>
+		<exec executable="${basedir}/ant_util.sh">
+			<arg line='package_common_classes ${classes.dir}'/>
 		</exec>
 		<tar destfile="${target.dir}/common_classes.tar" basedir="tarball"/>
 		<delete dir="tarball" /> 
@@ -469,27 +431,16 @@
 	
 	<target name="create_cleanup_lib" description="create clean up scripts">
 		<mkdir dir="${target.dir}"/>
-		<shellscript shell="sh" dir="${base}">
-			##### Create cleanup_common_lib #####
-			sed -e 's/%%%FILES%%%/ log4j-*.jar  commons-logging-1*.jar/' "${base}/common/configuration/cleanup_template" > "${base}/target/cleanup_common_lib"
-			chmod a+x "${base}/target/cleanup_common_lib"
-
-			##### Create cleanup_server_lib #####
-			sed -e 's/%%%FILES%%%/ glite-security-trustmanager*.jar  glite-security-util-java*.jar  bcprov-*.jar/' "${base}/common/configuration/cleanup_template" > "${base}/target/cleanup_server_lib"
-			chmod a+x "${base}/target/cleanup_server_lib"
-
-			##### Create cleanup_slf4j_lib #####
-			sed -e 's/%%%FILES%%%/ slf4j-api*.jar  slf4j-log4j12*.jar/' "${base}/common/configuration/cleanup_template" > "${base}/target/cleanup_slf4j_lib"
-			chmod a+x "${base}/target/cleanup_slf4j_lib"
-		</shellscript>
+		<exec executable="${basedir}/ant_util.sh">
+			<arg line='create_clean_up_scripts ${base}'/>
+		</exec>
 	</target>
 
 	<target name="gratia" description="generate gratia.tar file" depends="webapps, common_lib, server_lib, common_classes, slf4j_lib, create_cleanup_lib">
 		<mkdir dir="${target.dir}"/>
-		<shellscript shell="sh" dir="${base}">
-			sed -e "s/^gratia.services.version.*=.*/gratia.services.version = v${gratia.release}/"  -e "s/^gratia.reporting.version.*=.*/gratia.reporting.version = v${gratia.release}/" ${base}/common/configuration/service-configuration.properties > ${target.dir}/service-configuration.properties
-			sed -e "s/^gratia.services.version.*=.*/gratia.services.version = v$1/"  -e "s/^gratia.reporting.version.*=.*/gratia.reporting.version = v${gratia.release}/" ${base}/common/configuration/service-authorization.properties > ${target.dir}/service-authorization.properties
-		</shellscript>
+		<exec executable="${basedir}/ant_util.sh">
+			<arg line='set_service_properties ${base} ${gratia.release} ${target.dir}'/>
+		</exec>
 		<tar destfile="${target.dir}/gratia.tar">
 			<tarfileset dir="${target.dir}" >
 				<include name="gratia-release"/>
@@ -548,18 +499,12 @@
 	<!-- ************************************************** -->
 
 	<target name="clean">
-		<exec executable="find">
-			<arg line='${base} -name "*class" -delete'/>
-		</exec>
-		<exec executable="find">
-			<arg line='${base} -name "*~" -delete'/>
-		</exec>
-		<exec executable="find">
-			<arg line='${base} -name "*#" -delete'/>
-		</exec>
-		<exec executable="find">
-			<arg line='${base} -name "#*" -delete'/>
-		</exec>
+	        <delete>
+	              <fileset dir="${base}" includes="**/*.class"/>
+	              <fileset dir="${base}" includes="**/*~"/>
+	              <fileset dir="${base}" includes="**/*#"/>
+	              <fileset dir="${base}" includes="**/#*"/>
+	        </delete>
 		<delete file="${config.dir}/build-stored-procedures.sql"/>
 		<delete file="${config.dir}/build-stored-procedures_debug.sql"/>
 		<delete dir="${classes.dir}"/>

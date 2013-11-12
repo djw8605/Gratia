@@ -10,7 +10,6 @@ URL: http://sourceforge.net/projects/gratia/
 # svn export https://gratia.svn.sourceforge.net/svnroot/gratia/branches/dev/v1_10_rpm gratia-1.11
 # tar zcf gratia-1.11.tar.gz gratia-1.11
 Source0: gratia-%{version}.tar.gz
-BuildRequires: ant-contrib
 
 %description
 Gratia OSG accounting system
