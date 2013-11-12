@@ -9,6 +9,8 @@ import java.sql.*;
 import net.sf.gratia.storage.*;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
+
 
 public class NewProjectNameUpdate {
 
@@ -16,7 +18,16 @@ public class NewProjectNameUpdate {
    Statement statement = null;
    ResultSet resultSet = null;
 
-   public void check(Record rec, Session session) throws Exception {
+   public void check(final Record rec, Session session) throws Exception {
+
+       session.doWork(new Work() {
+               @Override
+                   public void execute(java.sql.Connection connection) throws SQLException {
+
+
+
+
+
      // John Weigand 8/9/12 - special note
      // The StringElement class (from the beginning of time in Gratia) appends
      // the ProjectNameDescription to the value if such a column exists.
@@ -45,7 +56,7 @@ public class NewProjectNameUpdate {
        return;
      }
 
-      java.sql.Connection connection = session.connection();
+     //java.sql.Connection connection = session.connection();
 
       String dq = "\"";
       String comma = ",";
@@ -86,7 +97,7 @@ public class NewProjectNameUpdate {
                   command + ", exception " + e);
             Logging.debug("Exception detail: ", e);
          }
-         throw new Exception("NewProjectNameUpdate: No Connection");
+         //throw new Exception("NewProjectNameUpdate: No Connection");
       }
       //
       // Otherwise create a new entry
@@ -113,7 +124,15 @@ public class NewProjectNameUpdate {
                   command + ", exception " + e);
             Logging.debug("Exception detail: ", e);
          }
-         throw new Exception("NewProjectNameUpdate: No Connection");
+         //throw new Exception("NewProjectNameUpdate: No Connection");
       }
+
+
+
+	       } // end of execute                                                                                                                                                                                             
+           }); // end of doWork( new Work() {                                                                                                                                                                                  
+
+
+
    }
 }

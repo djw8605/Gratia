@@ -9,6 +9,7 @@ import java.sql.*;
 import net.sf.gratia.storage.*;
 
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 
 public class NewVOUpdate {
 
@@ -16,7 +17,15 @@ public class NewVOUpdate {
    Statement statement = null;
    ResultSet resultSet = null;
 
-   public void check(Record rec, Session session) throws Exception {
+   public void check(final Record rec, Session session) throws Exception {
+
+       session.doWork(new Work() {
+               @Override
+                   public void execute(java.sql.Connection connection) throws SQLException {
+
+
+
+
      String voname;
      String reportablevoname;
      
@@ -33,7 +42,7 @@ public class NewVOUpdate {
        return;
      }
 
-      java.sql.Connection connection = session.connection();
+     //java.sql.Connection connection = session.connection();
 
       String dq = "\"";
       String comma = ",";
@@ -77,7 +86,7 @@ public class NewVOUpdate {
                   command + ", exception " + e);
             Logging.debug("Exception detail: ", e);
          }
-         throw new Exception("NewVOUpdate: No Connection");
+         //throw new Exception("NewVOUpdate: No Connection");
       }
       try {
          //
@@ -138,7 +147,16 @@ public class NewVOUpdate {
                   command + ", exception " + e);
             Logging.debug("Exception detail: ", e);
          }
-         throw new Exception("NewVOUpdate: No Connection");
+         //throw new Exception("NewVOUpdate: No Connection");
       }
+
+
+
+               } // end of execute
+           }); // end of doWork( new Work() {
+
+
+
+
    }
 }
