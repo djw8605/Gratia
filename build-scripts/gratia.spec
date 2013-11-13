@@ -76,6 +76,7 @@ Requires: /usr/share/java/xml-commons-apis.jar
 
 BuildRequires: java7-devel
 BuildRequires: jpackage-utils
+BuildRequires: ant 
 
 %define _webapps /var/lib/%_tomcat/webapps
 
@@ -91,8 +92,6 @@ Gratia web reporting service
 
 %build
 pushd build-scripts
-#sed -i 's|^version_default.*=*|version_default = v%{version}-%{release}|' Makefile
-#make
 ant -Dgratia.release='v%{version}-%{release}' -v
 popd
 
@@ -339,10 +338,11 @@ fi
 
 
 %changelog
-* Tue Nov 05 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.11-1
+* Wed Nov 13 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.11-1
 - pre-production release:
 - ant build
 - fixes for Logging and Admin Interface (GRATIA-512)
+- Hibernate4 upgrade
 
 * Fri Aug 09 2013 Matyas Selmeci <matyas@cs.wisc.edu> - 1.13.10-1.1
 - rebuild with Java 7
