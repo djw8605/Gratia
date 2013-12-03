@@ -56,29 +56,34 @@ function set_subselect {
   ,jur.CpuuserDuration
   ,jur.WallDuration
   ,IFNULL(jur.Processors,1) as Processors
-  ,round(((jur.CpuSystemDuration + jur.CpuUserDuration)/(IF(jur.WallDuration>0,jur.WallDuration,1) * IFNULL(jur.Processors,1)) * 100),2)  as CpuEfficiency
+  ,td.Value                 as CommittedTime
+  ,if(jur.WallDuration>0,round(((jur.CpuSystemDuration + jur.CpuUserDuration)/(jur.WallDuration * IFNULL(jur.Processors,1)) * 100),1),'Unknown')  as CpuEfficiency
+  ,if(jur.WallDuration=td.Value,'Same',if(td.Value>0,round(((jur.CpuSystemDuration + jur.CpuUserDuration)/(td.Value * IFNULL(jur.Processors,1)) * 100),1),'Unknown')) as CommittedEfficiency
 from trace               t
-    ,JobUsageRecord      jur
-    ,JobUsageRecord_Meta jurm
-    ,Probe               p
-    ,Site                s
-    ,VONameCorrection    voc
-    ,VO                  vo
+JOIN JobUsageRecord jur ON (
+      t.p1 = jur.dbid
+  and jur.ResourceType in ('Batch', 'BatchPilot', 'GridMonitor', 'RawCPU', 'Backfill')
+  and jur.Njobs        > 0
+  and jur.WallDuration > 0
+  and jur.EndTime >= \"$START_TIME\"
+  and jur.Endtime <  \"$END_TIME\"
+)
+JOIN JobUsageRecord_Meta jurm ON (jur.dbid = jurm.dbid)
+JOIN Probe p                  ON (jurm.ProbeName = p.probename)
+JOIN Site  s                  ON (p.siteid       = s.siteid)
+JOIN VONameCorrection voc     ON (
+     jur.ReportableVOName = voc.ReportableVOName
+ and jur.VOName           = voc.VOName
+)
+JOIN VO vo                    ON (voc.VOid = vo.VOid)
+LEFT JOIN TimeDuration td
+      ON (jur.dbid = td.dbid
+           and
+        td.type = 'CommittedTime')
 where t.eventtime >= \"$START_TIME\"
   and t.eventtime <  \"$END_TIME\"
   and procName   = 'add_JUR_to_summary'
   and t.sqlQuery like '%MasterSummaryData: CPU exceeds Wall%'
-  and t.p1                 = jur.dbid
-  and jur.ResourceType in ('Batch', 'BatchPilot', 'GridMonitor', 'RawCPU', 'Backfill')
-  and jur.Njobs        > 0
-  and jur.WallDuration > 0
-  and jur.dbid             = jurm.dbid
-  and jurm.ProbeName       = p.probename
-  and p.siteid             = s.siteid
-  and (jur.ReportableVOName = voc.ReportableVOName
-       and
-       jur.VOName          = voc.VOName )
-  and voc.VOid             = vo.VOid
 order by
    SiteName
   ,ProbeName
@@ -89,12 +94,8 @@ order by
   ,jur.dbid"
 }
 #----------------
-function find_probes {
+function find_totals {
   logit "
-#=========================================================
-#  Probes with efficiencies > $THRESHOLD 
-#  for $START_TIME to $END_TIME
-#=========================================================
 #
 # NOTE: The purpose of these queries is to go against the trace table
 # which now logs JobUsageRecords with efficiencies > 100%.
@@ -105,6 +106,117 @@ function find_probes {
 # sqlQuery:  WARNING: MasterSummaryData: CPU exceeds Wall: Njobs 1 
 #            WallDuration 0 Cores 6 Wall_w_Cores 0 
 #            CpuUserDuration 77777777 CpuSystemDuration 0
+#
+#=========================================================
+#  Totals for all jobs > ${THRESHOLD}% efficiency
+#  for $START_TIME to $END_TIME
+#=========================================================
+#"
+  cat >$SQLFILE <<EOF
+select
+  "Totals"                                as Period
+ ,sum(x.Njobs)                            as Jobs
+ ,round(sum(x.CpuSystemDuration)/3600,0)  as CpuSystemHrs
+ ,round(sum(x.CpuuserDuration)/3600,0)    as CpuUserHrs
+ ,round((sum(x.WallDuration * x.Processors))/3600,0) as WallHrs
+ ,round((sum((x.CpuSystemDuration + x.CpuUserDuration))/sum(if(x.WallDuration>0,x.WallDuration,1) * x.Processors)) * 100,0) as CpuEfficiency
+from (
+$SUBSELECT
+) x
+where x.CpuEfficiency > $THRESHOLD
+group by Period
+EOF
+  set_mysql_cmd "--table"
+  run_mysql  
+}
+
+#----------------
+function find_totals_all {
+  logit "
+#=========================================================
+#  Totals for all jobs  (any efficiency - VOProbeSummary)
+#  for $START_TIME to $END_TIME
+#=========================================================
+#"
+  cat >$SQLFILE <<EOF
+select
+  "Totals"                              as Period
+ ,sum(v.Njobs)                            as Jobs
+ ,round(sum(v.CpuSystemDuration)/3600,0)  as CpuSystemHrs
+ ,round(sum(v.CpuuserDuration)/3600,0)    as CpuUserHrs
+ ,round((sum(v.WallDuration))/3600,0)     as WallHrs
+ ,round((sum((v.CpuSystemDuration + v.CpuUserDuration))/sum(v.WallDuration)) * 100,0) as CpuEfficiency
+from VOProbeSummary v
+where v.EndTime >= "$START_TIME"
+  and v.EndTime <  "$END_TIME"
+  and v.ProbeName in ( select distinct(ProbeName) from ($SUBSELECT) x ) 
+group by Period
+EOF
+  set_mysql_cmd "--table"
+  run_mysql  
+}
+
+#--------------------------
+function find_site_totals {
+  logit "
+#=========================================================
+#  Site totals for all jobs > ${THRESHOLD}% efficiency
+#  for $START_TIME to $END_TIME
+#=========================================================
+#"
+  cat >$SQLFILE <<EOF
+select
+  x.SiteName                              as SiteName
+ ,sum(x.Njobs)                            as Jobs
+ ,round(sum(x.CpuSystemDuration)/3600,0)  as CpuSystemHrs
+ ,round(sum(x.CpuuserDuration)/3600,0)    as CpuUserHrs
+ ,round((sum(x.WallDuration * x.Processors))/3600,0) as WallHrs
+ ,round((sum((x.CpuSystemDuration + x.CpuUserDuration))/sum(if(x.WallDuration>0,x.WallDuration,1) * x.Processors)) * 100,0) as CpuEfficiency
+from (
+$SUBSELECT
+) x
+where x.CpuEfficiency > $THRESHOLD
+group by SiteName
+EOF
+  set_mysql_cmd "--table"
+  run_mysql  
+}
+
+#--------------------------
+function find_site_totals_all {
+  logit "
+#=========================================================
+#  Site totals for all jobs  (any efficiency - VOProbeSummary)
+#  for $START_TIME to $END_TIME
+#=========================================================
+#"
+  cat >$SQLFILE <<EOF
+select
+  SiteName                              as SiteName
+ ,sum(Njobs)                            as Jobs
+ ,round(sum(CpuSystemDuration)/3600,0)  as CpuSystemHrs
+ ,round(sum(CpuuserDuration)/3600,0)    as CpuUserHrs
+ ,round((sum(WallDuration))/3600,0)     as WallHrs
+ ,round((sum((CpuSystemDuration + CpuUserDuration))/sum(WallDuration)) * 100,0) as CpuEfficiency
+from VOProbeSummary v
+JOIN Probe p ON (v.ProbeName = p.probename)
+JOIN Site  s ON (p.siteid = s.siteid)
+where EndTime >= "$START_TIME"
+  and EndTime <  "$END_TIME"
+  and v.ProbeName in ( select distinct(ProbeName) from ($SUBSELECT) x ) 
+group by SiteName
+EOF
+  set_mysql_cmd "--table"
+  run_mysql  
+}
+#----------------
+#----------------
+function find_probe_totals {
+  logit "
+#=========================================================
+#  Probes with efficiencies > ${THRESHOLD}% efficiency
+#  for $START_TIME to $END_TIME
+#=========================================================
 #
 #--------------------------------------
 #-- summary by site/probe/vo/date   ---
@@ -136,7 +248,10 @@ group by
 EOF
   set_mysql_cmd "--table"
   run_mysql  
+}
 
+#----------------
+function find_jur_records {
   logit "   
 #----------------------------------------------------
 #  Distinct Probes with efficiencies > $THRESHOLD 
@@ -152,9 +267,6 @@ EOF
   set_mysql_cmd "--skip-column-names"
   run_mysql  
   PROBES="$(cat $TMPFILE |egrep -v '^#')" 
-}
-#----------------
-function find_jur_records {
   local main_logfile=$LOGFILE
   if [ -z "$PROBES" ];then
     logit;logit "No problem probes found."
@@ -185,15 +297,19 @@ select
  ,x.ResourceType                          as ResourceType
  ,x.dbid
  ,x.Njobs                           
- ,x.CpuSystemDuration 
- ,x.CpuUserDuration
- ,x.WallDuration
- ,x.Processors
- ,round(((x.CpuSystemDuration + x.CpuUserDuration)/(if(x.WallDuration>0,x.WallDuration,1) * x.Processors)) * 100,0) as CpuEfficiency
+ ,x.CpuSystemDuration                     as CpuSystem
+ ,x.CpuUserDuration                       as CpuUser
+ ,x.WallDuration                          as Wall
+ ,x.CommittedTime                         as Committed
+ ,x.Processors                            as Cores
+ ,x.CpuEfficiency                         as WallEff
+ ,x.CommittedEfficiency                   as CommittedEff
 from (
 $SUBSELECT
 ) x
-where x.CpuEfficiency > $THRESHOLD
+where (x.CpuEfficiency > $THRESHOLD
+          or 
+       x.CpuEfficiency = "Unknown")
   and x.ProbeName = "$PROBE"
 order by 
    SiteName
@@ -206,12 +322,44 @@ EOF
     set_mysql_cmd "--table"
     run_mysql 
     DBIDS="$(cat $TMPFILE | egrep -v '^#|^$' | awk -F'|' '{ if ( NR < 4 ) {next}; print $8}')"
+    get_jur_details
     create_del_summary_commands
     #-- Inserting sql comment characters into probe log file --
     #-- Doing this so entire file can be read in from stdin if needed --
     awk '{ if ($1 == "call") { print $0 } else {print "--",$0}}' $OUTPUTDIR/$LOGFILE >$OUTPUTDIR/$LOGFILE.tmp
     mv $OUTPUTDIR/$LOGFILE.tmp $OUTPUTDIR/$LOGFILE 
   done
+}
+#---------------------------------------
+function get_jur_details {
+  logit "
+-- ------------------------------------
+-- JobUsageRecord details for possible troubleshooting.
+-- JobsUsageRecords: $(echo $DBIDS | wc -w)
+-- ------------------------------------"
+  local inclause=""
+  for dbid in $DBIDS
+  do
+    inclause="$inclause $dbid,"
+  done
+  inclause="$inclause $dbid"
+  cat >$SQLFILE <<EOF
+select
+  GlobalJobId
+ ,StartTime
+ ,EndTime
+ ,dbid
+ ,LocalJobId
+ ,LocalUserId
+ ,Status
+ ,SubmitHost
+ ,Host
+from JobUsageRecord
+where dbid in ($inclause)
+order by GlobalJobId,EndTime
+EOF
+  set_mysql_cmd "--table"
+  run_mysql 
 }
 #---------------------------------------
 function create_del_summary_commands {
@@ -388,7 +536,11 @@ logit "
 #================================"
 validate_environ
 set_subselect
-find_probes 
+find_totals 
+find_totals_all
+find_site_totals
+find_site_totals_all
+find_probe_totals 
 find_jur_records 
 
 LOGFILE=analysis.log
