@@ -1,7 +1,7 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-	  "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
     
 <hibernate-mapping package= "net.sf.gratia.storage">
@@ -128,7 +128,7 @@
        <property name="Value" column="Host" type="text"/>
        <property name="Description" column="HostDescription" />
    </component>
-   <bag name="Disk" table="Disk" >
+   <bag name="Disk" >
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -139,7 +139,7 @@
           <property name="Description" />
        </composite-element>
    </bag>
-   <bag name="Memory" table="Memory" >
+   <bag name="Memory" >
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -150,7 +150,7 @@
           <property name="Description" />
        </composite-element>
    </bag>
-   <bag name="Swap" table="Swap" >
+   <bag name="Swap" >
        <key column="dbid"/>
        <composite-element class="net.sf.gratia.storage.ResourceElement">
           <property name="Value" />
@@ -161,7 +161,7 @@
           <property name="Description" />
        </composite-element>
    </bag>
-   <bag name="Network" table="Network" >
+   <bag name="Network" >
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -171,7 +171,7 @@
           <property name="Description" />
        </composite-element>
    </bag>
-   <bag name="TimeDuration" table="TimeDuration" >
+   <bag name="TimeDuration" >
        <key column="dbid"/>
        <composite-element class="DurationElement">
           <property name="Value"  />
@@ -179,7 +179,7 @@
           <property name="Type" />
        </composite-element>
    </bag>
-  <bag name="TimeInstant" table="TimeInstant" >
+  <bag name="TimeInstant" >
        <key column="dbid"/>
        <composite-element class="DateElement">
           <property name="Value"  />
@@ -187,7 +187,7 @@
           <property name="Type" />
        </composite-element>
    </bag>
-   <bag name="ServiceLevel" table="ServiceLevel" >
+   <bag name="ServiceLevel" >
        <key column="dbid"/>
        <composite-element class="StringElement">
           <property name="Value"  />
@@ -195,7 +195,7 @@
           <property name="Type" />
        </composite-element>
    </bag>
-   <bag name="PhaseResource" table="PhaseResource" >
+   <bag name="PhaseResource" >
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -204,7 +204,7 @@
           <property name="Description" />
        </composite-element>
    </bag>
-   <bag name="VolumeResource" table="VolumeResource" >
+   <bag name="VolumeResource" >
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -213,7 +213,7 @@
           <property name="Description" />
        </composite-element>
    </bag>
-   <bag name="ConsumableResource" table="ConsumableResource" >
+   <bag name="ConsumableResource" >
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -221,7 +221,7 @@
           <property name="Description" />
        </composite-element>
    </bag>
-   <bag name="Resource" table="Resource" >
+   <bag name="Resource" >
        <key column="dbid"/>
        <composite-element class="StringElement">
           <property name="Value" />
