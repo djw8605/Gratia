@@ -7,7 +7,6 @@ import java.sql.*;
 import net.sf.gratia.storage.*;
 
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 
 public class NewClusterUpdate {
 
@@ -31,12 +30,7 @@ public class NewClusterUpdate {
    * @throws Exception
    */
 
-  public synchronized void check(final Record rec, Session session) throws Exception {
-      session.doWork(new Work() {
-               @Override
-                   public void execute(java.sql.Connection connection) throws SQLException {
-
-
+  public synchronized void check(Record rec, Session session) throws Exception {
 
     // Only looking at compute element records
     if (!(rec instanceof ComputeElement)) {
@@ -46,7 +40,7 @@ public class NewClusterUpdate {
     ComputeElement record = (ComputeElement)rec;
     String clusterName = record.getCluster().getValue();
 
-    //java.sql.Connection connection = session.connection();
+    java.sql.Connection connection = session.connection();
 
     // If there is no cluster attached, we punt.
     if (clusterName == null) {
@@ -83,7 +77,7 @@ public class NewClusterUpdate {
             command + ", exception " + e);
         Logging.debug("Exception detail: ", e);
       }
-      //throw new Exception("NewClusterUpdate: No Connection");
+      throw new Exception("NewClusterUpdate: No Connection");
     }
     try {
       //
@@ -142,14 +136,7 @@ public class NewClusterUpdate {
             command + ", exception " + e);
         Logging.debug("Exception detail: ", e);
       }
-      //throw new Exception("NewClusterUpdate: No Connection");
+      throw new Exception("NewClusterUpdate: No Connection");
     }
-
-
-	       } // end of execute                                                                                                                                                                                             
-	  }); // end of doWork( new Work() {                                                                                                                                                                                  
-
-
-
   }
 }
