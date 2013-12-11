@@ -2,7 +2,7 @@ Name: gratia
 Summary: Gratia OSG accounting system
 Group: Applications/System
 Version: 1.13.12
-Release: 1%{?dist}
+Release: 1.1%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -338,7 +338,7 @@ fi
 
 
 %changelog
-* Wed Dec 11 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.12-1
+* Wed Dec 11 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.12-1.1
 - revert back hibernate4 modifications because of the problem with handling duplicate records
 
 * Wed Nov 13 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.11-1
