@@ -8,8 +8,8 @@ License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
 # Created by:
-# svn export https://gratia.svn.sourceforge.net/svnroot/gratia/branches/dev/v1_10_rpm gratia-1.11
-# tar zcf gratia-1.11.tar.gz gratia-1.11
+# svn export https://gratia.svn.sourceforge.net/svnroot/gratia/trunk gratia-1.14.0
+# tar zcf gratia-1.14.0.tar.gz gratia-1.14.0
 Source0: gratia-%{version}.tar.gz
 
 %description
@@ -47,6 +47,7 @@ Requires: /usr/share/java/xml-commons-apis.jar
 
 BuildRequires: java7-devel
 BuildRequires: jpackage-utils
+BuildRequires: ant
 
 
 %define _webapps /var/lib/%_tomcat/webapps
