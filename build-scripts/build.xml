@@ -87,7 +87,7 @@
 		<!-- Create the build directory structure used by compile -->
 		<mkdir dir="${classes.dir}"/>
 		<exec executable="${basedir}/ant_util.sh">
-			<arg line='create_versions_java ${base} collector'/>
+			<arg line='create_versions_java ${base} ${gratia-release}'/>
 		</exec>
 		<!-- Compile the java code into ${classes.dir} -->
 		<javac srcdir="${base}/collector/gratia-services/" destdir="${classes.dir}"
