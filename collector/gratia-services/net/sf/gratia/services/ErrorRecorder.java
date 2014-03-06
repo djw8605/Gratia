@@ -34,6 +34,7 @@ public class ErrorRecorder {
             }
             tx.commit();
             keepTrying = false;
+            HibernateWrapper.closeSession(session);
          } catch (Exception e) {
             HibernateWrapper.closeSession(session);
             if (!LockFailureDetector.detectAndReportLockFailure(e, nTries, "ErrorRecorder")) {
