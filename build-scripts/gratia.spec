@@ -1,8 +1,9 @@
 Name: gratia
 Summary: Gratia OSG accounting system
 Group: Applications/System
-Version: 1.13.12
-Release: 1.1%{?dist}
+#Version: 1.13.12
+Version: 1.14.0
+Release: 1%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -47,44 +48,12 @@ Requires: /usr/share/java/xml-commons-apis.jar
 BuildRequires: java7-devel
 BuildRequires: jpackage-utils
 
-%package reporting-web 
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-BuildArch: noarch
-Summary: Gratia OSG reporting service 
-Group: Applications/System
-Requires: java7
-Requires: jpackage-utils
-# ensure these are present, from jpackage-utils or missing-java-1.7.0-dirs
-Requires: /usr/lib/java-1.7.0
-Requires: /usr/share/java-1.7.0
-#Requires: jsvc 
-%if 0%{?rhel} < 6
-Requires: fetch-crl3 
-Requires: tomcat5
-%define _tomcat tomcat5
-%endif
-%if 0%{?rhel} == 6
-Requires: fetch-crl 
-Requires: tomcat6
-%define _tomcat tomcat6
-%endif
-
-Requires: osg-version
-# The following requirement makes sure we get the RPM that provides this,
-# and not just the JDK which happens to provide it, but not in the right spot. 
-Requires: /usr/share/java/xml-commons-apis.jar
-
-BuildRequires: java7-devel
-BuildRequires: jpackage-utils
-BuildRequires: ant 
 
 %define _webapps /var/lib/%_tomcat/webapps
 
 
 %description service
 %{summary}
-%description reporting-web
-Gratia web reporting service 
 
 %prep
 %setup -q -n gratia-%{version}
@@ -98,7 +67,7 @@ popd
 %install
 rm -rf $RPM_BUILD_ROOT
 
-for i in {administration,reporting,services,soap,registration,reports,servlets};
+for i in {administration,services,soap,registration,servlets};
 do
 echo $RPM_BUILD_ROOT%
 pwd
@@ -144,15 +113,15 @@ install -m 0644 conf/hibernate/* $RPM_BUILD_ROOT%{_datadir}/gratia/hibernate
 install -m 0644 conf/my-cnf-large-site.template $RPM_BUILD_ROOT%{_datadir}/gratia/my-cnf-large-site.template
 install -m 0644 conf/my-cnf.template $RPM_BUILD_ROOT%{_datadir}/gratia/my-cnf.template
 install -m 0644 conf/server.xml.template $RPM_BUILD_ROOT%{_datadir}/gratia/server.xml.template
-install -m 0755 conf/staticReports $RPM_BUILD_ROOT%{_datadir}/gratia/staticReports
-install -m 0644 conf/static-reports.cron.template $RPM_BUILD_ROOT%{_datadir}/gratia/static-reports.cron.template
 install -m 0755 conf/tomcat5.jsvc.initd.template $RPM_BUILD_ROOT%{_datadir}/gratia/tomcat5.jsvc.initd.template
 install -m 0755 conf/tomcat6.jsvc.initd.template $RPM_BUILD_ROOT%{_datadir}/gratia/tomcat6.jsvc.initd.template
-install -m 0755 conf/configure_urlredirect $RPM_BUILD_ROOT%{_datadir}/gratia/configure_urlredirect
-install -m 0644 conf/server.xml.noauth.template $RPM_BUILD_ROOT%{_datadir}/gratia/server.xml.noauth.template
+# not needed (only reports were unauthenticated):  install -m 0644 conf/server.xml.noauth.template $RPM_BUILD_ROOT%{_datadir}/gratia/server.xml.noauth.template
 install -m 0444 conf/gratia-release      $RPM_BUILD_ROOT%{_datadir}/gratia/gratia-release
-sed -i 's|^gratia.reporting.version.*=*|gratia.reporting.version = v%{version}-%{release}|' conf/service-configuration.properties
-sed -i 's|^gratia.reporting.version.*=*|gratia.reporting.version = v%{version}-%{release}|' conf/service-authorization.properties
+# Setting NULL instead of a release because reporting has been removed
+#sed -i 's|^gratia.reporting.version.*=*|gratia.reporting.version = v%{version}-%{release}|' conf/service-configuration.properties
+#sed -i 's|^gratia.reporting.version.*=*|gratia.reporting.version = v%{version}-%{release}|' conf/service-authorization.properties
+sed -i 's|^gratia.reporting.version.*=*|gratia.reporting.version = NULL|' conf/service-configuration.properties
+sed -i 's|^gratia.reporting.version.*=*|gratia.reporting.version = NULL|' conf/service-authorization.properties
 sed -i 's|^gratia.services.version.*=*|gratia.services.version = v%{version}-%{release}|'   conf/service-configuration.properties
 sed -i 's|^gratia.services.version.*=*|gratia.services.version = v%{version}-%{release}|'   conf/service-authorization.properties
 install -m 0600 conf/service-configuration.properties  $RPM_BUILD_ROOT%{_sysconfdir}/gratia/services/
@@ -171,7 +140,8 @@ rm -rf conf
 
 # Logs
 mkdir -p $RPM_BUILD_ROOT%{_var}/log/gratia-service
-touch $RPM_BUILD_ROOT%{_var}/log/gratia-service/gratia{,-rmi-servlet,-security,-administration,-registration,-reporting}.log
+#touch $RPM_BUILD_ROOT%{_var}/log/gratia-service/gratia{,-rmi-servlet,-security,-administration,-registration,-reporting}.log
+touch $RPM_BUILD_ROOT%{_var}/log/gratia-service/gratia{,-rmi-servlet,-security,-administration,-registration}.log
 
 # We need to get rid of log4j.jar files we have done in previous version
 %pre service
@@ -189,21 +159,6 @@ if [ $1 = 2 ]; then
 
 fi
 
-# We need to get rid of log4j.jar files we have done in previous version
-%pre reporting-web 
-if [ $1 = 2 ]; then
-  for d in `ls -1d %{_prefix}/share/%_tomcat/webapps/*/WEB-INF/lib`; do
-        if [ -f $d/log4j.jar ]; then
-                rm -f  $d/log4j.jar
-        fi
-  done
-  %if 0%{?rhel} < 6
-        if [ ! -f %{_prefix}/share/%_tomcat/common/lib/log4j.jar ]; then
-                ln -s %{_prefix}/share/java/log4j.jar %{_prefix}/share/%_tomcat/common/lib/log4j.jar
-        fi
-  %endif
-
-fi
 
 
 %files service
@@ -214,13 +169,11 @@ fi
 %{_datadir}/gratia/install-database
 %{_datadir}/gratia/configure_tomcat
 %{_datadir}/gratia/server.xml.template
+#%{_datadir}/gratia/server.xml.noauth.template
 %{_datadir}/gratia/tomcat5.jsvc.initd.template
 %{_datadir}/gratia/tomcat6.jsvc.initd.template
-%{_datadir}/gratia/configure_urlredirect
 %{_datadir}/gratia/my-cnf-large-site.template
 %{_datadir}/gratia/my-cnf.template
-%{_datadir}/gratia/staticReports
-%{_datadir}/gratia/static-reports.cron.template
 %{_datadir}/gratia/voms-server.sh
 %{_datadir}/gratia/gratia-release
 %{_sysconfdir}/cron.d/voms-server.cron
@@ -236,10 +189,6 @@ fi
 %verify(not md5 size mtime user) %{_sysconfdir}/gratia/services/service-configuration.properties
 %verify(not md5 size mtime user) %{_sysconfdir}/gratia/services/service-authorization.properties
 %verify(not md5 size mtime user) %{_sysconfdir}/gratia/services/log4j.properties
-%attr(0750,tomcat,tomcat) %dir %{_var}/lib/%_tomcat/webapps/gratia-reporting/logs
-%attr(0750,tomcat,tomcat) %dir %{_var}/lib/%_tomcat/webapps/gratia-reporting/WEB-INF/platform/configuration
-%attr(0750,tomcat,tomcat)  %{_var}/lib/%_tomcat/webapps/gratia-reporting/WEB-INF/server-config.wsdd
-%attr(0750,tomcat,tomcat) %dir %{_var}/lib/%_tomcat/webapps/gratia-reporting/documents
 %attr(0750,tomcat,tomcat) %dir %{_var}/log/gratia-service
 %ghost %{_var}/log/gratia-service/*.log
 %if 0%{?rhel} < 6
@@ -254,50 +203,14 @@ fi
 %{_prefix}/share/%_tomcat/lib/slf4j-log4j12-1.5.8.jar
 %endif
 
-%files reporting-web 
-%defattr(-,root,root,-)
-%{_datadir}/gratia/sql
-%{_datadir}/gratia/hibernate
-%{_datadir}/gratia/configure_tomcat
-%{_datadir}/gratia/server.xml.noauth.template
-%{_datadir}/gratia/tomcat5.jsvc.initd.template
-%{_datadir}/gratia/tomcat6.jsvc.initd.template
-%{_datadir}/gratia/staticReports
-%{_datadir}/gratia/static-reports.cron.template
-%{_datadir}/gratia/configure_urlredirect
-%{_datadir}/gratia/gratia-release
-%{_webapps}/gratia-reporting
-%{_webapps}/gratia-reports
-%dir %{_sysconfdir}/gratia/services
-%attr(0640,root,tomcat) %config(noreplace) %{_sysconfdir}/gratia/services/service-configuration.properties
-%attr(0640,root,tomcat) %config(noreplace) %{_sysconfdir}/gratia/services/service-authorization.properties
-%verify(not md5 size mtime user) %{_sysconfdir}/gratia/services/service-configuration.properties
-%verify(not md5 size mtime user) %{_sysconfdir}/gratia/services/service-authorization.properties
-%config(noreplace) %{_sysconfdir}/gratia/services/log4j.properties
-%verify(not md5 size mtime user) %{_sysconfdir}/gratia/services/log4j.properties
-%attr(0750,tomcat,tomcat) %dir %{_var}/lib/%_tomcat/webapps/gratia-reporting/logs
-%attr(0750,tomcat,tomcat) %dir %{_var}/lib/%_tomcat/webapps/gratia-reporting/WEB-INF/platform/configuration
-%attr(0750,tomcat,tomcat)  %{_var}/lib/%_tomcat/webapps/gratia-reporting/WEB-INF/server-config.wsdd
-%attr(0750,tomcat,tomcat) %dir %{_var}/lib/%_tomcat/webapps/gratia-reporting/documents
-%attr(0750,tomcat,tomcat) %dir %{_var}/log/gratia-service
-%ghost %{_var}/log/gratia-service/*.log
-%if 0%{?rhel} < 6
-%{_var}/lib/%_tomcat/server/lib/gratiaSecurity.jar
-%dir %{_var}/lib/%_tomcat/common/classes/net/sf/gratia/util/TidiedDailyRollingFileAppender$DatedFileFilter.class
-%dir %{_var}/lib/%_tomcat/common/classes/net/sf/gratia/util/TidiedDailyRollingFileAppender.class
-%endifi
-%if 0%{?rhel} == 6
-%{_prefix}/share/%_tomcat/lib/gratiaSecurity.jar
-%{_prefix}/share/%_tomcat/lib/gratia-util.jar
-%{_prefix}/share/%_tomcat/lib/slf4j-api-1.5.8.jar
-%{_prefix}/share/%_tomcat/lib/slf4j-log4j12-1.5.8.jar
-%endif
 
 
 %post service
-sed -i 's|^gratia.reporting.version.*=|gratia.reporting.version = v%{version}-%{release}\n#gratia.reporting.version=|' %{_sysconfdir}/gratia/services/service-configuration.properties
+#sed -i 's|^gratia.reporting.version.*=|gratia.reporting.version = v%{version}-%{release}\n#gratia.reporting.version=|' %{_sysconfdir}/gratia/services/service-configuration.properties
+sed -i 's|^gratia.reporting.version.*=|gratia.reporting.version = NULL\n#gratia.reporting.version=|' %{_sysconfdir}/gratia/services/service-configuration.properties
 sed -i 's|^gratia.services.version.*=|gratia.services.version = v%{version}-%{release}\n#gratia.services.version=|'    %{_sysconfdir}/gratia/services/service-configuration.properties
-sed -i 's|^gratia.reporting.version.*=|gratia.reporting.version = v%{version}-%{release}\n#gratia.reporting.version=|' %{_sysconfdir}/gratia/services/service-authorization.properties
+#sed -i 's|^gratia.reporting.version.*=|gratia.reporting.version = v%{version}-%{release}\n#gratia.reporting.version=|' %{_sysconfdir}/gratia/services/service-authorization.properties
+sed -i 's|^gratia.reporting.version.*=|gratia.reporting.version = NULL\n#gratia.reporting.version=|' %{_sysconfdir}/gratia/services/service-authorization.properties
 sed -i 's|^gratia.services.version.*=|gratia.services.version = v%{version}-%{release}\n#gratia.services.version=|'    %{_sysconfdir}/gratia/services/service-authorization.properties
 
 if [ -d %{_sysconfdir}/gratia/collector ]
@@ -309,35 +222,22 @@ mv %{_sysconfdir}/gratia/collector/service-configuration.properties %{_sysconfdi
 mv %{_sysconfdir}/gratia/services/log4j.properties  %{_sysconfdir}/gratia/services/log4j.properties.rpmnew
 mv %{_sysconfdir}/gratia/collector/log4j.properties %{_sysconfdir}/gratia/services/log4j.properties
 rmdir %{_sysconfdir}/gratia/collector/
-echo "service.reporting.urlrewrite = false"    >> %{_sysconfdir}/gratia/services/service-configuration.properties
-echo "service.reporting.permanent-redirect = " >> %{_sysconfdir}/gratia/services/service-configuration.properties
+# not needed echo "service.reporting.urlrewrite = false"    >> %{_sysconfdir}/gratia/services/service-configuration.properties
+# not needed echo "service.reporting.permanent-redirect = " >> %{_sysconfdir}/gratia/services/service-configuration.properties
 fi
 
-
-%post reporting-web 
-sed -i 's|^gratia.reporting.version.*=|gratia.reporting.version = v%{version}-%{release}\n#gratia.reporting.version=|' %{_sysconfdir}/gratia/services/service-configuration.properties
-sed -i 's|^gratia.services.version.*=|gratia.services.version = v%{version}-%{release}\n#gratia.services.version=|'    %{_sysconfdir}/gratia/services/service-configuration.properties
-sed -i 's|^gratia.reporting.version.*=|gratia.reporting.version = v%{version}-%{release}\n#gratia.reporting.version=|' %{_sysconfdir}/gratia/services/service-authorization.properties
-sed -i 's|^gratia.services.version.*=|gratia.services.version = v%{version}-%{release}\n#gratia.services.version=|'    %{_sysconfdir}/gratia/services/service-authorization.properties
-
-if [ -d %{_sysconfdir}/gratia/collector ]
-then
-mv %{_sysconfdir}/gratia/services/service-authorization.properties  %{_sysconfdir}/gratia/services/service-authorization.properties.rpmnew
-mv %{_sysconfdir}/gratia/collector/service-authorization.properties %{_sysconfdir}/gratia/services/service-authorization.properties
-mv %{_sysconfdir}/gratia/services/service-configuration.properties  %{_sysconfdir}/gratia/services/service-configuration.properties.rpmnew
-mv %{_sysconfdir}/gratia/collector/service-configuration.properties %{_sysconfdir}/gratia/services/service-configuration.properties
-mv %{_sysconfdir}/gratia/services/log4j.properties  %{_sysconfdir}/gratia/services/log4j.properties.rpmnew
-mv %{_sysconfdir}/gratia/collector/log4j.properties %{_sysconfdir}/gratia/services/log4j.properties
-rmdir %{_sysconfdir}/gratia/collector/
-echo "service.reporting.urlrewrite = false"    >> %{_sysconfdir}/gratia/services/service-configuration.properties
-echo "service.reporting.permanent-redirect = " >> %{_sysconfdir}/gratia/services/service-configuration.properties
-fi
 
 
 
 
 
 %changelog
+* Thu Mar 06 2014 Tanya Levshina - 1.14.0
+- merge with trunk Marco's branch
+
+* Thu Feb 06 2014 Marco Mambelli <marcom@fnal.gov> - 1.14.rc0
+- remove reporting
+
 * Wed Dec 11 2013 Tanya Levshina <tlevshin@fnal.gov> - 1.13.12-1.1
 - revert back hibernate4 modifications because of the problem with handling duplicate records
 

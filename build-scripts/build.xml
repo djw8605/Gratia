@@ -12,8 +12,6 @@
 	<property name="config.dir" value="${base}/common/configuration"/>
 	<property name="output.dir" value="${base}/build-scripts/output-dir"/>
 	<property name="classes.dir" value="${output.dir}/classes" />
-	<property name="birt.reporting.dir" value="${classes.dir}/birt-reporting" />
-	<property name="reporting.dir" value="${output.dir}/wars/reporting" />
 
 	<path id="webapps.class.path">
 		<fileset dir="${ext.dirs}">
@@ -121,41 +119,6 @@
 		</javac>
 	</target>
 
-	<target name="birt-reporting" description=	"compile birt-reporting" depends="clean">
-	        <exec executable="${basedir}/ant_util.sh">
-	        	<arg line='create_versions_java ${base} reporting'/>
-	        </exec>
-		<!-- Create the build directory structure used by compile -->
-		<mkdir dir="${birt.reporting.dir}"/>
-		<mkdir dir="${target.dir}"/>
-
-		<!-- Compile the java code into ${classes.dir} -->
-		<javac srcdir="${base}/common/gratia-util/" destdir="${birt.reporting.dir}"
-           includes="net/sf/gratia/util/*.java">
-			<classpath refid="webapps.class.path"/>
-		</javac>
-		<javac srcdir="${base}/reporting/gratia-reporting/src/" destdir="${birt.reporting.dir}"
-           includes="net/sf/gratia/reporting/exceptions/*.java">
-			<classpath refid="webapps.class.path"/>
-		</javac>
-		<javac srcdir="${base}/reporting/gratia-reporting/src/" destdir="${birt.reporting.dir}"
-           includes="net/sf/gratia/reporting/*.java">
-			<classpath refid="webapps.class.path"/>
-		</javac>
-		<javac srcdir="${base}/reporting/gratia-reporting/src/" destdir="${birt.reporting.dir}"
-           includes="net/sf/gratia/administration/*.java">
-			<classpath refid="webapps.class.path"/>
-		</javac>
-		<jar jarfile="${target.dir}/gratiaReporting.jar" 
-			basedir="${birt.reporting.dir}"
-			includes="
-			net/sf/gratia/util/*.class, 
-			net/sf/gratia/reporting/exceptions/*.class, 
-			net/sf/gratia/reporting/*.class, 
-			net/sf/gratia/administration/*.class 
-			"/>
-	</target>
-	
 	<target name="testtimeout" description="compile testtimeout" depends="util">
 		<!-- Create the build directory structure used by compile -->
 		<mkdir dir="${classes.dir}"/>
@@ -209,68 +172,7 @@
 			</war>
 	</target>
 	
-	<target name="reporting" description="Create gratia-reporting.war" depends="birt-reporting, release_data, administration">
-		<mkdir dir="${reporting.dir}/documents"/>
-		<mkdir dir="${reporting.dir}/WEB-INF/attachments"/>
-		<copy file="${target.dir}/gratia-release" todir="${reporting.dir}"/>
-		<copy file="${base}/reporting/birt-wars/birt-v261.war" todir="${reporting.dir}"/>
-		<unjar src="${reporting.dir}/birt-v261.war" dest="${reporting.dir}"/>
-		<delete file="${reporting.dir}/birt-v261.war"/>
-		<delete file="${reporting.dir}/test.rptdesign"/>
-		<delete file="${reporting.dir}/test1.rptdesign"/>
-		<exec executable="${basedir}/ant_util.sh">
-			<arg line='edit_web_xml ${reporting.dir}/WEB-INF'/>
-		</exec>
-		<copy file="${base}/reporting/gratia-reporting/WebContent/urlrewrite.xml" todir="${reporting.dir}/WEB-INF"/>
-		<copy file="${target.dir}/gratiaReporting.jar" todir="${reporting.dir}/WEB-INF/lib"/>
-		<copy file="${target.dir}/gratiaReporting.jar" todir="${reporting.dir}/scriptlib"/>
-		<copy file="${base}/common/lib/dom4j-1.6.1.jar" todir="${reporting.dir}/WEB-INF/lib"/>
-		<copy todir="${reporting.dir}/WEB-INF/lib">
-				<fileset dir="${base}/common/lib">
-					<include name="commons-lang-*.jar"/>
-				</fileset>
-		</copy>
-		<copy file="${base}/common/lib/urlrewritefilter-4.0.3.jar" todir="${reporting.dir}/WEB-INF/lib"/>
-		<copy todir="${reporting.dir}">
-				<fileset dir="${base}/reporting/gratia-reporting/WebContent/">
-					<include name="*.jsp"/>
-					<include name="*.xml"/>
-					<include name="*.html"/>
-					<include name="*.css"/>
-				</fileset>
-		</copy>	
-		<!--don't need urlrewrite.xml here , it is in WEB-INF-->
-		<delete file="${reporting.dir}/urlrewrite.xml"/>
-		<copy todir="${reporting.dir}">
-		      <fileset dir="${base}/reporting/gratia-reporting/WebContent/calendar"/>
-		      <fileset dir="${base}/reporting/gratia-reporting/WebContent/images"/>
-		      <fileset dir="${base}/reporting/gratia-reporting/WebContent/tooltip"/>
-		 </copy>
-		 <copy todir="${reporting.dir}/WEB-INF/lib">
-		      <fileset dir="${base}/common/lib/">
-		      	<include name="mysql-connector-java-*-bin.jar"/>
-		      </fileset>
-		 </copy>
-		 <copy todir="${reporting.dir}/WEB-INF/platform/plugins/org.eclipse.birt.report.data.oda.jdbc*/drivers">
-		 	<fileset dir="${base}/common/lib/">
-		        	<include name="mysql-connector-java-*-bin.jar"/>
-		        </fileset>
-		 </copy>
-		 <delete includeemptydirs="true">
-		     <fileset dir="${reporting.dir}" includes="**/.svn/" defaultexcludes="false"/>
-		 </delete>
-
-		<mkdir dir="${reporting.dir}/WEB-INF/classes/net/sf/gratia/administration"/>
-		<copy todir="${reporting.dir}/WEB-INF/classes/net/sf/gratia/administration">
-			<fileset dir="${classes.dir}/net/sf/gratia/administration">
-				<include name="MonitorStatus*.class"/>
-			</fileset>
-		</copy>
-		<jar destfile="${target.dir}/gratia-reporting.war" basedir="${reporting.dir}"></jar>
-		<delete dir="${reporting.dir}"/>
-	</target>
-	
-	<target name="webapps" description="generate the  webapps distribution" depends="servlets, reporting, soap, registration, administration, security, release_data">
+	<target name="webapps" description="generate the  webapps distribution" depends="servlets, soap, registration, administration, security, release_data">
 		<mkdir dir="${target.dir}"/>
 		<war destfile="${target.dir}/gratia-services.war" webxml="${base}/collector/gratia-services/net/sf/gratia/services/web.xml">
 			<lib dir="${ext.dirs}">
@@ -372,16 +274,6 @@
 			<zipfileset dir="${base}/collector/gratia-administration/WebContent/images" includes="*.gif" prefix="images"/>
 			<zipfileset dir="${target.dir}" includes="gratia-release"/>
 		</war>
-		<war destfile="${target.dir}/gratia-reports.war" webxml="${base}/reporting/gratia-reports/WebContent/WEB-INF/web.xml">
-			<lib dir="${target.dir}">
-				<include name="gratia-util.jar"/>
-			</lib>
-			<zipfileset dir="${base}/reporting/gratia-reports/WebContent/MenuConfig" includes="*.xml" prefix="MenuConfig"/>
-			<zipfileset dir="${base}/reporting/gratia-reports/WebContent/reports/production-osg" includes="*.rptdesign, *.rptlibrary" prefix="reports"/>
-			<zipfileset dir="${base}/reporting/gratia-reports/WebContent/reports/production-fermi" includes="*.rptdesign, *.rptlibrary" prefix="reports"/>
-			<zipfileset dir="${base}/reporting/gratia-reports/WebContent/reports/production-osgdaily" includes="*.rptdesign, *.rptlibrary" prefix="reports"/>
-			<zipfileset dir="${target.dir}" includes="gratia-release"/>	
-		</war>
 	</target>
 	
 	<target name="common_lib" description="create common_lib.tar">
@@ -476,14 +368,10 @@
 			<tarfileset dir="${base}/common/gratia-security/scripts" mode="744" username="root" group="root">
 				<include name="voms-server.sh"/>
 			</tarfileset>
-			<tarfileset dir="${base}/reporting/gratia-reporting/WebContent/staticReports" mode="755" username="root" group="root">
-				<include name="staticReports"/>
-			</tarfileset>
 			<tarfileset dir="${base}/common/configuration" mode="700" username="root" group="root">
 				<include name="post-install"/>
 				<include name="install-database"/>
 				<include name="configure_tomcat"/>
-				<include name="configure_urlredirect"/>
 			</tarfileset>
 			<tarfileset dir="${target.dir}" mode="600" username="root" group="root">
 				<include name="service-configuration.properties"/>

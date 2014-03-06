@@ -1,4 +1,5 @@
 PLATFORM := $(shell uname)
+# Makefile is not used any more. Please refer to ANT and build.xml
 
 # tarball version
 version_default = v1.13-1
@@ -50,7 +51,8 @@ staticScript=$(reportsrc)/WebContent/staticReports
 birtDir=$(reporting)/birt-wars
 #birtwarFile=birt-v231-N20080820.war
 #birtwarFile=birt-v231-N20080818.war
-birtwarFile=birt-v261.war
+#birtwarFile=birt-v261.war
+birtwarFile=birt-v431.war
 # common modules
 configuration=$(common)/configuration
 security=$(common)/gratia-security
