@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 ########################################################################
 # 
 # Author Philippe Canal, John Weigand
@@ -30,6 +32,7 @@ import math
 import re
 import string
 import popen2
+import email
 import smtplib, rfc822  # for email notifications via smtp
 import commands, os, sys, time, string
 
@@ -43,37 +46,47 @@ gSitesMissingData  = {}
 gSitesWithNoData   = [] 
 gKnownVOs = {}
 
-gFilterParameters = {"GratiaCollector"      :None,
-                     "SiteFilterFile"       :None,
-                     "SiteFilterHistory"    :None,
-                     "VOFilterFile"         :None,
-                     "DBConfFile"           :None,
-                     "LogSqlDir"            :None,
-                     "MissingDataDays"      :None,
-                     "FromEmail"            :None,
-                     "ToEmail"              :None,
-                    }
-gDatabaseParameters = {"GratiaHost":None,
-                       "GratiaPort":None,
-                       "GratiaDB"  :None,
-                       "SSMHome"   :None,
-                       "SSMConfig" :None,
-                       "SSMupdates":None,
-                       "SSMdeletes":None,
-                      }
+gParams = {"WebLocation"       :None,
+           "LogDir"            :None,
+           "TmpDataDir"        :None,
+           "UpdatesDir"        :None,
+           "UpdateFileName"    :None,
+           "DeleteFileName"    :None,
+           "SSMFile"           :None,
+           "SSMConfig"         :None,
+           "SiteFilterFile"    :None,
+           "SiteFilterHistory" :None,
+           "VOFilterFile"      :None,
+           "DBConfFile"        :None,
+           "MissingDataDays"   :None,
+           "FromEmail"         :None,
+           "ToEmail"           :None,
+           "CcEmail"           :None,
+         }
+gDbParams = {"GratiaHost" :None,
+            "GratiaPort"  :None,
+            "GratiaDB"    :None,
+            "GratiaUser"  :None,
+            "GratiaPswd"  :None,
+            }
 
 
 
+gProgramName        = None
+gMyOSG_available    = True  # flag indicating if there is a problem w/MyOSG
 # ------------------------------------------------------------------
 # -- Default is query only. Must specify --update to effect updates 
 # -- This is to protect against accidental running of the script   
-gProgramName        = None
+gInUpdateMode       = False  
+#------------------------
+#Command line arg to suppress email notice
+gEmailNotificationSuppressed = False  
 gFilterConfigFile   = None
 gDateFilter         = None
-gInUpdateMode       = False  
-gEmailNotificationSuppressed = False  #Command line arg to suppress email notice
-gMyOSG_available    = True  # flag indicating if there is a problem w/MyOSG
+gRunTime = time.strftime("%Y/%m/%d %H:%M %Z",time.localtime())
 
+#--------------------------
+#gPswdfile  = None  
 
 # ----------------------------------------------------------
 # special global variables to display queries in the email 
@@ -93,7 +106,36 @@ gRebus = Rebus.Rebus()
 def Usage():
   """ Display usage """
   print  """\
-this is the usage
+LCG.py   --conf=config_file --date=month [--update] [--no-email]
+
+     --conf - specifies the main configuration file to be used
+              which would normally be the lcg.conf file
+
+     --date - specifies the monthly time period to be updated:
+              Valid values:
+                current  - the current month
+                previous - the previous month
+                YYYY/MM  - any year and month
+
+              The 'current' and 'previous' values are to facillitate running
+              this as a cron script.  Generally, we will run a cron
+              entry for the 'previous' month for n days into the current
+              month in order to insure all reporting has been completed.
+
+     The following 2 options are to facilitate testing and to avoid
+     accidental running and sending of the SSM message to APEL.
+
+     --update - this option says to go ahead and update the APEL/WLCG database.
+                If this option is NOT specified, then everything is executed
+                EXCEPT the actual sending of the SSM message to APEL.
+                The message file will be created.
+                This is a required option when running in production mode.
+                Its purpose is to avoid accidentally sending data to APEL
+                when testing.
+
+     --no-email - this option says to turn off the sending of email
+                notifications on failures and successful completions.
+                This is very useful when testing changes.
 """
 
 
@@ -116,12 +158,8 @@ For help use --help
 
     for o, a in opts:
       if o in ("--help"):
-        print """
-For usage and a complete explanation of this interface, see the
-README--Gratia-APEL-interface file as there is too much to explain here. 
-
-...BYE"""
-        sys.exit(0)
+        Usage()
+        sys.exit(1)
       if o in ("--config"):
         gFilterConfigFile = a
         continue
@@ -149,28 +187,34 @@ README--Gratia-APEL-interface file as there is too much to explain here.
 #-----------------------------------------------
 def SendEmailNotificationFailure(error):
   """ Sends a failure  email notification to the EmailNotice attribute""" 
-  subject  = "SSM Gratia transfer to APEL (WLCG) for %s - FAILED" % gDateFilter
-  message  = "ERROR: " + error
-  SendEmailNotification(subject,message)
+  subject  = "GRATIA-APEL interface for %s - FAILED (%s)" % (gDateFilter,gRunTime)
+  contents = """The interface from Gratia to the APEL (WLCG) database FAILED
+with the following error(s):
+%(error)s
+""" % { "error" : error ,} 
+  contents = contents + InterfaceFiles()
+  SendEmailNotification(subject,contents)
+
 #-----------------------------------------------
 def SendEmailNotificationSuccess():
   """ Sends a successful email notification to the EmailNotice attribute""" 
   global gVoOutput
   global gSitesMissingData
-  subject  = "SSM Gratia transfer to APEL (WLCG) for %s - SUCCESS" % gDateFilter
-
-  contents = ""
-  if len(gSitesMissingData) == 0:
-    contents = contents + "All sites are reporting.\n"
+  subject  = "GRATIA-APEL interface for %s - SUCCESS (%s)" % (gDateFilter,gRunTime)
+  contents = """The interface from Gratia to the APEL (WLCG) database was successful."""
+  if len(gWarnings) == 0:
+    contents = contents + "\nNo warning conditions detected."
   else:
-    contents = contents + "Sites missing data for more than %s days:" % gFilterParameters["MissingDataDays"]
+    contents = contents + "\n\nWarning conditions have been detected and a separate email will be sent."
+  if len(gSitesMissingData) == 0:
+    contents = contents + "\nAll sites are reporting.\n"
+  else:
+    contents = contents + "\nSites missing data for more than %s days:" % gParams["MissingDataDays"]
     sites = gSitesMissingData.keys()
     for site in sites:
       contents = contents + "\n" + site + ": " + str(gSitesMissingData[site])
-  contents = contents + "\n\nResults of all VO queries (VO):\n" + gVoOutput 
-  contents = contents + "\nSample VO query:\n" + gVoQuery
-  contents = contents + "\nSample User query:\n" + gUserQuery
   SendEmailNotification(subject,contents)
+
 #-----------------------------------------------
 def SendEmailNotificationWarnings():
   """ Sends a warning email notification to the EmailNotice attribute""" 
@@ -178,8 +222,8 @@ def SendEmailNotificationWarnings():
     Logit("No warning conditions detected.")
     return
   Logit("Warning conditions have been detected.")
-  subject  = "SSM Gratia transfer to APEL (WLCG) for %s - WARNINGS/ADVISORY" % gDateFilter
-  contents = """
+  subject  = "GRATIA-APEL interface for %s - WARNINGS/ADVISORY (%s)" % (gDateFilter,gRunTime)
+  contents = """\
 The interface from Gratia to the APEL (WLCG) database was successful.
 
 However, the following possible problems were detected during the execution 
@@ -188,67 +232,61 @@ of the interface script and should be investigated.
   for warning in gWarnings:
     contents = "%s\nWARNING/ADVISORY: %s\n" % (contents,warning)
   SendEmailNotification(subject,contents)
+
 #-----------------------------------------------
-def SendEmailNotification(subject,message):
+def SendEmailNotification(subject, contents):
   """ Sends an email notification to the EmailNotice attribute value
       of the lcg-filters.conf file.  This can be overridden on the command
       line to suppress the notification.  This should only be done during
       testing, otherwise it is best to provide some notification on failure.
   """
-  if gEmailNotificationSuppressed:
-    Logit("Email notification suppressed")
+  global gEmailNotificationSuppressed
+  if gParams["CcEmail"] is None and gParams["ToEmail"] is None:
+    gEmailNotificationSuppressed = True
+    print >>sys.stderr, "ERROR: No CcEmail and ToEmail in configuration file"
+    print >>sys.stderr, "Email notification suppressed due to errors with email attributes"
+  if gParams["FromEmail"] is None: 
+    gEmailNotificationSuppressed = True
+    print >>sys.stderr, "ERROR: No FromEmail in configuration file"
+    print >>sys.stderr, "Email notification suppressed due to errors with email attributes"
+  if gEmailNotificationSuppressed is True:
+    Logit("Email notification suppressed due to command line argument or errors")
     return
-  Logit("Email notification being sent to %s" % gFilterParameters["ToEmail"])
-  Logit("\n" + message) 
+  message_body = """\
+Gratia to APEL/WLCG accountin data transfer.  
+This is run as a %(user)s cron process on %(hostname)s at %(runtime)s.
 
-  body = """\
-Gratia to APEL/WLCG transfer. 
+%(contents)s
+""" % { "contents" : contents,
+        "hostname" : commands.getoutput("hostname -f"),
+        "runtime"  : gRunTime,
+        "user"     : commands.getoutput("whoami"),}
 
-This is normally run as a cron process.  The log files associated with this 
-process can provide further details.
-
-Script............... %(program)s
-Node................. %(hostname)s
-User................. %(username)s
-Log file............. %(logfile)s
-
-SSM_HOME variable.... %(ssmhome)s 
-SSM config file...... %(ssmconfig)s 
-SSM summary file..... %(ssmupdates)s 
-SSM summary records.. %(ssmrecs)s  
-SSM deletes file..... %(ssmdeletes)s 
-SSM deletes records.. %(ssmdels)s 
-
-Reportable sites file.. %(sitefilter)s
-Reportable VOs file.... %(vofilter)s
-
-%(message)s
-	""" % { "program"     : gProgramName,
-                "hostname"    : commands.getoutput("hostname -f"),
-                "username"    : commands.getoutput("whoami"),
-                "logfile"     : commands.getoutput("echo $PWD")+"/"+GetFileName(None,"log"),
-                "sitefilter"  : gFilterParameters["SiteFilterFile"],
-                "vofilter"    : gFilterParameters["VOFilterFile"],
-                "ssmhome"     : gDatabaseParameters["SSMHome"],
-                "ssmconfig"   : gDatabaseParameters["SSMConfig"],
-                "ssmupdates"  : commands.getoutput("echo $PWD")+"/"+GetFileName(gDatabaseParameters["SSMupdates"],"txt"),
-                "ssmrecs"     : commands.getoutput("grep -c '%%' %s" % GetFileName(gDatabaseParameters["SSMupdates"],"txt")),
-                "ssmdeletes"  : commands.getoutput("echo $PWD")+"/"+GetFileName(gDatabaseParameters["SSMdeletes"],"txt"),
-                "ssmdels"     : commands.getoutput("grep -c '%%' %s" % GetFileName(gDatabaseParameters["SSMdeletes"],"txt")),
-                "message"     : message,} 
+  Logit("Email notification being sent to %s" % gParams["ToEmail"])
+  Logit("Email notification being cc'd to %s" % gParams["CcEmail"])
+  Logit("\n" +  contents) 
 
   try:
-    fromaddr = gFilterParameters["FromEmail"]
-    toaddrs  = string.split(gFilterParameters["ToEmail"],",")
+    fromaddr = gParams["FromEmail"]
+    toaddrs  = string.split(gParams["ToEmail"],",")
+    ccaddrs = ["",]
+    if gParams["CcEmail"] != "NONE" and  gParams["CcEmail"] is not None:
+      ccaddrs  =  string.split(gParams["CcEmail"],",")
     server   = smtplib.SMTP('localhost')
     server.set_debuglevel(0)
     message = """\
-From: %s
-To: %s
-Subject: %s
+From: %(fromaddr)s
+To: %(toaddr)s 
+Cc: %(ccaddr)s
+Subject: %(subject)s
 X-Mailer: Python smtplib
-%s
-""" % (fromaddr,gFilterParameters["ToEmail"],subject,body)
+%(message)s
+""" % { "fromaddr"    : fromaddr,
+        "toaddr"      : ",".join(toaddrs),
+        "ccaddr"      : ",".join(ccaddrs),
+        "subject"     : subject,
+        "message"     : message_body, }
+    toaddrs = toaddrs + ccaddrs
     server.sendmail(fromaddr,toaddrs,message)
     server.quit()
   except smtplib.SMTPSenderRefused:
@@ -257,9 +295,39 @@ X-Mailer: Python smtplib
     raise Exception("SMTPRecipientsRefused, message: %s" % message)
   except smtplib.SMTPDataError:
     raise Exception("SMTPDataError, message: %s" % message)
-  except:
-    raise Exception("Unsent Message: %s" % message)
+  except Exception, e:
+    raise Exception("Unsent Message: %s" % e)
 
+#-----------------------------------------------
+def InterfaceFiles():
+  return """
+Key Interface files:
+Script............... %(program)s
+Node................. %(hostname)s
+User................. %(username)s
+Log file............. %(logfile)s
+
+SSM executable....... %(ssmfile)s 
+SSM config file...... %(ssmconfig)s 
+SSM summary file..... %(ssmupdates)s 
+SSM summary records.. %(ssmrecs)s  
+SSM deletes file..... %(ssmdeletes)s 
+SSM deletes records.. %(ssmdels)s 
+
+Reportable sites file.. %(sitefilter)s
+Reportable VOs file.... %(vofilter)s
+""" % { "program"     : gProgramName,
+                "hostname"    : commands.getoutput("hostname -f"),
+                "username"    : commands.getoutput("whoami"),
+                "logfile"     : GetFileName(gParams["LogDir"],None,"log"),
+                "sitefilter"  : gParams["SiteFilterFile"],
+                "vofilter"    : gParams["VOFilterFile"],
+                "ssmfile"     : gParams["SSMFile"],
+                "ssmconfig"   : gParams["SSMConfig"],
+                "ssmupdates"  : GetFileName(gParams["UpdatesDir"],gParams["UpdateFileName"],"txt"),
+                "ssmrecs"     : commands.getoutput("grep -c '%%' %s" % GetFileName(gParams["UpdatesDir"],gParams["UpdateFileName"],"txt")),
+                "ssmdeletes"  : GetFileName(gParams["UpdatesDir"],gParams["DeleteFileName"],"txt"),
+                "ssmdels"     : commands.getoutput("grep -c '%%' %s" % GetFileName(gParams["UpdatesDir"],gParams["DeleteFileName"],"txt")), }
 
 #-----------------------------------------------
 def GetVOFilters(filename):
@@ -338,21 +406,24 @@ def GetDBConfigParams(filename):
   """ Retrieves and validates the database configuration file parameters"""
 
   params = GetConfigParams(filename)
-  for key in gDatabaseParameters.keys():
+  for key in gDbParams.keys():
     if params.has_key(key):
-      gDatabaseParameters[key] = params[key]
+      gDbParams[key] = params[key]
       continue
     raise Exception("Required parameter (%s) missing in config file %s" % (key,filename))
 
 #----------------------------------------------
 def GetFilterConfigParams(filename):
   """ Retrieves and validates the filter configuration file parameters"""
+  missingEntries = ""
   params = GetConfigParams(filename)
-  for key in gFilterParameters.keys():
+  for key in gParams.keys():
     if params.has_key(key):
-      gFilterParameters[key] = params[key]
+      gParams[key] = params[key]
       continue
-    raise Exception("Required parameter (%s) missing in config file %s" % (key,filename))
+    missingEntries = missingEntries + "Required parameter (%s) missing in config file %s\n" % (key,filename)
+  if len(missingEntries) > 0:
+    raise Exception(missingEntries)
 
 #----------------------------------------------
 def DetermineReportableSitesFileToUse(reportingPeriod):
@@ -374,8 +445,8 @@ def DetermineReportableSitesFileToUse(reportingPeriod):
       Arguments: reporting period (YYYY/MM)
       Returns: the reportable sites file to use
   """
-  filterFile  = gFilterParameters["SiteFilterFile"]
-  historyDir  = gFilterParameters["SiteFilterHistory"]
+  filterFile  = gParams["SiteFilterFile"]
+  historyDir  = gParams["SiteFilterHistory"]
   #--- make the history directory if it does not exist ---
   if not os.path.isdir(historyDir):
     Logit("... creating %s directory for the reportable sites configuration files" % (historyDir))
@@ -385,7 +456,7 @@ def DetermineReportableSitesFileToUse(reportingPeriod):
   if reportingPeriod == None:
     raise Exception("System error: the DetermineReportableSitesFileToUse method requires a reporting period argument (YYYY/MM) which is missing")
   fileSuffix = reportingPeriod[0:4] + reportingPeriod[5:7]
-  historyFile = historyDir + "/" + filterFile + "." + fileSuffix
+  historyFile = historyDir + "/" + os.path.basename(filterFile) + "." + fileSuffix
 
   #--- update the history only if it is for the current month --
   currentPeriod = GetCurrentPeriod()
@@ -424,12 +495,15 @@ def GetConfigParams(filename):
         continue
       values = line.split()
       if len(values) <> 2:
-        message = "Invalid config file entry ("+line+") in file ("+filename+")"
-        raise Exception(message)
+        print >> sys.stderr, """Invalid config file entry (%(line)s) in file (%(filename)s)
+... all entries must contain a value""" % \
+                  { "line" : line, "filename" : filename,}
+        sys.exit(1)
       params[values[0]]=values[1]
     fd.close()
     return params
   except IOError, (errno,strerror):
+    print "... ERROR IOError\n"
     raise Exception("IO error(%s): %s (%s)" % (errno,strerror,filename))
 
 #---------------------------------------------
@@ -462,6 +536,10 @@ def Logit(message):
 def Logerr(message):
     Logit("ERROR: " + message)
 #-----------------------------------------------
+def Logstderr(message):
+    print >>sys.stderr,"FAILED: " + message
+    Logit("ERROR: " + message)
+#-----------------------------------------------
 def Logwarn(message):
     Logit("WARNING: " + message)
     gWarnings.append(message)
@@ -469,11 +547,10 @@ def Logwarn(message):
 #-----------------------------------------------
 def LogToFile(message):
     "Write a message to the Gratia log file"
-
     file = None
     filename = ""
     try:
-        filename = GetFileName(None,"log")
+        filename = GetFileName(gParams["LogDir"],None,"log")
         file = open(filename, 'a')  
         file.write( message + "\n")
         if file != None:
@@ -482,11 +559,14 @@ def LogToFile(message):
       raise Exception,"IO error(%s): %s (%s)" % (errno,strerror,filename)
 
 #-----------------------------------------------
-def GetFileName(type,suffix):
+def GetFileName(dir,type,suffix):
     """ Sets the file name to YYYY-MM[.type].suffix based on the time
-        period for the transfer with the LogSqlDir, the type and the 
+        period being processed, the directory, type and the 
         attribute of the filters configuration prepended to it.
     """
+    if dir == None:
+      print >> sys.stderr,"Failed in GetFileName method: directory (LogDir attribute) not specified"
+      sys.exit(1)
     if type == None:
       qualifier = ""
     else:
@@ -495,29 +575,20 @@ def GetFileName(type,suffix):
       filename = time.strftime("%Y-%m") + qualifier + "." + suffix
     else:
       filename = gDateFilter[0:4] + "-" + gDateFilter[5:7] + qualifier + "." + suffix 
-    if gFilterParameters["LogSqlDir"] == None:  
-      filename = "./" + filename
-    else:
-      filename = gFilterParameters["LogSqlDir"] + "/" + filename
-    if not os.path.exists(gFilterParameters["LogSqlDir"]):
-      os.mkdir(gFilterParameters["LogSqlDir"])
+    if not os.path.exists(dir):
+      os.mkdir(dir)
+    filename = dir + "/" + filename
     return filename
 
 #-----------------------------------------------
-def CheckGratiaDBAvailability(params):
+def CheckGratiaDBAvailability():
   """ Checks the availability of the Gratia database. """
-  CheckDB(params["GratiaHost"], 
-          params["GratiaPort"], 
-          params["GratiaDB"]) 
-
-#-----------------------------------------------
-def CheckDB(host,port,db):
-  """ Checks the availability of a MySql database. """
-
-  Logit("Checking availability on %s:%s of %s database" % (host,port,db))
-  connectString = " -h %s --port=%s -u reader -preader %s " % (host,port,db)
-  command = "mysql %s -e status" % connectString
+  Logit("Checking availability of Gratia database")
+  connectString = CreateConnectString()
+  pswdfile = CreatePswdFile()
+  command = "mysql --defaults-extra-file=%s -e status %s " % (pswdfile,connectString)
   (status, output) = commands.getstatusoutput(command)
+  os.system("rm -f " + pswdfile)
   if status == 0:
     msg =  "Status: \n"+output
     if output.find("ERROR") >= 0 :
@@ -662,7 +733,7 @@ def GetSiteClause(resource_grp):
 
 
 #-----------------------------------------------
-def GetQueryForDaysReported(resource_grp,vos):
+def GetQueryForDaysReported(resource_grp,resource):
     """ Creates the SQL query DML statement for the Gratia database.
         This is used to determine if there are any gaps in the
         reporting for a site. It just identifies the days that
@@ -671,10 +742,9 @@ def GetQueryForDaysReported(resource_grp,vos):
     userDataClause=""
     userGroupClause=""
     periodWhereClause = SetDatesWhereClause()
-    siteClause        = GetSiteClause(resource_grp)
     dateFmt  =  "%Y-%m-%d"
-    Logit("Resource Group: %(rg)s  Resources: %(resources)s" % \
-       { "rg" : resource_grp, "resources" : siteClause } )
+    Logit("---- Gratia days reported query - Resource Group: %(rg)s  Resource: %(resource)s ----" % \
+       { "rg" : resource_grp, "resource" : resource } )
     query="""\
 SELECT distinct(date_format(EndTime,"%(date_format)s"))
 from 
@@ -682,29 +752,29 @@ from
      Probe,
      VOProbeSummary Main 
 where 
-      Site.SiteName in ( %(resources)s )
+      Site.SiteName = "%(resource)s" 
   and Site.siteid = Probe.siteid 
   and Probe.ProbeName  = Main.ProbeName 
---  and Main.VOName in ( %(vos)s )
   and %(period)s 
   and Main.ResourceType = "Batch"
 """ % { "date_format"  : dateFmt,
-        "resources"    : siteClause,
-        "vos"          : vos,
+        "resource"     : resource,
         "period"       : periodWhereClause
       }
     return query
 
 #-----------------------------------------------
-def RunGratiaQuery(select,params,LogResults=True,headers=False):
+def RunGratiaQuery(select,LogResults=True,headers=False):
   """ Runs the query of the Gratia database """
-  Logit("Running query on %s of the %s db" % (params["GratiaHost"],params["GratiaDB"]))
-  host = params["GratiaHost"]
-  port = params["GratiaPort"] 
-  db   = params["GratiaDB"]
+  host = gDbParams["GratiaHost"]
+  port = gDbParams["GratiaPort"] 
+  db   = gDbParams["GratiaDB"]
+  Logit("Running query on %s:%s of the %s db" % (host,port,db))
 
-  connectString = CreateConnectString(host,port,db,headers)
-  (status,output) = commands.getstatusoutput("echo '" + select + "' | " + connectString)
+  connectString = CreateConnectString(headers)
+  pswdfile = CreatePswdFile()
+  (status,output) = commands.getstatusoutput("echo '" + select + "' | mysql --defaults-extra-file=" + pswdfile + " " + connectString)
+  os.system("rm -f " + pswdfile)
   results = EvaluateMySqlResults((status,output))
   if len(results) == 0:
     cnt = 0
@@ -718,7 +788,7 @@ def RunGratiaQuery(select,params,LogResults=True,headers=False):
   return results
 
 #-----------------------------------------------
-def FindTierPath(params,table):
+def FindTierPath(table):
   """ The path in the org_Tier1/2 table keeps changing so we need to find it
       using the top level name which does not appear to change that
       frequently.
@@ -731,7 +801,7 @@ def FindTierPath(params,table):
     query = 'select Path from org_Tier2 where Name in ("USA","Brazil")'
   else:
     Logerr("System error: method(FindTierPath) does not support this table (%s)" % (table))
-  results = RunLCGQuery(query,type,params)
+  results = RunLCGQuery(query,type)
   if len(results) == 0:
     Logit("Results: None")
   else:
@@ -777,29 +847,29 @@ def SendXmlHtmlFiles(filename,dest):
   
 
 #-----------------------------------------------
-def RunLCGUpdate(params,type):
+def RunLCGUpdate(type):
   """ Performs the update of the APEL database """
-  configfile = params["SSMConfig"]
-  ssm_home   = params["SSMHome"]
-  os.putenv("SSM_HOME",params["SSMHome"])
+  configfile = gParams["SSMConfig"]
+  ssm_file   = gParams["SSMFile"]
 
   Logit("---------------------")
   Logit("--- Updating APEL ---")
   Logit("---------------------")
+  dir = gParams["UpdatesDir"]
   if type == "delete":
-    file = GetFileName(params["SSMdeletes"],"txt")
+    file = GetFileName(dir,gParams["DeleteFileName"],"txt")
     if not os.path.isfile(file):
       Logit("... this is likely the 1st time run for this period therefore no file to send")
       return
   if type == "update":
-    file = GetFileName(params["SSMupdates"],"txt")
+    file = GetFileName(dir,gParams["UpdateFileName"],"txt")
   Logit("%(type)s file... %(file)s Records: %(count)s" % \
          { "type"   : type,
            "file"   : file,
            "count"  : commands.getoutput("grep -c '%%' %s" % file), 
          } )
   try:
-    ssm = SSMInterface.SSMInterface(configfile,ssm_home)
+    ssm = SSMInterface.SSMInterface(configfile,ssm_file)
     ssm.send_file(file)
   except SSMInterface.SSMException,e:
     raise Exception(e)
@@ -814,16 +884,32 @@ def RunLCGUpdate(params,type):
   Logit("------------------------------")
 
 #------------------------------------------------
-def CreateConnectString(host,port,db,headers=False):
-  col_names = ""
+def CreatePswdFile():
+    file = None
+    filename = gParams["TmpDataDir"] + "/.pswd"
+    filedata = """[client]\npassword=%s\n"""  % gDbParams["GratiaPswd"]
+    try:
+        file = open(filename, 'w')
+        file.write(filedata)
+        if file != None:
+          file.close()
+        os.system("chmod 0400 " + filename)
+    except IOError, (errno,strerror):
+      raise Exception,"IO error(%s): %s (%s)" % (errno,strerror,filename)
+    return filename
+
+#------------------------------------------------
+def CreateConnectString(headers=False):
+  args = ""
   if not headers:
-    col_names = "--disable-column-names"
-  return "mysql  %(col)s -h %(host)s --port=%(port)s -u reader -preader %(db)s " % \
-      {  "host" : host,
-        "port" : port,
-        "db"   : db,
-        "col"  : col_names,
-       }
+    args = " --disable-column-names" 
+  return " %(args)s -h %(host)s --port=%(port)s -u %(user)s %(db)s " % \
+      {  "host" : gDbParams["GratiaHost"], 
+         "port" : gDbParams["GratiaPort"], 
+         "db"   : gDbParams["GratiaDB"], 
+         "user" : gDbParams["GratiaUser"],  
+         "args" : args,
+      }
 
 #------------------------------------------------
 def EvaluateMySqlResults((status,output)):
@@ -841,7 +927,7 @@ def EvaluateMySqlResults((status,output)):
   return output
 
 #-----------------------------------------------
-def CreateVOSummary(results,params,reportableSites):
+def CreateVOSummary(results,reportableSites):
   """ Creates a summary by site,vo for troubleshooting purposes. """
   Logit("-----------------------------------------------------")
   Logit("-- Creating a resource group, vo summary html page --") 
@@ -863,8 +949,9 @@ def CreateVOSummary(results,params,reportableSites):
   totals = totalsList(metrics)
   resourceGrp = None
   vo          = None
-  htmlfilename = GetFileName("summary","html")
-  datfilename  = GetFileName("summary","dat")
+  dir = gParams["WebLocation"]
+  htmlfilename = GetFileName(dir,"summary","html")
+  datfilename  = GetFileName(dir,"summary","dat")
   Logit("... summary html file: %s" % htmlfilename) 
   Logit("... summary dat  file: %s" % datfilename) 
   htmlfile    = open(htmlfilename,"w")
@@ -942,8 +1029,8 @@ def CreateVOSummary(results,params,reportableSites):
 
   htmlfile.close()
   summaryfile.close()
-  SendXmlHtmlFiles(htmlfilename,gFilterParameters["GratiaCollector"])
-  SendXmlHtmlFiles(datfilename, gFilterParameters["GratiaCollector"])
+  ## SendXmlHtmlFiles(htmlfilename,gParams["WebLocation"])
+  ## SendXmlHtmlFiles(datfilename, gParams["WebLocation"])
 
 #--------------------------------
 def totalsList(metrics):
@@ -986,7 +1073,7 @@ def writeSummaryFile(file, rg, vo, nf, totals, metrics, earliest, latest, curren
   Logit("SUMMARY: " + line)
 
 #-----------------------------------------------
-def CreateLCGssmUpdates(results,params):
+def CreateLCGssmUpdates(results):
   """ Creates the SSM summary job records for the EGI portal."""
   Logit("-----------------------------------------------------")
   Logit("--- Creating SSM update records for the EGI portal --") 
@@ -995,8 +1082,9 @@ def CreateLCGssmUpdates(results,params):
     raise Exception("No updates to apply")
   ssmHeaderRec = "APEL-summary-job-message: v0.2\n"
   ssmRecordEnd = "%%\n"
-  filename  =  GetFileName(params["SSMupdates"]  ,"txt")
-  deletions =  GetFileName(params["SSMdeletes"],"txt")
+  dir = gParams["UpdatesDir"]
+  filename  =  GetFileName(dir,gParams["UpdateFileName"]  ,"txt")
+  deletions =  GetFileName(dir,gParams["DeleteFileName"],"txt")
 
   Logit("... update file: %s" % filename) 
   Logit("... delete file: %s" % deletions) 
@@ -1032,7 +1120,7 @@ def CreateLCGssmUpdates(results,params):
   deletes.close()
 
 #-----------------------------------------------
-def RetrieveUserData(reportableVOs,reportableSites,params):
+def RetrieveUserData(reportableVOs,reportableSites):
   """ Retrieves Gratia data for reportable sites """
   Logit("--------------------------------------------")
   Logit("---- Gratia user data retrieval started ----")
@@ -1050,7 +1138,7 @@ def RetrieveUserData(reportableVOs,reportableSites,params):
       Logit("Query:")
       LogToFile(query)
       firstTime = 0
-    results = RunGratiaQuery(query,params,LogResults=False,headers=True)
+    results = RunGratiaQuery(query,LogResults=False,headers=True)
     if len(results) == 0:
       results = ProcessEmptyResultsSet(resource_grp,reportableVOs)
     output += results + "\n"
@@ -1086,9 +1174,9 @@ def ProcessUserData(ReportableVOs,ReportableSites):
   """ Retrieves and creates the DML for the new (5/16/09) Site/User/VO summary
       data for the APEL interface.
   """
-  gUserOutput = RetrieveUserData(ReportableVOs,ReportableSites,gDatabaseParameters)
-  CreateLCGssmUpdates(gUserOutput,gDatabaseParameters)
-  CreateVOSummary(gUserOutput,gDatabaseParameters,ReportableSites)
+  gUserOutput = RetrieveUserData(ReportableVOs,ReportableSites)
+  CreateLCGssmUpdates(gUserOutput)
+  CreateVOSummary(gUserOutput,ReportableSites)
 
 #-----------------------------------------------
 def CheckMyOsgInteropFlag(reportableSites):
@@ -1185,80 +1273,95 @@ def CheckForUnreportedDays(reportableVOs,reportableSites):
   """
   global gSitesMissingData 
   global gMyOSG_available
-  daysMissing = int(gFilterParameters["MissingDataDays"])
+  global gInteropAccounting
+  daysMissing = int(gParams["MissingDataDays"])
   Logit("-------------------------------------------")
   Logit("---- Check for unreported days started ----")
   Logit("-------------------------------------------")
-  Logit("Starting checking for sites that are missing data for more than %d days" % (daysMissing))
+  Logit("Starting checking for resources that are missing data for more than %d days" % (daysMissing))
   output = ""
   firstTime = 1
 
-  #-- using general query to see all dates reported for the period --
+  #-- Using general query to see all dates reported for the period --
   periodWhereClause = SetDatesWhereClause()
   endTimeFmt = "%Y-%m-%d"
-  sites = reportableSites.keys()
+  resourceGroups = reportableSites.keys()
   query="""select distinct(date_format(EndTime,"%s")) from VOProbeSummary Main where %s """ % (endTimeFmt,periodWhereClause)
-  dateResults = RunGratiaQuery(query,gDatabaseParameters,LogResults=False,headers=False)
-  Logit("Available dates: " + str(dateResults.split("\n"))) 
+  dateResults = RunGratiaQuery(query,LogResults=False,headers=False)
+  Logit("Available dates reported in Gratia: " + str(dateResults.split("\n"))) 
 
-  #-- now checking for each site ---
+  #-- we need to filter out future dates as there are a few probes --
+  #-- that are sending future dates to Gratia periodically.        --
+  reportableDates = []
+  today = str(datetime.date.today())
+  for thisdate in dateResults.split("\n"):
+    if thisdate < today:
+      reportableDates.append(thisdate)
+  Logit("Available dates used: " + str(reportableDates))
+
+  #-- now checking for each resource within a resource groups ---
   missingDataList = []
-  for site in sorted(sites):
-    allDates = dateResults.split("\n")
-    Logit("------ User Query: %s  ------" % site)
-    query = GetQueryForDaysReported(site,reportableVOs)
-    if firstTime:
-      Logit("Sample Query:")
-      LogToFile(query)
-      firstTime = 0
-    results = RunGratiaQuery(query,gDatabaseParameters,LogResults=False,headers=False)
+  for resourceGroup in sorted(resourceGroups):
+    resources = gInteropAccounting.interfacedResources(resourceGroup)
+    for resource in sorted(resources):
+      who = "Resource: %(r)s in Resource Group: %(rg)s " % \
+               { "rg" : resourceGroup, "r" : resource } 
+      allDates = reportableDates[:]
+      query = GetQueryForDaysReported(resourceGroup,resource)
+      if firstTime:
+          Logit("Sample Query:")
+          LogToFile(query)
+          firstTime = 0
+      results = RunGratiaQuery(query,LogResults=False,headers=False)
 
-    #--- determine if any days are missing
+      #--- determine if any days are missing
+      reportedDates = []
+      if len(results) > 0:
+        reportedDates = results.split("\n")
+      Logit("Reported dates: " + str(reportedDates))
+      for i in range (0,len(reportedDates)):  
+        if reportedDates[i] < today: #needed due to sites reporting future dates
+          allDates.remove(reportedDates[i])
+      if  len(allDates) > 0: 
+        missingDataList.append("")
+        missingDataList.append("%s (missing days): %s" %  (who, str(allDates)))
 
-    reportedDates = []
-    if len(results) > 0:
-      reportedDates = results.split("\n")
-    for i in range (0,len(reportedDates)):  
-      allDates.remove(reportedDates[i])
-    if  len(allDates) > 0: 
-      missingDataList.append("")
-      missingDataList.append(site + "  (missing days): " + str(allDates))
-
-      #--- see if dowmtime for those days was scheduled ---
-      if gMyOSG_available:
-        try:
-          shutdownDays = CheckForShutdownDays(site,allDates)
-          missingDataList.append(site + " (shutdown days): " + str(shutdownDays))
-          for i in range (0,len(shutdownDays)):  
-            allDates.remove(shutdownDays[i])
-          #--- see if the site is inactive ----
-          if  len(allDates) > daysMissing: 
-            if inactives.resource_is_inactive(site):
-              missingDataList.append(site + " is marked as inactive in MyOsg")
-              allDates = []  # this keeps it from being reported as missing data
-        except Exception, e:
+        #--- see if dowmtime for those days was scheduled ---
+        if gMyOSG_available:
+          try:
+            shutdownDays = CheckForShutdownDays(resource,allDates)
+            missingDataList.append("%s (shutdown days): %s" % (who, str(shutdownDays)))
+            for i in range (0,len(shutdownDays)):  
+              allDates.remove(shutdownDays[i])
+            #--- see if the resource is inactive ----
+            # this keeps it from being reported as missing data
+            # as this is another means of marking downtimes per the goc
+            if  len(allDates) > daysMissing: 
+              if inactives.resource_is_inactive(resource):
+                missingDataList.append("%s is marked as inactive in MyOsg" % who)
+                allDates = []  
+          except Exception, e:
+            allDates.append("WARNING: Unable to determine planned shutdowns - MyOSG error (" + str(sys.exc_info()[1]) +")" )
+            gMyOSG_available = False   
+        else: 
           allDates.append("WARNING: Unable to determine planned shutdowns - MyOSG error (" + str(sys.exc_info()[1]) +")" )
-          gMyOSG_available = False   
-      else: 
-        allDates.append("WARNING: Unable to determine planned shutdowns - MyOSG error (" + str(sys.exc_info()[1]) +")" )
 
-      #--- see if we have any missing days now ----
-      if  len(allDates) > daysMissing: 
-        missingDataList.append(site + " is missing data for %d days" % len(allDates))
-        gSitesMissingData[site] = allDates
-
+        #--- see if we have any missing days now ----
+        if  len(allDates) > daysMissing: 
+          missingDataList.append("%s is missing data for %d days" % (who,len(allDates)))
+          gSitesMissingData[resource] = allDates
+          Logwarn("%s missing data for more than %d days: " % \
+               ( who, daysMissing) + str(gSitesMissingData[resource]))
+      #--- end of resource loop ----
+    # --- end of resourceGroup loop ---
   #--- create html file of missing data ---
   CreateMissingDaysHtml(missingDataList)
 
   #--- see if any need to be reported ---
-  if len(gSitesMissingData) > 0:
-    sites = gSitesMissingData.keys()
-    for site in sites:
-      Logwarn(site + " missing data for more than %d days: " % (daysMissing) + str(gSitesMissingData[site]))
-  else:
-      Logit("No sites had missing data for more than %d days" % (daysMissing))
+  if len(gSitesMissingData) == 0:
+    Logit("No sites/resources had missing data for more than %d days" % (daysMissing))
 
-  Logit("Ended checking for sites that are missing data for more than %d days" % (daysMissing))
+  Logit("Ended checking for sites/resources that are missing data for more than %d days" % (daysMissing))
   Logit("---------------------------------------------")
   Logit("---- Check for unreported days completed ----")
   Logit("---------------------------------------------")
@@ -1271,7 +1374,8 @@ def CreateMissingDaysHtml(missingData):
   file = None
   filename = ""
   try:
-    filename = GetFileName("missingdays","html") 
+    dir = gParams["WebLocation"]
+    filename = GetFileName(dir,"missingdays","html") 
     Logit("#--------------------------------#")
     Logit("Creating html file of sites with missing data: %s" % filename)
     file = open(filename, 'w')  
@@ -1295,7 +1399,7 @@ def CreateMissingDaysHtml(missingData):
   except IOError, (errno,strerror):
     raise Exception,"IO error(%s): %s (%s)" % (errno,strerror,filename)
   # ---- send to collector -----
-  SendXmlHtmlFiles(filename,gFilterParameters["GratiaCollector"])
+  ## SendXmlHtmlFiles(filename,gParams["WebLocation"])
 
 #-----------------------------------------
 def CheckForShutdownDays(site,missingDays):
@@ -1319,54 +1423,54 @@ def main(argv=None):
   global gVoOutput
   global gUserOutput
 
-  #--- get command line arguments  -------------
+  #--- get command line arguments and parameter file arguments  -------------
   try:
     old_umask = os.umask(002)  # set so new files are 644 permissions
     GetArgs(argv)
   except Exception, e:
-    print >>sys.stderr, e.__str__()
+    print >>sys.stderr, "ERROR: " + e.__str__()
     return 1
-  
 
   try:      
-    #--- get parameters -------------
     GetFilterConfigParams(gFilterConfigFile)
-    GetDBConfigParams(gFilterParameters["DBConfFile"])
-
+    GetDBConfigParams(gParams["DBConfFile"])
     Logit("====================================================")
     Logit("Starting transfer from Gratia to APEL")
     Logit("Filter date............ %s" % (gDateFilter))
-    gFilterParameters["SiteFilterFile"] = DetermineReportableSitesFileToUse(gDateFilter)
-    Logit("Reportable sites file.. %s" % (gFilterParameters["SiteFilterFile"]))
-    Logit("Reportable VOs file.... %s" % (gFilterParameters["VOFilterFile"]))
-    Logit("Gratia database host... %s:%s" % (gDatabaseParameters["GratiaHost"],gDatabaseParameters["GratiaPort"]))
-    Logit("Gratia database........ %s" % (gDatabaseParameters["GratiaDB"]))
-    Logit("Missing days threshold. %s" % (gFilterParameters["MissingDataDays"]))
-    Logit("LCG SSM_HOME variable.. %s" % (gDatabaseParameters["SSMHome"]))
-    Logit("LCG SSM config file.... %s" % (gDatabaseParameters["SSMConfig"]))
-    Logit("LCG SSM update file.... %s" % (GetFileName(gDatabaseParameters["SSMupdates"]  ,"txt")))
-    Logit("LCG SSM delete file.... %s" % (GetFileName(gDatabaseParameters["SSMdeletes"],"txt")))
+    gParams["SiteFilterFile"] = DetermineReportableSitesFileToUse(gDateFilter)
+    Logit("Reportable sites file.. %s" % (gParams["SiteFilterFile"]))
+    Logit("Reportable VOs file.... %s" % (gParams["VOFilterFile"]))
+    Logit("Gratia database host... %s:%s" % (gDbParams["GratiaHost"],gDbParams["GratiaPort"]))
+    Logit("Gratia database........ %s" % (gDbParams["GratiaDB"]))
+    Logit("Web location........... %s" % (gParams["WebLocation"]))
+    Logit("Log location........... %s" % (gParams["LogDir"]))
+    Logit("Missing days threshold. %s" % (gParams["MissingDataDays"]))
+    Logit("SSM module............. %s" % (gParams["SSMFile"]))
+    Logit("SSM config file........ %s" % (gParams["SSMConfig"]))
+    Logit("SSM updates dir file... %s" % (gParams["UpdatesDir"]))
+    Logit("SSM update file........ %s" % (GetFileName(gParams["UpdatesDir"],gParams["UpdateFileName"]  ,"txt")))
+    Logit("SSM delete file........ %s" % (GetFileName(gParams["UpdatesDir"],gParams["DeleteFileName"],"txt")))
 
     #--- check db availability -------------
-    CheckGratiaDBAvailability(gDatabaseParameters)
+    CheckGratiaDBAvailability()
 
     #--- get all filters -------------
-    ReportableSites    = GetSiteFilters(gFilterParameters["SiteFilterFile"])
-    ReportableVOs      = GetVOFilters(gFilterParameters["VOFilterFile"])
+    ReportableSites    = GetSiteFilters(gParams["SiteFilterFile"])
+    ReportableVOs      = GetVOFilters(gParams["VOFilterFile"])
 
     #--- Perform Rebus topology checks ---
     CheckMyOsgInteropFlag(ReportableSites)
    
     #--- process deletions ---
     if gInUpdateMode:
-      RunLCGUpdate(gDatabaseParameters,"delete")
+      RunLCGUpdate("delete")
     
     ProcessUserData(ReportableVOs,ReportableSites)
     CheckForUnreportedDays(ReportableVOs,ReportableSites)
 
     #--- apply the updates to the APEL accounting database ----
     if gInUpdateMode:
-      RunLCGUpdate(gDatabaseParameters,"update")
+      RunLCGUpdate("update")
       SendEmailNotificationSuccess()
       SendEmailNotificationWarnings()
       Logit("Transfer Completed SUCCESSFULLY from Gratia to APEL")
@@ -1375,15 +1479,15 @@ def main(argv=None):
     Logit("====================================================")
 
   except Exception, e:
+    Logerr(e.__str__())
     SendEmailNotificationFailure(e.__str__())
     Logit("Transfer FAILED from Gratia to APEL.")
-    ## traceback.print_exc()  
-    Logerr(e.__str__())
+#    traceback.print_exc()
     Logit("====================================================")
     return 1
 
   return 0
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv))
 

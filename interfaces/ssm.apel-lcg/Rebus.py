@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-import commands, os, sys, time, string
+import os, sys, time, string
+import subprocess
 import getopt
 import traceback
 import csv
@@ -44,12 +45,12 @@ class Rebus:
       # the wget creates an empty file if it fails. we want to preserve the old one
       tmp_csv = self.csvfile + ".tmp"
       cmd = 'wget -t1 -O %s "%s"' % (tmp_csv,self.location)
-      rtn = os.system("%s >/dev/null 2>&1" % cmd)
+      rtn = subprocess.call("%s >/dev/null 2>&1" % cmd,shell=True)
       if rtn == 0:
         self.isAccessible = True
-        os.system("mv %s %s" % (tmp_csv, self.csvfile)) # use the new one
+        subprocess.call("mv %s %s" % (tmp_csv, self.csvfile),shell=True) # use the new one
       else:
-        os.system("rm -f %s" % (tmp_csv)) # clean up
+        subprocess.call("rm -f %s" % (tmp_csv),shell=True) # clean up
         self.isAccessible = False
         if self.verbose: 
           raise RebusException("ERROR: Problem performing: %s" % cmd)

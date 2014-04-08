@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# chkconfig:    - 51 01
+#
+# description:  Enable the gratia-apel interface to run via cron.
+# processname:  gratia-apel-cron
+#
+# source function library
+. /etc/rc.d/init.d/functions
+lockfile=LOCKFILE
+
+RETVAL=0
+
+start() {
+        action $"Enabling periodic gratia-apel.cron: " touch "$lockfile"
+        RETVAL=$?
+}
+
+stop() {
+        action $"Disabling periodic gratia-apel.cron: " rm -f "$lockfile"
+        RETVAL=$?
+}
+
+restart() {
+        stop
+        start
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|force-reload)
+        restart
+        ;;
+  reload)
+        ;;
+  condrestart)
+        [ -f "$lockfile" ] && restart
+        ;;
+  status)
+        if [ -f $lockfile ]; then
+                echo $"Periodic gratia-apel.cron is enabled."
+                RETVAL=0
+        else
+                echo $"Periodic gratia-apel.cron is disabled."
+                RETVAL=3
+        fi
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
+        RETVAL 1
+esac
+
+exit $RETVAL

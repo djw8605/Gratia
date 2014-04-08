@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import commands, os, sys, time, string
+import sys, time, string
 import libxml2
 import urllib2
 import exceptions

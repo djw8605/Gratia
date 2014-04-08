@@ -5,10 +5,8 @@ import commands, os, sys, time, string
 import datetime
 import traceback
 import urllib2
-import elementtree as et
-from elementtree.ElementTree import Element
-from elementtree.ElementTree import ElementTree
-from elementtree.ElementTree import parse
+import libxml2
+import exceptions
 
 ##################################################
 class InteropAccounting:
@@ -57,12 +55,10 @@ class InteropAccounting:
     """
     self.location = "http://myosg.grid.iu.edu/rgsummary/xml?datasource=summary&summary_attrs_showwlcg=on&summary_attrs_showservice=on&summary_attrs_showfqdn=on&gip_status_attrs_showtestresults=on&downtime_attrs_showpast=&account_type=cumulative_hours&ce_account_type=gip_vo&se_account_type=vo_transfer_volume&start_type=7daysago&start_date=03%2F20%2F2009&end_type=now&end_date=03%2F27%2F2009&all_resources=on&facility_10009=on&site_10026=on&gridtype=on&gridtype_1=on&service_1=on&service_5=on&service_2=on&service_3=on&service_central_value=0&service_hidden_value=0&active_value=1&disable_value=1"
 
-    self.xmlFile        = "InteropAccounting.xml" 
     self.accountingDict = {}
-    self.jgw_oldSitesTable = {}
-
     self.myosgResourceGroups = []    # All MyOsg Resource Groups
     self.resourceGroups      = None  # InteropAccounting Resource Groups
+    self.doc                 = None  # MyOsg xml document
 
 
   ################################# 
@@ -76,8 +72,8 @@ class InteropAccounting:
     if self.resourceGroups != None:  # only retrieve ones
       return
     self.resourceGroups = {}
-    root = self.__getMyOsgData__()
-    for rg in root.findall("ResourceGroup"):
+    self.__getMyOsgData__()
+    for rg in self.doc.xpathEval("/ResourceSummary/ResourceGroup"):
       resource_grp = self.__get_value__(rg,"GroupName") 
       if self.resourceGroupDisabled(rg):
         continue
@@ -85,15 +81,15 @@ class InteropAccounting:
       interfaced  = False
       ceResources = {}
       #--- Resources ----
-      for resource in rg.findall("Resources/Resource"):
+      for resource in rg.xpathEval("Resources/Resource"):
         if self.resourceDisabled(resource):
           continue
         resource_name     = self.__get_value__(resource,"Name") 
         #--- WLCGInfo ----
-        wlcg = resource.findall("WLCGInformation")
+        wlcg = resource.xpathEval("WLCGInformation")
         acctName = self.__get_value__(wlcg[0],"AccountingName") 
         #--- Services ----
-        for service in resource.findall("Services/Service"):
+        for service in resource.xpathEval("Services/Service"):
           if not self.CEService(service):
             continue
           ceResources[resource_name] = [self.interfacedToApel(wlcg[0]),acctName]
@@ -206,18 +202,22 @@ class InteropAccounting:
     return False
   #############################
   def __getMyOsgData__(self):
-    os.system('wget -O %s "%s" >/dev/null 2>&1' % (self.xmlFile,self.location))
-    root     = ElementTree(file=self.xmlFile)
-    return root
+    try:
+      if self.doc == None:
+        html     = urllib2.urlopen(self.location).read()
+        self.doc = libxml2.parseDoc(html)
+    except:
+      raise Exception("Unable to retrieve or parse xml from MyOSG")
+
     
   #################################################
   def __get_value__(self,element,name):
     """ Returns the value of the xml element."""
-    el = element.find("%s" % name)
-    if el == None:
+    el = element.xpathEval(name)
+    if len(el) == 0:
       return ""
     else:
-      return  el.text 
+      return  el[0].content 
 
 #### end class #######################
 #----------------

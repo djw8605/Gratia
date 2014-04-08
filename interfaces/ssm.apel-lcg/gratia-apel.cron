@@ -1,0 +1,22 @@
+#-------------------------------------------------------------------------
+# Gratia/APEL-EGI interface crontab entry
+#-------------------------------------------------------------------------
+# Previous month's transfers are run for just the 1st n days of the month to 
+# insure all sites have reported to Gratia. 
+# The n days is dependent on when LCG accounting issues the monthly MOU reports
+#
+# Note the lock file not existing is success hence the the slightly odd logic
+# below.
+#
+# The lock file can be enabled or disabled via a
+#   service   gratia-apel-cron start
+#   chkconfig gratia-apel-cron on
+#-------------------------------------------------------------------------
+15 10 1-5 * *  root   [ ! -f LOCKFILE ] || (DATADIR/LCG.py --config=SYSCONFDIR/lcg.conf --date=previous --update)
+#
+#-------------------------------------------------------------------------
+# Current month's transfers - Always daily.
+#-------------------------------------------------------------------------
+15 11 * * *  root [ ! -f LOCKFILE ] || ( DATADIR/LCG.py --config=SYSCONFDIR/lcg.conf --date=current --update && DATADIR/create-apel-index.sh SYSCONFDIR/lcg.conf) 
+#
+#-------------------------------------------------------------------------

@@ -1,10 +1,9 @@
 #!/usr/bin/python
 
-import commands, os, sys, time, string
+import sys, time, string
 import libxml2
 import urllib2
 import exceptions
-
   
 #------------------------------
 class Downtimes:
@@ -31,7 +30,7 @@ class Downtimes:
        2. if the xml changes, one is never notified.
        3. if MyOSG is down (planned/unplanned), even if notified, can't do
           anything about it.
-       
+
   """
   #-------------------------------------- 
   def __init__(self):

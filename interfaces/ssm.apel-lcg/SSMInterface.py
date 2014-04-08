@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-import commands, os, sys, time, string
-import popen2
+import os, sys, time, string
+import subprocess
 import getopt
 import glob
 import traceback
@@ -20,13 +20,13 @@ class SSMInterface:
   """
 
   #############################
-  def __init__(self,config_file,ssm_home):
+  def __init__(self,config_file,ssm_file):
     self.config = ConfigParser.ConfigParser()
     if not os.path.isfile(config_file):
       raise SSMException("""The SSM configuration file does not exist (%s).""" % config_file)
     self.configFile = config_file
     self.config.read(config_file)
-    self.ssm_master = "%s/ssm_master.py" % ssm_home
+    self.ssm_master = "/usr/share/gratia-apel/ssm/ssm_master.py"
     self.outgoing = "%s/outgoing" % self.config.get("messagedb","path")
     self.__validate__() 
 
@@ -66,10 +66,13 @@ This is the "messagedb" section, "path" attribute""" % \
 
   #-----------------------
   def send_file(self,file):
+    """Copies a file to the SSM outgoing directory and invokes the
+       send_outgoing method.
+    """
     if not os.path.isfile(file):
       raise SSMException("File to be sent does not exist: %s" % file)
-    os.system("cp %(file)s %(outgoing)s" % \
-                 { "file" : file, "outgoing": self.outgoing} )
+    subprocess.call("cp %(file)s %(outgoing)s" % \
+                 { "file" : file, "outgoing": self.outgoing} ,shell=True)
     if not os.path.isfile(file):
       raise SSMException("""Copy failed. File: %(file)s
 To: %(dir)s""" % { "file" : file, "dir" : self.outgoing })
@@ -77,46 +80,69 @@ To: %(dir)s""" % { "file" : file, "dir" : self.outgoing })
 
   #-----------------------
   def send_outgoing(self):
-    ## print self.show_outgoing()
+    """Invokes the SSM client process which sends all files in the
+       outgoing directory to APEL.  It then verifies that all files
+       have been sent, i.e., there are no files left in the outgoing
+       directory.  A 2 minute timeout is used in the event the 
+       interface hangs.  Since the SSM client runs as a daemon,
+       the client is killed on termination of this process.
+    """
     cmd = "python %(ssm_master)s %(config)s" % \
        { "ssm_master" : self.ssm_master, "config" : self.configFile }
-    p = popen2.Popen3(cmd,True)
+    try:
+      p = subprocess.Popen(cmd, shell=True,
+                           stdin=subprocess.PIPE, 
+                           stdout=subprocess.PIPE, 
+                           stderr=subprocess.PIPE,
+                           close_fds=True, env=os.environ)
+    except OSError, e:
+      raise SSMException("""Interface FAILED.
+Command: %(cmd)s
+Exception OSError: %(oserror)s
+Files in: %(dir)s
+%(files)s
+""" % { "cmd" : cmd, "oserror" : e, "dir" : self.outgoing,
+        "files" : os.listdir(self.outgoing) } )
+
     maxtime   = 120   # max seconds to wait before giving up and terminating job
     totaltime = 0
     sleep     = 10    # sleep time between checks to see if file was sent
     rtn = p.poll()
     while self.outgoing_sent() == False:
       rtn = p.poll()
-      if rtn != -1:
+      if rtn is not None:
         break
-      os.system("sleep %s" % sleep)
+      subprocess.call("sleep %s" % sleep,shell=True)
       if totaltime > maxtime:
-        self.kill_ssm(p.pid)
-        raise SSMException("""Interface FAILED.  
+        p.terminate()
+        msg = """Interface FAILED.  
 Command: %(cmd)s
 Had to kill process after %(timeout)s seconds.
 Files in: %(dir)s
 %(files)s
 """ % { "timeout" : maxtime, "dir"   : self.outgoing, 
-        "cmd"     : cmd,     "files" : os.listdir(self.outgoing) } )
+        "cmd"     : cmd,     "files" : os.listdir(self.outgoing) } 
+        raise SSMException(msg)
       totaltime = totaltime + sleep
-      
+    ##-- end of while --  
+    stdoutdata, stderrdata = p.communicate()
+    rtn = p.returncode
     if rtn > 0: 
-      msg = """Interface FAILED.
+      msg = """Interface FAILED. Messages have not been sent.
 Command:  %(cmd)s
-""" %  { "cmd" : cmd }
-      for line in p.fromchild.readlines():
-        msg += line
-      for line in p.childerr.readlines():
-        msg += line
+Return code: %(rtn)s
+SSM stdout: %(stdout)s
+SSM stderr: %(stderr)s""" %  \
+         { "cmd" : cmd, "rtn" : rtn, "stdout" : stdoutdata, "stderr" : stderrdata}
       raise SSMException(msg)
-    self.kill_ssm(p.pid)
-    
-  #-----------------------
-  def kill_ssm(self,pid):
-    os.system("kill -9 %s >/dev/null 2>&1" % pid)
-
-    
+    #-- double check the SSM program does not always give a non-zero return code
+    if not self.outgoing_sent():
+      msg = """Interface FAILED. All messages have NOT been sent.
+Command:  %(cmd)s
+SSM stdout: %(stdout)s
+SSM stderr: %(stderr)s""" %  \
+           { "cmd" : cmd, "stdout" : stdoutdata, "stderr" : stderrdata}
+      raise SSMException(msg)
 ## end of class ###
 
 #----------------
@@ -179,18 +205,32 @@ def main(argv):
       usage()
       print "ERROR: you need to specify the --config option"
       return 1
-    try:
-      ssm_home = os.environ["SSM_HOME"]
-    except: 
-      print "ERROR: You must set the SSM_HOME variable"
-      return 1
+
+    ssm_home = "xxx"
     ssm = SSMInterface(config,ssm_home)
     if action == "--show-outgoing":
       print ssm.show_outgoing()
     elif action == "--send-outgoing":
+      if ssm.outgoing_sent():
+        print "There are no messages to send"
+        return 1
       ssm.send_outgoing()
+      if ssm.outgoing_sent():
+        print "All messages have been sent"
+        return 0
+      else:
+        print "ERROR: all messages have NOT been sent"
+        print ssm.show_outgoing()
+        return 1
     elif action == "--send-file":
       ssm.send_file(file)
+      if ssm.outgoing_sent():
+        print "File has been sent successfully"
+        return 0
+      else:
+        print "ERROR: File has NOT been sent"
+        print ssm.show_outgoing()
+        return 1
     else:
       usage()
       print "ERROR: no action options specified"
