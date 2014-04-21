@@ -188,7 +188,8 @@ function check_svn {
   svndir=$svnsrc
   logit "Checking svn"
   cd $svndir
-  svn status --show-updates 2>&1 |egrep -v "rpms|tarballs" 1>>$tmpfile 2>&1
+#  svn status --show-updates 2>&1 |egrep -v "rpms|tarballs" 1>>$tmpfile 2>&1
+  svn status 2>&1 |egrep -v "rpms|tarballs" 1>>$tmpfile 2>&1
   cd - 1>>$tmpfile 2>&1
 }
 #---------------
