@@ -103,6 +103,11 @@
 #            MWT2           from 8.87  to  9.26
 #            WT2            from 10.79 to 11.06 
 #
+# 04/30/14 (John Weigand)
+#     Added resource group Purdue-Hadoop.
+#     It is replacing Purdue-RCAC mid month so both need to remain for April.
+#     Giving it the same NF factor as Purdue-RCAC until they supply a new one.
+#
 ##################################################################
 #
 #-- Site  ------- HEPSpec2006
@@ -117,6 +122,7 @@ GLOW                9632
 MIT_CMS            10800
 Nebraska           10412
 Purdue-RCAC        12124
+Purdue-Hadoop      12124
 Purdue-Rossmann    11240
 Purdue-Hansen       8680
 Purdue-Carter      16400
