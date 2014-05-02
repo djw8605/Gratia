@@ -482,6 +482,9 @@ insert a record in the trace table for any jobs where CPU exceed Wall times.
 The trace table is an internal table that functions pretty much like an 
 error/warning log internally in the Gratia database.
 
+NOTE: This query HAS to go against the main Gratia database and NOT the replica
+      since the trace table is not replicated.
+
 This script queries the trace table for the time period specified searching
 for entries with a 
 - procName = 'add_JUR_to_summary' 
