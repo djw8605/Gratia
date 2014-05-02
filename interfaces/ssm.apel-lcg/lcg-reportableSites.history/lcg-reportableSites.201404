@@ -108,6 +108,9 @@
 #     It is replacing Purdue-RCAC mid month so both need to remain for April.
 #     Giving it the same NF factor as Purdue-RCAC until they supply a new one.
 #
+# 05/02/14 (John Weigand)
+#     Changed Purdue-Hadoop NF from 12124 to 12370  goc ticket 20873
+#
 ##################################################################
 #
 #-- Site  ------- HEPSpec2006
@@ -122,7 +125,7 @@ GLOW                9632
 MIT_CMS            10800
 Nebraska           10412
 Purdue-RCAC        12124
-Purdue-Hadoop      12124
+Purdue-Hadoop      12370
 Purdue-Rossmann    11240
 Purdue-Hansen       8680
 Purdue-Carter      16400
