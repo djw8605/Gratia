@@ -111,6 +111,9 @@
 # 05/02/14 (John Weigand)
 #     Changed Purdue-Hadoop NF from 12124 to 12370  goc ticket 20873
 #
+# 05/05/14 (John Weigand)
+#     Removed Purdue-RCAC was replaced by Purdue-Hadoop mid-April
+#
 ##################################################################
 #
 #-- Site  ------- HEPSpec2006
@@ -124,7 +127,6 @@ CIT_CMS_T2         12944
 GLOW                9632
 MIT_CMS            10800
 Nebraska           10412
-Purdue-RCAC        12124
 Purdue-Hadoop      12370
 Purdue-Rossmann    11240
 Purdue-Hansen       8680
@@ -160,3 +162,4 @@ LC-glcc            15680
 #################################
 #Purdue-Steele      12784
 #UFlorida-SSERCA     7250
+#Purdue-RCAC        12124
