@@ -229,6 +229,7 @@ select
  ,date_format(x.EndTime,"%Y-%m-%d")       as Period
  ,x.CommonName                            as CommonName
  ,x.ResourceType                          as ResourceType
+ ,x.Processors                            as Cores
  ,sum(x.Njobs)                            as Jobs
  ,round(sum(x.CpuSystemDuration)/3600,2)  as CpuSystemHrs
  ,round(sum(x.CpuuserDuration)/3600,2)    as CpuUserHrs
@@ -245,6 +246,7 @@ group by
   ,Period
   ,CommonName
   ,ResourceType
+  ,Cores
 EOF
   set_mysql_cmd "--table"
   run_mysql  
@@ -429,6 +431,7 @@ function set_db_parameters {
   case $DATABASE in
     "gratia"    ) 
                   HOST=gr-osg-mysql-collector.opensciencegrid.org
+                  HOST=fcl411.fnal.gov
                   PORT=3306
                   ;;
     "gratia_osg_daily"    ) 
