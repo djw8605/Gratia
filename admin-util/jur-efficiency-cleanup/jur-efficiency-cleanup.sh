@@ -100,12 +100,14 @@ function find_totals {
 # NOTE: The purpose of these queries is to go against the trace table
 # which now logs JobUsageRecords with efficiencies > 100%.
 #
-# Key columns:
-# procName: add_JUR_to_summary
-# p1      : dbid of JobUsageRecord
-# sqlQuery:  WARNING: MasterSummaryData: CPU exceeds Wall: Njobs 1 
-#            WallDuration 0 Cores 6 Wall_w_Cores 0 
-#            CpuUserDuration 77777777 CpuSystemDuration 0
+# Key columns in trace table 
+# - only populated on main collector db and not the replica (reporting) db
+#   as the trace table is no replicated):
+#      procName: add_JUR_to_summary
+#      p1      : dbid of JobUsageRecord
+#      sqlQuery:  WARNING: MasterSummaryData: CPU exceeds Wall: Njobs 1 
+#                 WallDuration 0 Cores 6 Wall_w_Cores 0 
+#                 CpuUserDuration 77777777 CpuSystemDuration 0
 #
 #=========================================================
 #  Totals for all jobs > ${THRESHOLD}% efficiency
@@ -531,7 +533,7 @@ DATABASE=gratia
 SHOWSQL="no"
 
 validate_args $*
-OUTPUTDIR=$DIR/$DATABASE-$(date +'%Y%m%d')
+OUTPUTDIR=$DIR/$DATABASE-$(echo $START_TIME |sed 's/-//g')-$(echo $END_TIME |sed 's/-//g')
 make_dir $OUTPUTDIR
 clean_all_directories
 logit "
