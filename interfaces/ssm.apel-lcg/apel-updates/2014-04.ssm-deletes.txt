@@ -168,10 +168,23 @@ NormalisedWallDuration: 0
 NormalisedCpuDuration: 0
 NumberOfJobs: 0
 %%
+Site: BNL-ATLAS
+Group: atlas
+EarliestEndTime: 1396933200
+LatestEndTime: 1396933200
+Month: 04
+Year: 2014
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Xin Zhao 87/CN=proxy
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1396328400
-LatestEndTime: 1398142800
+LatestEndTime: 1398834000
 Month: 04
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -184,7 +197,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1396328400
-LatestEndTime: 1398229200
+LatestEndTime: 1398834000
 Month: 04
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -197,7 +210,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1396328400
-LatestEndTime: 1398229200
+LatestEndTime: 1398834000
 Month: 04
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -210,7 +223,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1396933200
-LatestEndTime: 1398142800
+LatestEndTime: 1398834000
 Month: 04
 Year: 2014
 GlobalUserName: iVDGL
@@ -665,7 +678,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1396414800
-LatestEndTime: 1398661200
+LatestEndTime: 1398834000
 Month: 04
 Year: 2014
 GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Philipp Mogg
@@ -2810,7 +2823,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1396414800
-LatestEndTime: 1398661200
+LatestEndTime: 1398834000
 Month: 04
 Year: 2014
 GlobalUserName: /C=BR/O=ANSP/OU=ANSPGrid CA/OU=People/CN=Angelo de Souza Santos
