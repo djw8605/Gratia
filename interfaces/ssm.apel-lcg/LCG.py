@@ -31,10 +31,10 @@ import getopt
 import math
 import re
 import string
-import popen2
 import email
 import smtplib, rfc822  # for email notifications via smtp
-import commands, os, sys, time, string
+import os, sys, time, string
+import subprocess
 
 downtimes          = Downtimes.Downtimes()
 inactives          = InactiveResources.InactiveResources()
@@ -138,6 +138,23 @@ LCG.py   --conf=config_file --date=month [--update] [--no-email]
                 This is very useful when testing changes.
 """
 
+#----------------------------------------------
+def getoutput (cmd):
+    """Used for simple shell command execution.
+       Returns: stdout
+    """
+    process = subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True)
+    return process.communicate()[0]
+
+#----------------------------------------------
+def getstatusoutput(cmd):
+    """Used for simple shell command execution.
+       Returns: (return code, stdout)[0]
+    """
+    process = subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True)
+    returncode = process.wait()
+    stdout,stderr = process.communicate()
+    return returncode,stdout,stderr 
 
 #-----------------------------------------------
 def GetArgs(argv):
@@ -258,9 +275,9 @@ This is run as a %(user)s cron process on %(hostname)s at %(runtime)s.
 
 %(contents)s
 """ % { "contents" : contents,
-        "hostname" : commands.getoutput("hostname -f"),
+        "hostname" : getoutput("hostname -f"),
         "runtime"  : gRunTime,
-        "user"     : commands.getoutput("whoami"),}
+        "user"     : getoutput("whoami"),}
 
   Logit("Email notification being sent to %s" % gParams["ToEmail"])
   Logit("Email notification being cc'd to %s" % gParams["CcEmail"])
@@ -317,17 +334,17 @@ SSM deletes records.. %(ssmdels)s
 Reportable sites file.. %(sitefilter)s
 Reportable VOs file.... %(vofilter)s
 """ % { "program"     : gProgramName,
-                "hostname"    : commands.getoutput("hostname -f"),
-                "username"    : commands.getoutput("whoami"),
+                "hostname"    : getoutput("hostname -f"),
+                "username"    : getoutput("whoami"),
                 "logfile"     : GetFileName(gParams["LogDir"],None,"log"),
                 "sitefilter"  : gParams["SiteFilterFile"],
                 "vofilter"    : gParams["VOFilterFile"],
                 "ssmfile"     : gParams["SSMFile"],
                 "ssmconfig"   : gParams["SSMConfig"],
                 "ssmupdates"  : GetFileName(gParams["UpdatesDir"],gParams["UpdateFileName"],"txt"),
-                "ssmrecs"     : commands.getoutput("grep -c '%%' %s" % GetFileName(gParams["UpdatesDir"],gParams["UpdateFileName"],"txt")),
+                "ssmrecs"     : getoutput("grep -c '%%' %s" % GetFileName(gParams["UpdatesDir"],gParams["UpdateFileName"],"txt")),
                 "ssmdeletes"  : GetFileName(gParams["UpdatesDir"],gParams["DeleteFileName"],"txt"),
-                "ssmdels"     : commands.getoutput("grep -c '%%' %s" % GetFileName(gParams["UpdatesDir"],gParams["DeleteFileName"],"txt")), }
+                "ssmdels"     : getoutput("grep -c '%%' %s" % GetFileName(gParams["UpdatesDir"],gParams["DeleteFileName"],"txt")), }
 
 #-----------------------------------------------
 def GetVOFilters(filename):
@@ -465,7 +482,7 @@ def DetermineReportableSitesFileToUse(reportingPeriod):
       Logwarn("The %s files should be checked to see if any updates should be made to SVN/CVS in order to retain their history." % (historyDir))
 
     Logit("... updating the reportable sites configuration file: %s" % (historyFile))
-    os.system("cp -p %s %s" % (filterFile,historyFile))
+    subprocess.call("cp -p %s %s" % (filterFile,historyFile),shell=True)
 
   #--- verify a history file exists for the time period. ---
   #--- if it does not, we don't want to update           ---
@@ -587,15 +604,15 @@ def CheckGratiaDBAvailability():
   connectString = CreateConnectString()
   pswdfile = CreatePswdFile()
   command = "mysql --defaults-extra-file=%s -e status %s " % (pswdfile,connectString)
-  (status, output) = commands.getstatusoutput(command)
-  os.system("rm -f " + pswdfile)
+  status, stdout, strerr = getstatusoutput(command)
+  subprocess.call("rm -f " + pswdfile,shell=True) 
   if status == 0:
-    msg =  "Status: \n"+output
-    if output.find("ERROR") >= 0 :
-      msg = "Error in running mysql:\n  %s\n%s" % (command,output)
+    msg =  "Status: \n" + stdout
+    if stdout.find("ERROR") >= 0:
+      msg = "Error in running mysql:\n  %s\nreturn code: %s\nstdout: %s\nstderr: %s\n" % (command,status,stdout,stderr)
       raise Exception(msg)
   else:
-    msg = "Error in running mysql:\n  %s\n%s" % (command,output)
+    msg = "Error in running mysql:\n  %s\nreturn code: %s\nstdout: %s\nstderr: %s\n" % (command,status,stdout,stderr)
     raise Exception(msg)
   Logit("Status: available")
       
@@ -770,11 +787,10 @@ def RunGratiaQuery(select,LogResults=True,headers=False):
   port = gDbParams["GratiaPort"] 
   db   = gDbParams["GratiaDB"]
   Logit("Running query on %s:%s of the %s db" % (host,port,db))
-
   connectString = CreateConnectString(headers)
   pswdfile = CreatePswdFile()
-  (status,output) = commands.getstatusoutput("echo '" + select + "' | mysql --defaults-extra-file=" + pswdfile + " " + connectString)
-  os.system("rm -f " + pswdfile)
+  (status,output,stderr) = getstatusoutput("echo '" + select + "' | mysql --defaults-extra-file=" + pswdfile + " " + connectString)
+  subprocess.call("rm -f " + pswdfile,shell=True)
   results = EvaluateMySqlResults((status,output))
   if len(results) == 0:
     cnt = 0
@@ -821,32 +837,6 @@ def WriteFile(data,filename):
   file.close()
 
 #-----------------------------------------------
-def SendXmlHtmlFiles(filename,dest):
-  """ Copies the xml and html files created to a Gratia collector
-      data area to they are accessible for reporting on the
-      collector or by other software.
-  """
-  global gInUpdateMode
-  if not gInUpdateMode:  # no updates
-    Logit("%s file NOT copied to a Gratia collector. Not in update mode." % (filename,))
-    return
-  if dest == 'DO_NOT_SEND':
-    Logit("%s file NOT copied to a Gratia collector (arg is '%s')" % (filename,dest))
-    return
-  cmd = "scp %s %s" % (filename,dest) 
-  Logit(cmd)
-  p = popen2.Popen3(cmd,1)
-  rtn = p.wait()
-  if rtn <> 0:
-    stderr = p.childerr.readlines()
-    p.childerr.close()
-    Logwarn("SendXmlHtmlFiles method: command(%s) failed rtn code %d: %s" % (cmd,rtn,stderr))
-    return
-  p.childerr.close()
-  Logit("%s file successfully copied" % filename)
-  
-
-#-----------------------------------------------
 def RunLCGUpdate(type):
   """ Performs the update of the APEL database """
   configfile = gParams["SSMConfig"]
@@ -866,7 +856,7 @@ def RunLCGUpdate(type):
   Logit("%(type)s file... %(file)s Records: %(count)s" % \
          { "type"   : type,
            "file"   : file,
-           "count"  : commands.getoutput("grep -c '%%' %s" % file), 
+           "count"  : getoutput("grep -c '%%' %s" % file), 
          } )
   try:
     ssm = SSMInterface.SSMInterface(configfile,ssm_file)
@@ -893,7 +883,7 @@ def CreatePswdFile():
         file.write(filedata)
         if file != None:
           file.close()
-        os.system("chmod 0400 " + filename)
+        subprocess.call("chmod 0400 " + filename,shell=True)
     except IOError, (errno,strerror):
       raise Exception,"IO error(%s): %s (%s)" % (errno,strerror,filename)
     return filename
@@ -958,8 +948,8 @@ def CreateVOSummary(results,reportableSites):
   summaryfile = open(datfilename,"w")
   htmlfile.write("""<HTML><BODY>\n""")
   htmlfile.write("Last update: " + time.strftime('%Y-%m-%d %H:%M',time.localtime()) + "<BR/>")
-  htmlfile.write("Host: " + commands.getoutput("hostname -f") + "<BR/>")
-  htmlfile.write("User: " +  commands.getoutput("whoami"))
+  htmlfile.write("Host: " + getoutput("hostname -f") + "<BR/>")
+  htmlfile.write("User: " + getoutput("whoami"))
   htmlfile.write("""<TABLE border="1">""")
   htmlfile.write("""<TR>""")
   htmlfile.write("""<TH align="center">Resource Group</TH>""")
@@ -1029,8 +1019,6 @@ def CreateVOSummary(results,reportableSites):
 
   htmlfile.close()
   summaryfile.close()
-  ## SendXmlHtmlFiles(htmlfilename,gParams["WebLocation"])
-  ## SendXmlHtmlFiles(datfilename, gParams["WebLocation"])
 
 #--------------------------------
 def totalsList(metrics):
@@ -1482,7 +1470,7 @@ def main(argv=None):
     Logerr(e.__str__())
     SendEmailNotificationFailure(e.__str__())
     Logit("Transfer FAILED from Gratia to APEL.")
-#    traceback.print_exc()
+#    traceback.print_exc() #JGW uncomment when needed to test
     Logit("====================================================")
     return 1
 
