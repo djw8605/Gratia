@@ -412,7 +412,7 @@ function validate_args {
       "--start"    | "-start"     ) START_TIME=$2; shift   ;;
       "--end"      | "-end"       ) END_TIME=$2;   shift   ;;
       "--threshold"| "-threshold" ) THRESHOLD=$2;  shift   ;;
-      "--showsql"  | "-showsql"   ) SHOWSQL="yes"; shift   ;;
+      "--showsql"  | "-showsql"   ) SHOWSQL="yes"          ;;
       "--help"     | "-help"  | "--h" | "-h" ) usage;exit 1 ;;
       * ) usage;echo  "ERROR: Invalid command line argument" ; exit 1 ;;
     esac
