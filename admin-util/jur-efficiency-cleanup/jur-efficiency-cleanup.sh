@@ -293,13 +293,13 @@ EOF
 #============================================================="
   cat >$SQLFILE <<EOF
 select
-  x.SiteName                              as SiteName
+  x.dbid                                  as dbid
+ ,x.SiteName                              as SiteName
  ,x.VOName                                as VOName
  ,x.ProbeName                             as ProbeName
  ,x.CommonName                            as CommonName
  ,date_format(x.EndTime,"%Y-%m-%d")       as Period
  ,x.ResourceType                          as ResourceType
- ,x.dbid
  ,x.Njobs                           
  ,x.CpuSystemDuration                     as CpuSystem
  ,x.CpuUserDuration                       as CpuUser
@@ -315,17 +315,11 @@ where (x.CpuEfficiency > $THRESHOLD
           or 
        x.CpuEfficiency = "Unknown")
   and x.ProbeName = "$PROBE"
-order by 
-   SiteName
-  ,VOName
-  ,ProbeName
-  ,CommonName
-  ,Period
-  ,ResourceType
+order by dbid
 EOF
     set_mysql_cmd "--table"
     run_mysql 
-    DBIDS="$(cat $TMPFILE | egrep -v '^#|^$' | awk -F'|' '{ if ( NR < 4 ) {next}; print $8}')"
+    DBIDS="$(cat $TMPFILE | egrep -v '^#|^$|^\+' | awk -F'|' '{ if ( NR < 2 ) {next}; print $2}')"
     get_jur_details
     create_del_summary_commands
     #-- Inserting sql comment characters into probe log file --
@@ -349,10 +343,10 @@ function get_jur_details {
   inclause="$inclause $dbid"
   cat >$SQLFILE <<EOF
 select
-  GlobalJobId
+  dbid
+ ,GlobalJobId
  ,StartTime
  ,EndTime
- ,dbid
  ,LocalJobId
  ,LocalUserId
  ,Status
@@ -360,7 +354,7 @@ select
  ,Host
 from JobUsageRecord
 where dbid in ($inclause)
-order by GlobalJobId,EndTime
+order by dbid
 EOF
   set_mysql_cmd "--table"
   run_mysql 
