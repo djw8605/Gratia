@@ -903,17 +903,25 @@ def CreateConnectString(headers=False):
 
 #------------------------------------------------
 def EvaluateMySqlResults((status,output)):
-  """ Evaluates the output of a MySql execution using the 
+  """ Evaluates the output of a MySql execution based on the 
       getstatusoutput command.
+      The latest upgrade of MySql to v5.1 appears to be adding a
+      newline to the end of the output where it never did in the past.
+      Or it is the use of the subprocess module.
+      Either way We need to remove it.
   """
   if status == 0:
     if output.find("ERROR") >= 0 :
       raise Exception("MySql error:  %s" % (output))
   else:
     raise Exception("Status (non-zero rc): rc=%d - %s " % (status,output))
-
   if output == "NULL": 
-    output = ""
+    return ""
+  if len(output) == 0: 
+    return ""
+  #-- remove newline from end of output --
+  if output[len(output)-1] == "\n":
+    output = output[0:len(output)-1]
   return output
 
 #-----------------------------------------------
