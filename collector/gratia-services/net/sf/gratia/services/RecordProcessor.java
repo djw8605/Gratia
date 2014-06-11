@@ -82,8 +82,10 @@ public class RecordProcessor extends Thread {
       }
 
       public int maybeHandleDuplicateOrigin(ConstraintViolationException e, String ident) {
-         if (fgDuplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
-             fgOriginFinder.matcher(e.getSQL()).find()) {
+	Logging.fine(fIdentity + ":getSQL " + e.getSQL());
+         if (fgDuplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find()) { 
+         //if (fgDuplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
+         //    fgOriginFinder.matcher(e.getSQL()).find()) {
             if (++fTries < TOO_MANY_DUPS) {
                Logging.fine(fIdentity + ": detected " + fTries +
                             ((fTries > 1)?" consecutive ":"") +
@@ -1094,8 +1096,9 @@ public class RecordProcessor extends Thread {
       long dupdbid = 0;
       boolean needCurrentSaveDup = false;
       Transaction tx = null;
-      if (fgDuplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
-          fgMetaFinder.matcher(e.getSQL()).find()) { // Duplicate of an interesting table
+      if (fgDuplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find()){ 
+      //if (fgDuplicateExceptionFinder.matcher(e.getSQLException().getMessage()).find() &&
+      //    fgMetaFinder.matcher(e.getSQL()).find()) { // Duplicate of an interesting table
          if (current.getTableName().equals("JobUsageRecord")) {
             UserIdentity newUserIdentity =
                ((JobUsageRecord) current).getUserIdentity();

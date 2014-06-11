@@ -23,19 +23,21 @@ Performs the following on the MySql instance for a Gratia Service
 "
 ########################################################################
 }
-#-------------------------------
-function ask_continue {
-  while :
-  do
-    echo -n "... do you want to continue? y/n: "
-    read ans
-    case "$ans" in
-     "y" ) echo ; return ;;
-     "n" ) echo "... terminating at your request";exit 1 ;;
-      *  ) continue ;;
-    esac
-  done
+
+#----------------------------------
+function get_mysql_attributes {
+  DBPORT=`grep ^service.mysql.url $CONFIGURATIONS | tr ':' ' ' | tr '/' ' ' | awk '{print $4;}'`
+  DBNAME=`grep ^service.mysql.url $CONFIGURATIONS | tr ':' ' ' | tr '/' ' ' | awk '{print $NF;}'`
+  DBHOST=`grep ^service.mysql.url $CONFIGURATIONS | tr ':' ' ' | tr '/' ' ' | awk '{print $3;}'`
+
+  DBUSER=`grep           ^service.mysql.user         $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
+  DBPASSWD=`grep         ^service.mysql.password     $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
+  DBREADER=`grep         ^service.reporting.user     $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
+  DBREADERPASSWD=`grep   ^service.reporting.password $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
+  DBROOTPASSWD=`grep     ^service.mysql.rootpassword $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
 }
+
+#-------------------------------
 #-------------------------------
 function verify_mysql_installed {
   echo "... validating MySql is installed"
@@ -48,6 +50,19 @@ function verify_mysql_installed {
   if [ ! -e "/etc/init.d/mysqld" ];then
     echo "ERROR: Could not find initd service: /etc/init.d/mysqld"
     echo "Did you install of MySql work correctly?"
+    exit 1
+  fi
+}
+
+#-------------------------------
+function verify_mysql_running {
+  echo "... verifying mysqld daemon is running"
+  cmd="service mysqld status"
+  echo "$cmd"
+  $cmd;rtn=$?
+  if [ "$rtn" != "0" ];then
+    echo "ERROR: The MySql mysqld daemon does not appear to be running"
+    echo "You will need it running to complete this installation."
     exit 1
   fi
 }
@@ -69,18 +84,11 @@ function validate_mysql_config {
   fi
   echo "... port: $DBPORT"
 }
+
+
+
 #-------------------------------
-function verify_mysql_running {
-  echo "... verifying mysqld daemon is running"
-  cmd="service mysqld status"
-  echo "$cmd"
-  $cmd;rtn=$?
-  if [ "$rtn" != "0" ];then
-    echo "ERROR: The MySql mysqld daemon does not appear to be running"
-    echo "You will need it running to complete this installation."
-    exit 1
-  fi
-}
+#-------------------------------
 #-------------------------------
 function check_if_root_passwd_set {
   # Attempts to determine if the root password has been set already
@@ -93,18 +101,6 @@ function check_if_root_passwd_set {
     echo "... root password has already been set."
   fi
 }
-#-------------------------------
-function mysql_arguments {
-  # If the root password is already set, then a tmp file is needed
-  # so as not to show the password in the mysql execution.
-  local passwd_arg=""
-  if [ "$ROOT_SET" = "1" ];then 
-    passwd_arg=" --defaults-extra-file=$TMPPSWD "
-    create_tmp_passwd_file
-  fi
-  echo "$passwd_arg -B --unbuffered  --user=root --port=$DBPORT" 
-}
-#-------------------------------
 function verify_root_pswd {
   # If the root password is already set, then we are verifying the one
   # in the Gratia authorization file is correct.
@@ -122,6 +118,53 @@ function verify_root_pswd {
   fi
 }
 #-------------------------------
+#-------------------------------
+#-------------------------------
+#-------------------------------
+function check_if_root_passwd_set_remote {
+  ssh $MSHOST "echo \"quit\" | mysql -B --unbuffered --user=root &>/dev/null";rtn=$?
+  if [ "$rtn" = "0" ];then
+    ROOT_SET=0 
+    echo "... root password has not been set yet."
+  else
+    ROOT_SET=1
+    echo "... root password has already been set."
+  fi
+}
+function verify_root_pswd_remote {
+  [ "$ROOT_SET" = "0" ] && return
+  echo "... verifying if root password is correct"
+
+  ssh $MSHOST "echo \"quit\" | mysql -B --unbuffered --user=root --password=${DBROOTPASSWD} &>/dev/null";rtn=$?
+#HK> for remote, mysql_arguments function is not working
+#  echo "quit" | mysql `mysql_arguments` &>/dev/null;rtn=$?
+#  rm -f $TMPPSWD
+  if [ "$rtn" != "0" ];then 
+    echo "The root mysql password has already been set and the one specified in the "
+    echo "Gratia authorization file does not match:"
+    echo "  File: $AUTHORIZATIONS"
+    echo "  Attribute: service.mysql.rootpassword"
+    echo "Please correct."
+    exit 1
+  fi
+}
+
+
+
+
+#-------------------------------
+function mysql_arguments {
+# HK> used in function verify_root_pswd() and  function update_mysql()
+  # If the root password is already set, then a tmp file is needed
+  # so as not to show the password in the mysql execution.
+  local passwd_arg=""
+  if [ "$ROOT_SET" = "1" ];then 
+    passwd_arg=" --defaults-extra-file=$TMPPSWD "
+    create_tmp_passwd_file
+  fi
+  echo "$passwd_arg -B --unbuffered  --user=root --port=$DBPORT" 
+}
+# HK> used only in function mysql_arguments() above
 function create_tmp_passwd_file {
   cat >$TMPPSWD <<EOF
 [client]
@@ -129,18 +172,15 @@ password="${DBROOTPASSWD}"
 EOF
   chmod 600 $TMPPSWD
 }
-#----------------------------------
-function get_mysql_attributes {
-  DBPORT=`grep ^service.mysql.url $CONFIGURATIONS | tr ':' ' ' | tr '/' ' ' | awk '{print $4;}'`
-  DBNAME=`grep ^service.mysql.url $CONFIGURATIONS | tr ':' ' ' | tr '/' ' ' | awk '{print $NF;}'`
-  DBHOST=`grep ^service.mysql.url $CONFIGURATIONS | tr ':' ' ' | tr '/' ' ' | awk '{print $3;}'`
+#-------------------------------
 
-  DBUSER=`grep           ^service.mysql.user         $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
-  DBPASSWD=`grep         ^service.mysql.password     $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
-  DBREADER=`grep         ^service.reporting.user     $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
-  DBREADERPASSWD=`grep   ^service.reporting.password $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
-  DBROOTPASSWD=`grep     ^service.mysql.rootpassword $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
-}
+
+
+
+
+
+#-------------------------------
+#-------------------------------
 #-------------------------------
 function create_gratia_sql_updates_file {
   > $TMPSQL
@@ -179,6 +219,54 @@ function update_mysql {
     exit 1
   fi
 }
+
+
+#----------------------------
+#----------------------------
+#----------------------------
+#----------------------------
+function update_mysql_remote {
+
+  if [ "$ROOT_SET" = "0" ];then 
+    echo "... creating the root password specified" 
+    if [ "x$DBROOTPASSWD" = "x" ] || [ $DBROOTPASSWD = "service.mysql.rootpassword" ];then
+      DBROOTPASSWD=""
+    fi
+  fi
+#HK> Normally DBROOTPASSWD is set by get_mysql_attributes
+#HK> The function check_if_root_passwd_set()  and function verify_root_pswd() directly tries to use mysql as root without password to see if the root password is set or not
+# If rootpasswd is not set, set it to null
+# If rootpasswd is yes set, just make sure that it is same as DBROOTPASSWD
+#HK> if the root password is NOT set, i.e. if it is set to service.mysql.rootpassword, then we manually set     DBROOTPASSWD=""
+#HK> because
+# if  service.mysql.rootpassword=
+# then          grep     ^service.mysql.rootpassword service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'
+# returns       service.mysql.rootpassword
+# i.e. DBROOTPASSWD=service.mysql.rootpassword
+# if service.mysql.rootpassword=password
+# then          grep     ^service.mysql.rootpassword service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'
+# returns       messi
+# i.e. DBROOTPASSWD=password
+##HK> Important thing is, we assume       DBROOTPASSWD for both root@MSHOST and root@GSHOST
+
+    echo "... creating $DBNAME database and updating privileges"
+    ssh $MSHOST "mysql -uroot --password=${DBROOTPASSWD} --execute  'GRANT ALL PRIVILEGES ON        *.* TO \"root\"@\"$GSHOST\"    IDENTIFIED BY \"$DBROOTPASSWD\"'    mysql"
+    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "update user set Grant_priv=\"Y\" where Host=\"$GSHOST\" and User=\"root\"         " mysql
+    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "CREATE database $DBNAME"
+    ssh $MSHOST "mysql -uroot --password=${DBROOTPASSWD} --execute  'GRANT ALL PRIVILEGES ON \$DBNAME.* TO \"root\"@\"$GSHOST\"    IDENTIFIED BY \"$DBROOTPASSWD\"'    mysql"
+#################
+    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO   \"$DBUSER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBPASSWD\""       mysql
+    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "GRANT SELECT,EXECUTE ON $DBNAME.* TO \"$DBREADER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBREADERPASSWD\"" mysql
+    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "FLUSH PRIVILEGES"
+}
+
+
+
+
+
+
+
+
 ### MAIN ######################################################
 #set -x
 PGM=`basename $0`
@@ -199,14 +287,37 @@ Creating Gratia database based on the properties you updated in these files:
   $CONFIGURATIONS
   $AUTHORIZATIONS"
 
+
+
+get_mysql_attributes
+GSHOST=`hostname -f`
+[ $DBHOST == "localhost" ] && MSHOST=`hostname -f` || MSHOST=$DBHOST
+echo "GS = $GSHOST"
+echo "MS = $MSHOST"
+
+
+if [ $GSHOST = $MSHOST ] 
+then
+echo "GS and MS running in one node"
 verify_mysql_installed 
 verify_mysql_running 
-get_mysql_attributes
 validate_mysql_config
+
 check_if_root_passwd_set  # ROOT_SET=1 - password set / ROOT_SET=0 - pswd not set
 verify_root_pswd 
+
 create_gratia_sql_updates_file 
 update_mysql 
+else
+echo "GS and MS running in two nodes"
+##HK> Important thing is, for remote case, we do not have remote versions of
+# verify_mysql_installed, verify_mysql_running , validate_mysql_config
+# i.e. we assume that MS is installed and running with correct configuration
+# we just proceed to the root password and privilege
+check_if_root_passwd_set_remote
+verify_root_pswd_remote
+update_mysql_remote
+fi
 
 echo "
 Gratia database installation complete.
