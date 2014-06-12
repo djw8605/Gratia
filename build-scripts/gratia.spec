@@ -2,7 +2,7 @@ Name: gratia
 Summary: Gratia OSG accounting system
 Group: Applications/System
 #Version: 1.13.12
-Version: 1.14.0
+Version: 1.15.0
 Release: 1%{?dist}
 License: GPL
 Group: Applications/System
@@ -233,6 +233,9 @@ fi
 
 
 %changelog
+* Thu Jun 12 2014 Hyunwoo Kim - 1.15.0
+- hibernate4 branch meged with trunk, hibernate4, mysql51, new install-database
+
 * Thu Mar 06 2014 Tanya Levshina - 1.14.0
 - merge with trunk Marco's branch
 
