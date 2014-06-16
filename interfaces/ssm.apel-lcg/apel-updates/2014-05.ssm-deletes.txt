@@ -223,7 +223,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1398920400
-LatestEndTime: 1400562000
+LatestEndTime: 1401339600
 Month: 05
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -236,7 +236,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1398920400
-LatestEndTime: 1400562000
+LatestEndTime: 1401512400
 Month: 05
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -249,7 +249,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1398920400
-LatestEndTime: 1400562000
+LatestEndTime: 1401426000
 Month: 05
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -262,7 +262,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1398920400
-LatestEndTime: 1400562000
+LatestEndTime: 1401512400
 Month: 05
 Year: 2014
 GlobalUserName: iVDGL
