@@ -2,7 +2,7 @@ APEL-summary-job-message: v0.2
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -15,7 +15,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1401858000
-LatestEndTime: 1402635600
+LatestEndTime: 1402808400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=wguan/CN=667815/CN=Wen Guan
@@ -28,7 +28,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Bob Ball 81
@@ -41,7 +41,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -54,7 +54,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -67,7 +67,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /OU=LocalUser/CN=atlasconnect
@@ -80,7 +80,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -106,7 +106,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -145,7 +145,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1402635600
-LatestEndTime: 1402635600
+LatestEndTime: 1402981200
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Paul Nilsson 1162
@@ -158,7 +158,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -171,7 +171,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1401771600
-LatestEndTime: 1401858000
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Xin Zhao 87
@@ -210,7 +210,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -236,7 +236,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -249,7 +249,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -262,7 +262,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1402722000
 Month: 06
 Year: 2014
 GlobalUserName: iVDGL
@@ -288,7 +288,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -301,7 +301,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -314,7 +314,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -327,7 +327,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -340,7 +340,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -353,7 +353,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -366,7 +366,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -379,7 +379,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -392,7 +392,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -405,7 +405,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -418,7 +418,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401944400
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -431,7 +431,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -444,7 +444,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -470,7 +470,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401685200
-LatestEndTime: 1402117200
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Raphael Friese
@@ -483,7 +483,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -496,7 +496,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -509,7 +509,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -522,7 +522,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -535,7 +535,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -548,7 +548,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -561,7 +561,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -574,7 +574,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -587,7 +587,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -600,7 +600,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -613,7 +613,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -626,7 +626,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -652,7 +652,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -743,7 +743,7 @@ NumberOfJobs: 0
 Site: HU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -756,7 +756,7 @@ NumberOfJobs: 0
 Site: HU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1402030800
-LatestEndTime: 1402030800
+LatestEndTime: 1402981200
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Brunelle 221
@@ -769,7 +769,7 @@ NumberOfJobs: 0
 Site: HU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -781,8 +781,21 @@ NumberOfJobs: 0
 %%
 Site: HU_ATLAS_Tier2
 Group: atlas
+EarliestEndTime: 1402981200
+LatestEndTime: 1403067600
+Month: 06
+Year: 2014
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: HU_ATLAS_Tier2
+Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402376400
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: Generic atlas user
@@ -795,7 +808,7 @@ NumberOfJobs: 0
 Site: LC-glcc
 Group: alice
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: Generic alice user
@@ -808,7 +821,7 @@ NumberOfJobs: 0
 Site: LUCILLE
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -821,7 +834,7 @@ NumberOfJobs: 0
 Site: LUCILLE
 Group: atlas
 EarliestEndTime: 1402635600
-LatestEndTime: 1402635600
+LatestEndTime: 1402894800
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=wguan/CN=667815/CN=Wen Guan
@@ -834,7 +847,7 @@ NumberOfJobs: 0
 Site: LUCILLE
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -847,7 +860,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -860,7 +873,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -873,7 +886,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -886,7 +899,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -899,7 +912,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -912,7 +925,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -925,7 +938,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -938,7 +951,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -951,7 +964,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -964,7 +977,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -977,7 +990,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401944400
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -990,7 +1003,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -1003,7 +1016,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1029,7 +1042,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402549200
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -1042,7 +1055,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1401858000
-LatestEndTime: 1401944400
+LatestEndTime: 1402894800
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=wguan/CN=667815/CN=Wen Guan
@@ -1055,7 +1068,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -1067,8 +1080,21 @@ NumberOfJobs: 0
 %%
 Site: MWT2
 Group: atlas
+EarliestEndTime: 1402981200
+LatestEndTime: 1403067600
+Month: 06
+Year: 2014
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: MWT2
+Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1402722000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=pilot/osg-flock.grid.iu.edu
@@ -1081,7 +1107,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1401685200
-LatestEndTime: 1402635600
+LatestEndTime: 1403067600
 Month: 06
 Year: 2014
 GlobalUserName: /OU=LocalUser/CN=ruc.indiana
@@ -1107,7 +1133,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /OU=LocalUser/CN=ruc.uchicago
@@ -1120,7 +1146,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1401858000
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /OU=LocalUser/CN=ruc.uiuc
@@ -1133,7 +1159,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1401685200
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /OU=LocalUser/CN=ruc.utexas
@@ -1146,7 +1172,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /OU=LocalUser/CN=usatlas3
@@ -1159,7 +1185,7 @@ NumberOfJobs: 0
 Site: NERSC-PDSF
 Group: alice
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: Alice Nonprod
@@ -1185,7 +1211,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -1198,7 +1224,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -1211,7 +1237,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -1224,7 +1250,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -1237,7 +1263,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -1250,7 +1276,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -1263,7 +1289,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -1276,7 +1302,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -1289,7 +1315,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -1302,7 +1328,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -1315,7 +1341,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401944400
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1328,7 +1354,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -1341,7 +1367,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1364,10 +1390,36 @@ NormalisedWallDuration: 0
 NormalisedCpuDuration: 0
 NumberOfJobs: 0
 %%
+Site: Nebraska
+Group: cms
+EarliestEndTime: 1402722000
+LatestEndTime: 1403154000
+Month: 06
+Year: 2014
+GlobalUserName: Generic /cms/Role=pilot/Capability=NULL user
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: Nebraska
+Group: cms
+EarliestEndTime: 1402722000
+LatestEndTime: 1403154000
+Month: 06
+Year: 2014
+GlobalUserName: Generic /cms/Role=production/Capability=NULL user
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
 Site: OU_OCHEP_SWT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1402722000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -1380,7 +1432,7 @@ NumberOfJobs: 0
 Site: OU_OCHEP_SWT2
 Group: atlas
 EarliestEndTime: 1402635600
-LatestEndTime: 1402635600
+LatestEndTime: 1402894800
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=wguan/CN=667815/CN=Wen Guan
@@ -1393,7 +1445,33 @@ NumberOfJobs: 0
 Site: OU_OCHEP_SWT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
+Month: 06
+Year: 2014
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: OU_OCHEP_SWT2
+Group: atlas
+EarliestEndTime: 1402981200
+LatestEndTime: 1403067600
+Month: 06
+Year: 2014
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: OU_OSCER_ATLAS
+Group: atlas
+EarliestEndTime: 1401598800
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -1405,11 +1483,11 @@ NumberOfJobs: 0
 %%
 Site: OU_OSCER_ATLAS
 Group: atlas
-EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+EarliestEndTime: 1402981200
+LatestEndTime: 1403067600
 Month: 06
 Year: 2014
-GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
 WallDuration: 0
 CpuDuration: 0
 NormalisedWallDuration: 0
@@ -1419,7 +1497,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -1432,7 +1510,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -1445,7 +1523,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -1458,7 +1536,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -1471,7 +1549,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -1484,7 +1562,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -1497,7 +1575,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -1510,7 +1588,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -1523,7 +1601,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -1536,7 +1614,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -1549,7 +1627,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401944400
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1562,7 +1640,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -1574,8 +1652,21 @@ NumberOfJobs: 0
 %%
 Site: Purdue-Carter
 Group: cms
+EarliestEndTime: 1403154000
+LatestEndTime: 1403154000
+Month: 06
+Year: 2014
+GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=marabgol/CN=653155/CN=Majid Arabgol
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: Purdue-Carter
+Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1598,10 +1689,23 @@ NormalisedWallDuration: 0
 NormalisedCpuDuration: 0
 NumberOfJobs: 0
 %%
+Site: Purdue-Carter
+Group: cms
+EarliestEndTime: 1402981200
+LatestEndTime: 1403154000
+Month: 06
+Year: 2014
+GlobalUserName: Generic uscms user
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -1614,7 +1718,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -1627,7 +1731,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -1640,7 +1744,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -1653,7 +1757,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -1666,7 +1770,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -1679,7 +1783,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -1692,7 +1796,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -1705,7 +1809,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -1718,7 +1822,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -1744,7 +1848,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -1757,7 +1861,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1402462800
-LatestEndTime: 1402462800
+LatestEndTime: 1402808400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=marabgol/CN=653155/CN=Majid Arabgol
@@ -1770,7 +1874,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1795,8 +1899,8 @@ NumberOfJobs: 0
 %%
 Site: Purdue-Conte
 Group: cms
-EarliestEndTime: 1401858000
-LatestEndTime: 1401858000
+EarliestEndTime: 1401598800
+LatestEndTime: 1402981200
 Month: 06
 Year: 2014
 GlobalUserName: Generic uscms user
@@ -1809,7 +1913,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -1822,7 +1926,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -1835,7 +1939,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -1848,7 +1952,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -1874,7 +1978,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -1900,7 +2004,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -1926,7 +2030,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -1952,7 +2056,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -1965,7 +2069,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -1991,7 +2095,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -2017,7 +2121,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401944400
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -2030,7 +2134,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -2056,7 +2160,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -2069,7 +2173,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -2082,7 +2186,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -2095,7 +2199,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -2108,7 +2212,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -2121,7 +2225,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -2134,7 +2238,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -2147,7 +2251,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -2160,7 +2264,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -2173,7 +2277,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -2186,7 +2290,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -2199,7 +2303,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401944400
-LatestEndTime: 1402462800
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -2212,7 +2316,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -2225,7 +2329,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402462800
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -2248,10 +2352,23 @@ NormalisedWallDuration: 0
 NormalisedCpuDuration: 0
 NumberOfJobs: 0
 %%
+Site: Purdue-Hansen
+Group: cms
+EarliestEndTime: 1403240400
+LatestEndTime: 1403240400
+Month: 06
+Year: 2014
+GlobalUserName: Generic uscms user
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -2264,7 +2381,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -2277,7 +2394,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -2290,7 +2407,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -2303,7 +2420,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -2316,7 +2433,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -2329,7 +2446,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -2342,7 +2459,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -2355,7 +2472,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -2368,7 +2485,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -2407,7 +2524,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1402462800
-LatestEndTime: 1402462800
+LatestEndTime: 1402808400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=marabgol/CN=653155/CN=Majid Arabgol
@@ -2420,7 +2537,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -2443,10 +2560,23 @@ NormalisedWallDuration: 0
 NormalisedCpuDuration: 0
 NumberOfJobs: 0
 %%
+Site: Purdue-Rossmann
+Group: cms
+EarliestEndTime: 1401598800
+LatestEndTime: 1402894800
+Month: 06
+Year: 2014
+GlobalUserName: Generic uscms user
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1402117200
-LatestEndTime: 1402117200
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /C=BR/O=ANSP/OU=ANSPGrid CA/OU=People/CN=Angelo de Souza Santos
@@ -2458,8 +2588,21 @@ NumberOfJobs: 0
 %%
 Site: SPRACE
 Group: cms
+EarliestEndTime: 1402722000
+LatestEndTime: 1402894800
+Month: 06
+Year: 2014
+GlobalUserName: /C=BR/O=ANSP/OU=ANSPGrid CA/OU=People/CN=Cesar Augusto Bernardes
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: SPRACE
+Group: cms
 EarliestEndTime: 1402030800
-LatestEndTime: 1402117200
+LatestEndTime: 1402981200
 Month: 06
 Year: 2014
 GlobalUserName: /C=DE/O=GermanGrid/OU=DESY/CN=Pooja Saxena
@@ -2471,8 +2614,21 @@ NumberOfJobs: 0
 %%
 Site: SPRACE
 Group: cms
+EarliestEndTime: 1402722000
+LatestEndTime: 1402722000
+Month: 06
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Raphael Friese
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: SPRACE
+Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -2485,7 +2641,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -2498,7 +2654,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -2511,7 +2667,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -2524,7 +2680,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -2537,7 +2693,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -2550,7 +2706,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -2563,7 +2719,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -2576,7 +2732,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -2589,7 +2745,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -2602,7 +2758,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401944400
-LatestEndTime: 1402376400
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -2615,7 +2771,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -2628,10 +2784,23 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: SPRACE
+Group: cms
+EarliestEndTime: 1402981200
+LatestEndTime: 1402981200
+Month: 06
+Year: 2014
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Bockjoo Kim 118811
 WallDuration: 0
 CpuDuration: 0
 NormalisedWallDuration: 0
@@ -2654,7 +2823,7 @@ NumberOfJobs: 0
 Site: SWT2_CPB
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -2667,7 +2836,7 @@ NumberOfJobs: 0
 Site: SWT2_CPB
 Group: atlas
 EarliestEndTime: 1402635600
-LatestEndTime: 1402635600
+LatestEndTime: 1402894800
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=wguan/CN=667815/CN=Wen Guan
@@ -2680,7 +2849,7 @@ NumberOfJobs: 0
 Site: SWT2_CPB
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -2692,8 +2861,47 @@ NumberOfJobs: 0
 %%
 Site: SWT2_CPB
 Group: atlas
+EarliestEndTime: 1403067600
+LatestEndTime: 1403067600
+Month: 06
+Year: 2014
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Patrick McGuigan 55
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: SWT2_CPB
+Group: atlas
+EarliestEndTime: 1402981200
+LatestEndTime: 1403067600
+Month: 06
+Year: 2014
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: SWT2_CPB
+Group: atlas
+EarliestEndTime: 1403067600
+LatestEndTime: 1403067600
+Month: 06
+Year: 2014
+GlobalUserName: /DC=org/DC=terena/DC=tcs/C=NL/O=Nikhef/CN=Pierfrancesco Butti pbutti@nikhef.nl
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: SWT2_CPB
+Group: atlas
 EarliestEndTime: 1401944400
-LatestEndTime: 1401944400
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: Generic atlas user
@@ -2706,7 +2914,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -2719,7 +2927,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -2732,7 +2940,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -2745,7 +2953,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -2758,7 +2966,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -2771,7 +2979,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -2784,7 +2992,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -2797,7 +3005,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -2810,7 +3018,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -2823,7 +3031,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -2836,7 +3044,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -2849,7 +3057,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -2862,7 +3070,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401858000
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=rebassoo/CN=673313/CN=Finn O'Neill Rebassoo
@@ -2875,7 +3083,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -2914,7 +3122,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401858000
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=t2pilot01/uaf-2.t2.ucsd.edu
@@ -2927,7 +3135,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1401858000
-LatestEndTime: 1402462800
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=t3pilot01/uaf-2.t2.ucsd.edu
@@ -2953,7 +3161,7 @@ NumberOfJobs: 0
 Site: UERJ
 Group: cms
 EarliestEndTime: 1402376400
-LatestEndTime: 1402635600
+LatestEndTime: 1402722000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -2966,7 +3174,7 @@ NumberOfJobs: 0
 Site: UERJ
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1402894800
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -2992,7 +3200,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401944400
-LatestEndTime: 1402462800
+LatestEndTime: 1402981200
 Month: 06
 Year: 2014
 GlobalUserName: /C=DE/O=GermanGrid/OU=DESY/CN=Pooja Saxena
@@ -3005,7 +3213,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1402376400
-LatestEndTime: 1402635600
+LatestEndTime: 1402981200
 Month: 06
 Year: 2014
 GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Dominik Haitz
@@ -3018,7 +3226,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -3031,7 +3239,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -3044,7 +3252,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -3057,7 +3265,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -3070,7 +3278,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -3083,7 +3291,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -3096,7 +3304,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -3109,7 +3317,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -3122,7 +3330,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -3135,7 +3343,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -3148,7 +3356,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -3161,7 +3369,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -3187,7 +3395,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401858000
-LatestEndTime: 1402462800
+LatestEndTime: 1402981200
 Month: 06
 Year: 2014
 GlobalUserName: /C=DE/O=GermanGrid/OU=DESY/CN=Pooja Saxena
@@ -3200,7 +3408,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1402376400
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Dominik Haitz
@@ -3251,8 +3459,21 @@ NumberOfJobs: 0
 %%
 Site: USCMS-FNAL-WC1
 Group: cms
+EarliestEndTime: 1402635600
+LatestEndTime: 1403067600
+Month: 06
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=uni-hamburg/CN=Teresa Lenz
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: USCMS-FNAL-WC1
+Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
@@ -3265,7 +3486,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot01/vocms0167.cern.ch
@@ -3278,7 +3499,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
@@ -3291,7 +3512,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
@@ -3304,7 +3525,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot04/vocms0167.cern.ch
@@ -3317,7 +3538,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot05/vocms0167.cern.ch
@@ -3330,7 +3551,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot06/vocms0167.cern.ch
@@ -3343,7 +3564,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot07/vocms0167.cern.ch
@@ -3356,7 +3577,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot08/vocms0167.cern.ch
@@ -3369,7 +3590,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
@@ -3382,7 +3603,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403154000
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -3395,7 +3616,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -3434,7 +3655,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -3459,8 +3680,21 @@ NumberOfJobs: 0
 %%
 Site: UTA_SWT2
 Group: atlas
+EarliestEndTime: 1402635600
+LatestEndTime: 1402894800
+Month: 06
+Year: 2014
+GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=wguan/CN=667815/CN=Wen Guan
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: UTA_SWT2
+Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -3473,7 +3707,7 @@ NumberOfJobs: 0
 Site: UTA_SWT2
 Group: atlas
 EarliestEndTime: 1401685200
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Paul Nilsson 1162
@@ -3485,8 +3719,21 @@ NumberOfJobs: 0
 %%
 Site: UTA_SWT2
 Group: atlas
+EarliestEndTime: 1402981200
+LatestEndTime: 1403067600
+Month: 06
+Year: 2014
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: UTA_SWT2
+Group: atlas
 EarliestEndTime: 1401771600
-LatestEndTime: 1402635600
+LatestEndTime: 1402894800
 Month: 06
 Year: 2014
 GlobalUserName: Generic atlas user
@@ -3499,7 +3746,7 @@ NumberOfJobs: 0
 Site: WT2
 Group: atlas
 EarliestEndTime: 1401598800
-LatestEndTime: 1402635600
+LatestEndTime: 1403240400
 Month: 06
 Year: 2014
 GlobalUserName: Generic atlas user
