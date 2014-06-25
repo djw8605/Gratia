@@ -3,7 +3,7 @@ Summary: Gratia OSG accounting system
 Group: Applications/System
 #Version: 1.13.12
 Version: 1.15.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -235,7 +235,7 @@ fi
 
 
 %changelog
-* Thu Jun 12 2014 Marco Mambelli - 1.15.1
+* Thu Jun 12 2014 Marco Mambelli - 1.15.0-2
 - added Obsoletes reporting-web to avoid upgrade conflicts
 
 * Thu Jun 12 2014 Hyunwoo Kim - 1.15.0
