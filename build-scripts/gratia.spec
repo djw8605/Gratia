@@ -19,6 +19,8 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildArch: noarch
 Summary: Gratia OSG accounting system
 Group: Applications/System
+# this should be by default: Obsoletes: service 
+Obsoletes: reporting-web < 1.14
 Requires: java7
 Requires: jpackage-utils
 # ensure these are present, from jpackage-utils or missing-java-1.7.0-dirs
@@ -233,6 +235,9 @@ fi
 
 
 %changelog
+* Thu Jun 12 2014 Marco Mambelli - 1.15.1
+- added Obsoletes reporting-web to avoid upgrade conflicts
+
 * Thu Jun 12 2014 Hyunwoo Kim - 1.15.0
 - hibernate4 branch meged with trunk, hibernate4, mysql51, new install-database
 
