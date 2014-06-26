@@ -20,7 +20,7 @@ BuildArch: noarch
 Summary: Gratia OSG accounting system
 Group: Applications/System
 # this should be by default: Obsoletes: service 
-Obsoletes: reporting-web < 1.14
+Obsoletes: gratia-reporting-web < 1.14
 Requires: java7
 Requires: jpackage-utils
 # ensure these are present, from jpackage-utils or missing-java-1.7.0-dirs
