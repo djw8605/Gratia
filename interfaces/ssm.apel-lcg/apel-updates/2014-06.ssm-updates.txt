@@ -331,11 +331,11 @@ LatestEndTime: 1404104400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
-WallDuration: 225834
-CpuDuration: 145907
-NormalisedWallDuration: 2923195
-NormalisedCpuDuration: 1888619
-NumberOfJobs: 33946
+WallDuration: 227114
+CpuDuration: 146510
+NormalisedWallDuration: 2939764
+NormalisedCpuDuration: 1896421
+NumberOfJobs: 34229
 %%
 Site: CIT_CMS_T2
 Group: cms
@@ -474,11 +474,11 @@ LatestEndTime: 1404104400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
-WallDuration: 729735
-CpuDuration: 607385
-NormalisedWallDuration: 9445684
-NormalisedCpuDuration: 7861989
-NumberOfJobs: 76288
+WallDuration: 729825
+CpuDuration: 607405
+NormalisedWallDuration: 9446857
+NormalisedCpuDuration: 7862246
+NumberOfJobs: 76297
 %%
 Site: CIT_CMS_T2
 Group: cms
@@ -487,11 +487,11 @@ LatestEndTime: 1404104400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
-WallDuration: 1483
+WallDuration: 1486
 CpuDuration: 23
-NormalisedWallDuration: 19193
+NormalisedWallDuration: 19240
 NormalisedCpuDuration: 297
-NumberOfJobs: 5027
+NumberOfJobs: 5028
 %%
 Site: CIT_CMS_T2
 Group: cms
