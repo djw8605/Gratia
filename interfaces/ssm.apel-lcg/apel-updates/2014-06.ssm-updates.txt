@@ -1514,11 +1514,11 @@ LatestEndTime: 1404104400
 Month: 06
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
-WallDuration: 533145
-CpuDuration: 479622
-NormalisedWallDuration: 4702339
-NormalisedCpuDuration: 4230267
-NumberOfJobs: 135473
+WallDuration: 533220
+CpuDuration: 479694
+NormalisedWallDuration: 4702996
+NormalisedCpuDuration: 4230898
+NumberOfJobs: 135483
 %%
 Site: OU_OCHEP_SWT2
 Group: atlas
