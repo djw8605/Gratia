@@ -448,11 +448,11 @@ LatestEndTime: 1406782800
 Month: 07
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
-WallDuration: 2269
+WallDuration: 2309
 CpuDuration: 17
-NormalisedWallDuration: 29374
+NormalisedWallDuration: 29891
 NormalisedCpuDuration: 224
-NumberOfJobs: 4772
+NumberOfJobs: 4774
 %%
 Site: CIT_CMS_T2
 Group: cms
@@ -4114,11 +4114,11 @@ LatestEndTime: 1406782800
 Month: 07
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot00/vocms0167.cern.ch
-WallDuration: 711663
-CpuDuration: 643296
-NormalisedWallDuration: 7304510
-NormalisedCpuDuration: 6602791
-NumberOfJobs: 63421
+WallDuration: 712043
+CpuDuration: 643617
+NormalisedWallDuration: 7308405
+NormalisedCpuDuration: 6606081
+NumberOfJobs: 63444
 %%
 Site: USCMS-FNAL-WC1
 Group: cms
@@ -4140,11 +4140,11 @@ LatestEndTime: 1406782800
 Month: 07
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot02/vocms0167.cern.ch
-WallDuration: 80927
-CpuDuration: 70441
-NormalisedWallDuration: 830631
-NormalisedCpuDuration: 723010
-NumberOfJobs: 3948
+WallDuration: 80982
+CpuDuration: 70480
+NormalisedWallDuration: 831202
+NormalisedCpuDuration: 723407
+NumberOfJobs: 3952
 %%
 Site: USCMS-FNAL-WC1
 Group: cms
@@ -4153,11 +4153,11 @@ LatestEndTime: 1406782800
 Month: 07
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot03/vocms0167.cern.ch
-WallDuration: 83642
-CpuDuration: 72184
-NormalisedWallDuration: 858504
-NormalisedCpuDuration: 740900
-NumberOfJobs: 3875
+WallDuration: 83657
+CpuDuration: 72190
+NormalisedWallDuration: 858653
+NormalisedCpuDuration: 740956
+NumberOfJobs: 3876
 %%
 Site: USCMS-FNAL-WC1
 Group: cms
@@ -4231,11 +4231,11 @@ LatestEndTime: 1406782800
 Month: 07
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot09/vocms0167.cern.ch
-WallDuration: 77925
-CpuDuration: 67710
-NormalisedWallDuration: 799820
-NormalisedCpuDuration: 694972
-NumberOfJobs: 3757
+WallDuration: 77959
+CpuDuration: 67722
+NormalisedWallDuration: 800173
+NormalisedCpuDuration: 695096
+NumberOfJobs: 3758
 %%
 Site: USCMS-FNAL-WC1
 Group: cms
@@ -4244,11 +4244,11 @@ LatestEndTime: 1406782800
 Month: 07
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
-WallDuration: 79678
-CpuDuration: 68908
-NormalisedWallDuration: 817810
-NormalisedCpuDuration: 707276
-NumberOfJobs: 3979
+WallDuration: 79768
+CpuDuration: 68969
+NormalisedWallDuration: 818737
+NormalisedCpuDuration: 707899
+NumberOfJobs: 3984
 %%
 Site: USCMS-FNAL-WC1
 Group: cms
