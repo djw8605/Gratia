@@ -1,7 +1,7 @@
 
 Name: gratia-gold
 Summary: A converter script from a Gratia database into Gold
-Version: 1.2
+Version: 1.3
 License: ASL 2.0
 Release: 1%{?dist}
 Group: System Environment/Libraries
@@ -58,6 +58,8 @@ exit 0
 %ghost %_localstatedir/lock/gratia-gold.lock
 
 %changelog
+* Tue Aug 19 2014 Mats Rynge <rynge@isi.edu> - 1.3
+- Fixed dbid logic when moving forward in the database
 * Fri Oct 18 2013 Srini Ramachandran <srini@fnal.gov> - 1.2
 - Added cleanup of rollback_file and refund_file to avoid unnecessary rollback
 * Thu Oct 17 2013 Srini Ramachandran <srini@fnal.gov> - 1.1

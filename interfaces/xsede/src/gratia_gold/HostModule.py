@@ -142,7 +142,7 @@ class Host(object):
             txn = curr_txn
             txn[probename] = curr_dbid
 
-            while curr_dbid <=  gratia_max_dbid:
+            while curr_dbid < gratia_max_dbid:
 
                 self.log.debug("Current transaction: probe=" + str(probename) + " DBID=" + str(txn[probename]))
                 roll_fd = None
@@ -233,7 +233,7 @@ class Host(object):
                         return 0
 
                 if job_count == 0:
-                    max_id = txn[probename] + gratia.MAX_ID
+                    max_id = gratia_max_dbid
                     self.log.debug("job_count is 0. max_id= " + str(max_id))
                 txn[probename] = max_id
                 self.log.debug("Query_And_Process: txn[probename] is: " + str(txn[probename]))

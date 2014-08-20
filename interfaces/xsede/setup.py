@@ -3,10 +3,10 @@
 from distutils.core import setup
 
 setup(name="gratia-gold",
-      version="1.2",
-      author="Srini Ramachandran",
-      author_email="srini@fnal.gov",
-      url="https://github.com/bbockelman/gratia-gold",
+      version="1.3",
+      author="Mats Rynge",
+      author_email="rynge@isi.edu",
+      url="https://sourceforge.net/projects/gratia/",
       description="Probe for synchronizing Gratia and GOLD",
       package_dir={"": "src"},
       packages=["gratia_gold"],
