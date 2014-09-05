@@ -35,6 +35,10 @@ function get_mysql_attributes {
   DBREADER=`grep         ^service.reporting.user     $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
   DBREADERPASSWD=`grep   ^service.reporting.password $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
   DBROOTPASSWD=`grep     ^service.mysql.rootpassword $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
+
+# HK this is new as of September 2014
+  DBROOTUSER=`grep       ^service.mysql.rootuser     $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
+  echo $DBROOTUSER
 }
 
 #-------------------------------
@@ -205,8 +209,8 @@ GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBUSER'@'localhost'   IDENTIFIED BY '$DBP
 GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBUSER'@'$host'       IDENTIFIED BY '$DBPASSWD';
 GRANT SELECT,EXECUTE ON $DBNAME.* TO '$DBREADER'@'localhost' IDENTIFIED BY '$DBREADERPASSWD';
 GRANT SELECT,EXECUTE ON $DBNAME.* TO '$DBREADER'@'$host'     IDENTIFIED BY '$DBREADERPASSWD';
-GRANT ALL PRIVILEGES ON $DBNAME.* TO 'root'@'$DBHOST'        IDENTIFIED BY '$DBROOTPASSWD';
 GRANT ALL PRIVILEGES ON $DBNAME.* TO 'root'@'localhost'      IDENTIFIED BY '$DBROOTPASSWD';
+GRANT ALL PRIVILEGES ON $DBNAME.* TO 'root'@'$DBHOST'        IDENTIFIED BY '$DBROOTPASSWD';
 EOF
   chmod 600 $TMPSQL
 }
@@ -250,16 +254,37 @@ function update_mysql_remote {
 ##HK> Important thing is, we assume       DBROOTPASSWD for both root@MSHOST and root@GSHOST
 
     echo "... creating $DBNAME database and updating privileges"
-    ssh $MSHOST "mysql -uroot --password=${DBROOTPASSWD} --execute  'GRANT ALL PRIVILEGES ON        *.* TO \"root\"@\"$GSHOST\"    IDENTIFIED BY \"$DBROOTPASSWD\"'    mysql"
-    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "update user set Grant_priv=\"Y\" where Host=\"$GSHOST\" and User=\"root\"         " mysql
-    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "CREATE database $DBNAME"
-    ssh $MSHOST "mysql -uroot --password=${DBROOTPASSWD} --execute  'GRANT ALL PRIVILEGES ON \$DBNAME.* TO \"root\"@\"$GSHOST\"    IDENTIFIED BY \"$DBROOTPASSWD\"'    mysql"
-#################
-    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO   \"$DBUSER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBPASSWD\""       mysql
-    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "GRANT SELECT,EXECUTE ON $DBNAME.* TO \"$DBREADER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBREADERPASSWD\"" mysql
-    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "FLUSH PRIVILEGES"
+
+# HK> We used to aggressively conduct the following 3 commands, but as of September 2014, we simply trust MySQL DBA to have done these commands for us.
+#    ssh $MSHOST "mysql -uroot --password=${DBROOTPASSWD} --execute  'GRANT ALL PRIVILEGES ON        *.* TO \"root\"@\"$GSHOST\"    IDENTIFIED BY \"$DBROOTPASSWD\"'    mysql"
+#    ssh $MSHOST "mysql -uroot --password=${DBROOTPASSWD} --execute  'GRANT ALL PRIVILEGES ON \$DBNAME.* TO \"root\"@\"$GSHOST\"    IDENTIFIED BY \"$DBROOTPASSWD\"'    mysql"
+#    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "update user set Grant_priv=\"Y\" where Host=\"$GSHOST\" and User=\"root\"         " mysql
+
+    mysql -h $MSHOST -u${DBROOTUSER} --password=${DBROOTPASSWD}  --execute  "CREATE database $DBNAME CHARACTER SET latin1 COLLATE latin1_swedish_ci"
+    mysql -h $MSHOST -u${DBROOTUSER}  --password=${DBROOTPASSWD}  --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO   \"$DBUSER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBPASSWD\""       mysql
+    mysql -h $MSHOST -u${DBROOTUSER}  --password=${DBROOTPASSWD}  --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO   \"root\"@\"$GSHOST\"  IDENTIFIED BY \"$DBROOTPASSWD\""       mysql
+    mysql -h $MSHOST -u${DBROOTUSER}  --password=${DBROOTPASSWD}  --execute  "GRANT SELECT,EXECUTE ON $DBNAME.* TO \"$DBREADER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBREADERPASSWD\"" mysql
 }
 
+# The final strategy is as follows
+# If GS and MS are different, we have to ask DBA of MySQL node to do the following
+#mysql> use mysql;
+#mysql> grant all privileges on      *.* to "root"@"gratianode.fnal.gov" identified by "password";
+#mysql> update user set Grant_priv="Y"  where Host="gratianode.fnal.gov" and User="root";
+#mysql> grant all privileges on gratia.* to "root"@"gratianode.fnal.gov" identified by "password";
+# and the DBA should let GS admin know if "root" and "password" are different strings
+
+# GS node admin should assign those strings from MS DBA to DBROOTUSER and DBROOTPASSWOD as defined in service-authorization.properties
+# install-database script will simply use DBROOTUSER and DBROOTPASSWOD as defined in service-authorization.properties
+# and will assume that DBROOTUSER in MySQL node has Grant_priv=Y
+# and execute the following commands
+
+# mysql -h $MS -u${DBROOTUSER} --password=${DBROOTPASSWD} --execute  "CREATE database $DBNAME CHARACTER SET latin1 COLLATE latin1_swedish_ci"
+# mysql -h $MS -u${DBROOTUSER} --password=${DBROOTPASSWD} --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO    \"$DBUSER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBPASSWD\""       mysql
+# mysql -h $MS -u${DBROOTUSER} --password=${DBROOTPASSWD} --execute  "GRANT SELECT,EXECUTE ON $DBNAME.* TO  \"$DBREADER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBREADERPASSWD\"" mysql
+# mysql -h $MS -u${DBROOTUSER} --password=${DBROOTPASSWD} --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO \"DBROOTUSER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBROOTPASSWD\""   mysql
+
+# And make sure post-install is also using DBROOTUSER, not root
 
 
 
@@ -290,6 +315,7 @@ Creating Gratia database based on the properties you updated in these files:
 
 
 get_mysql_attributes
+
 GSHOST=`hostname -f`
 [ $DBHOST == "localhost" ] && MSHOST=`hostname -f` || MSHOST=$DBHOST
 echo "GS = $GSHOST"
@@ -305,17 +331,19 @@ validate_mysql_config
 
 check_if_root_passwd_set  # ROOT_SET=1 - password set / ROOT_SET=0 - pswd not set
 verify_root_pswd 
-
 create_gratia_sql_updates_file 
 update_mysql 
+
 else
+
 echo "GS and MS running in two nodes"
 ##HK> Important thing is, for remote case, we do not have remote versions of
 # verify_mysql_installed, verify_mysql_running , validate_mysql_config
 # i.e. we assume that MS is installed and running with correct configuration
 # we just proceed to the root password and privilege
-check_if_root_passwd_set_remote
-verify_root_pswd_remote
+#check_if_root_passwd_set_remote
+#verify_root_pswd_remote
+
 update_mysql_remote
 fi
 

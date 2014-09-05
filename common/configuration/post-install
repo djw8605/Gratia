@@ -20,6 +20,10 @@ function preprocess_proc() {
         proc="$TPROC"
      fi
 }
+
+DBROOTPASSWD=`grep     ^service.mysql.rootpassword /etc/gratia/services/service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'`
+DBROOTUSER=`grep       ^service.mysql.rootuser     /etc/gratia/services/service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'`
+
 dbname=`grep ^service.mysql.url /etc/gratia/services/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $5;}'`
 dbhost=`grep ^service.mysql.url /etc/gratia/services/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $3;}'`
 dbport=`grep ^service.mysql.url /etc/gratia/services/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $4;}'`
@@ -216,11 +220,12 @@ while [[ -n "$1" ]]; do
     #--- create temporary password file ---
     cat >$tmpfile <<EOF
 [client]
-password="$dbpasswd"
+password="$DBROOTPASSWD"
 EOF
     chmod 600 $tmpfile
     #--- do it -----
-   cat ${proc} | mysql --defaults-extra-file=$tmpfile -B --unbuffered --user=root  --host=$dbhost --port=$dbport $dbname 
+#   cat ${proc} | mysql --defaults-extra-file=$tmpfile -B --unbuffered --user=mysqlroot  --host=$dbhost --port=$dbport $dbname 
+   cat ${proc} | mysql --defaults-extra-file=$tmpfile -B --unbuffered --user=$DBROOTUSER  --host=$dbhost --port=$dbport $dbname 
    status=$?
     #--- remove temporary password file ---
     rm -f $tmpfile
