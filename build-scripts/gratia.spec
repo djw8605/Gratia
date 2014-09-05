@@ -2,8 +2,8 @@ Name: gratia
 Summary: Gratia OSG accounting system
 Group: Applications/System
 #Version: 1.13.12
-Version: 1.15.0
-Release: 2%{?dist}
+Version: 1.15.1
+Release: 1%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -237,6 +237,9 @@ fi
 
 
 %changelog
+* Thu Sep 04 2014 Hyunwoo Kim - 1.15.1
+- better install-database,post-install,service-authorization.properties,hibernate.cfg.xml to handle MySQL 5 6
+
 * Thu Jun 12 2014 Marco Mambelli - 1.15.0-2
 - added Obsoletes reporting-web to avoid upgrade conflicts
 
