@@ -2,7 +2,7 @@ APEL-summary-job-message: v0.2
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -15,7 +15,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Bob Ball 81
@@ -41,7 +41,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -54,7 +54,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jose Caballero 649
@@ -67,7 +67,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1411102800
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Paul Nilsson 1162
@@ -80,7 +80,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -93,7 +93,7 @@ NumberOfJobs: 0
 Site: AGLT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /OU=LocalUser/CN=atlasconnect
@@ -106,7 +106,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -132,7 +132,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -158,7 +158,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jose Caballero 649
@@ -171,7 +171,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1409720400
-LatestEndTime: 1410411600
+LatestEndTime: 1411621200
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Paul Nilsson 1162
@@ -184,7 +184,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -197,7 +197,7 @@ NumberOfJobs: 0
 Site: BNL-ATLAS
 Group: atlas
 EarliestEndTime: 1409634000
-LatestEndTime: 1411102800
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Xin Zhao 87
@@ -223,7 +223,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -236,7 +236,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -249,7 +249,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jose Caballero 649
@@ -262,7 +262,7 @@ NumberOfJobs: 0
 Site: BU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -274,8 +274,21 @@ NumberOfJobs: 0
 %%
 Site: CIT_CMS_T2
 Group: cms
+EarliestEndTime: 1411621200
+LatestEndTime: 1411621200
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: CIT_CMS_T2
+Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -288,7 +301,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1409806800
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot11/vocms0167.cern.ch
@@ -301,7 +314,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -314,7 +327,7 @@ NumberOfJobs: 0
 Site: CIT_CMS_T2
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -339,6 +352,19 @@ NumberOfJobs: 0
 %%
 Site: GLOW
 Group: cms
+EarliestEndTime: 1411534800
+LatestEndTime: 1411707600
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: GLOW
+Group: cms
 EarliestEndTime: 1410843600
 LatestEndTime: 1411448400
 Month: 09
@@ -353,7 +379,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1410325200
-LatestEndTime: 1410670800
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /C=DE/O=GermanGrid/OU=uni-hamburg/CN=Roman Kogler
@@ -366,7 +392,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -379,7 +405,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1409806800
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot11/vocms0167.cern.ch
@@ -392,7 +418,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -405,7 +431,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -418,7 +444,7 @@ NumberOfJobs: 0
 Site: GLOW
 Group: cms
 EarliestEndTime: 1410238800
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=pilot01/test-008.t2.ucsd.edu
@@ -496,7 +522,7 @@ NumberOfJobs: 0
 Site: HU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -522,7 +548,7 @@ NumberOfJobs: 0
 Site: HU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -535,7 +561,7 @@ NumberOfJobs: 0
 Site: HU_ATLAS_Tier2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jose Caballero 649
@@ -548,7 +574,7 @@ NumberOfJobs: 0
 Site: LC-glcc
 Group: alice
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: Generic alice user
@@ -561,7 +587,7 @@ NumberOfJobs: 0
 Site: LUCILLE
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -574,10 +600,36 @@ NumberOfJobs: 0
 Site: LUCILLE
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jose Caballero 649
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: LUCILLE
+Group: atlas
+EarliestEndTime: 1411621200
+LatestEndTime: 1411621200
+Month: 09
+Year: 2014
+GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: MIT_CMS
+Group: cms
+EarliestEndTime: 1411534800
+LatestEndTime: 1411707600
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
 WallDuration: 0
 CpuDuration: 0
 NormalisedWallDuration: 0
@@ -600,7 +652,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -613,7 +665,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1409806800
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot11/vocms0167.cern.ch
@@ -626,7 +678,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -639,7 +691,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -652,7 +704,7 @@ NumberOfJobs: 0
 Site: MIT_CMS
 Group: cms
 EarliestEndTime: 1410498000
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=pilot01/test-008.t2.ucsd.edu
@@ -665,7 +717,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -678,7 +730,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=David Lesny 148
@@ -691,7 +743,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -704,7 +756,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jose Caballero 649
@@ -730,7 +782,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -821,7 +873,7 @@ NumberOfJobs: 0
 Site: MWT2
 Group: atlas
 EarliestEndTime: 1410584400
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: Generic atlas user
@@ -834,7 +886,7 @@ NumberOfJobs: 0
 Site: NERSC-PDSF
 Group: alice
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: Alice Nonprod
@@ -847,10 +899,23 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: atlas
 EarliestEndTime: 1410238800
-LatestEndTime: 1411448400
+LatestEndTime: 1411621200
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: Nebraska
+Group: cms
+EarliestEndTime: 1411621200
+LatestEndTime: 1411621200
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
 WallDuration: 0
 CpuDuration: 0
 NormalisedWallDuration: 0
@@ -873,7 +938,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411621200
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -886,7 +951,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1409806800
-LatestEndTime: 1411448400
+LatestEndTime: 1411621200
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot11/vocms0167.cern.ch
@@ -899,7 +964,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411621200
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -912,7 +977,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411621200
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -938,7 +1003,7 @@ NumberOfJobs: 0
 Site: Nebraska
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411621200
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=pilot01/test-008.t2.ucsd.edu
@@ -964,7 +1029,7 @@ NumberOfJobs: 0
 Site: OU_OCHEP_SWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -977,7 +1042,7 @@ NumberOfJobs: 0
 Site: OU_OCHEP_SWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -990,7 +1055,7 @@ NumberOfJobs: 0
 Site: OU_OCHEP_SWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jose Caballero 649
@@ -1016,7 +1081,7 @@ NumberOfJobs: 0
 Site: OU_OCHEP_SWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -1029,7 +1094,7 @@ NumberOfJobs: 0
 Site: OU_OSCER_ATLAS
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -1042,7 +1107,7 @@ NumberOfJobs: 0
 Site: OU_OSCER_ATLAS
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jose Caballero 649
@@ -1055,7 +1120,7 @@ NumberOfJobs: 0
 Site: OU_OSCER_ATLAS
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -1068,7 +1133,7 @@ NumberOfJobs: 0
 Site: OU_OSCER_ATLAS
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: Generic atlas user
@@ -1080,8 +1145,21 @@ NumberOfJobs: 0
 %%
 Site: Purdue-Carter
 Group: cms
+EarliestEndTime: 1411707600
+LatestEndTime: 1411707600
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: Purdue-Carter
+Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1094,7 +1172,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1107,7 +1185,7 @@ NumberOfJobs: 0
 Site: Purdue-Carter
 Group: cms
 EarliestEndTime: 1410498000
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=pilot01/test-008.t2.ucsd.edu
@@ -1132,8 +1210,21 @@ NumberOfJobs: 0
 %%
 Site: Purdue-Conte
 Group: cms
+EarliestEndTime: 1411707600
+LatestEndTime: 1411707600
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: Purdue-Conte
+Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1146,7 +1237,7 @@ NumberOfJobs: 0
 Site: Purdue-Conte
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1171,8 +1262,21 @@ NumberOfJobs: 0
 %%
 Site: Purdue-Hadoop
 Group: cms
+EarliestEndTime: 1411621200
+LatestEndTime: 1411707600
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: Purdue-Hadoop
+Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1185,7 +1289,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1409806800
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot11/vocms0167.cern.ch
@@ -1198,7 +1302,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -1211,7 +1315,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1409720400
-LatestEndTime: 1409720400
+LatestEndTime: 1411448400
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=marabgol/CN=653155/CN=Majid Arabgol
@@ -1237,7 +1341,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1250,7 +1354,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1410238800
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=pilot01/test-008.t2.ucsd.edu
@@ -1263,7 +1367,7 @@ NumberOfJobs: 0
 Site: Purdue-Hadoop
 Group: cms
 EarliestEndTime: 1411362000
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=testpilot03/test-frontend-1.t2.ucsd.edu
@@ -1275,8 +1379,21 @@ NumberOfJobs: 0
 %%
 Site: Purdue-Hansen
 Group: cms
+EarliestEndTime: 1411707600
+LatestEndTime: 1411707600
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: Purdue-Hansen
+Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1289,7 +1406,7 @@ NumberOfJobs: 0
 Site: Purdue-Hansen
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1314,8 +1431,21 @@ NumberOfJobs: 0
 %%
 Site: Purdue-Rossmann
 Group: cms
+EarliestEndTime: 1411707600
+LatestEndTime: 1411707600
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: Purdue-Rossmann
+Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1341,7 +1471,7 @@ NumberOfJobs: 0
 Site: Purdue-Rossmann
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1358,6 +1488,19 @@ LatestEndTime: 1411362000
 Month: 09
 Year: 2014
 GlobalUserName: Generic uscms user
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: SPRACE
+Group: cms
+EarliestEndTime: 1411448400
+LatestEndTime: 1411448400
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Dominik Haitz
 WallDuration: 0
 CpuDuration: 0
 NormalisedWallDuration: 0
@@ -1406,7 +1549,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1419,7 +1562,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -1432,7 +1575,7 @@ NumberOfJobs: 0
 Site: SPRACE
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1445,7 +1588,7 @@ NumberOfJobs: 0
 Site: SWT2_CPB
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=ddmadmin/CN=531497/CN=Robot: ATLAS Data Management
@@ -1458,7 +1601,7 @@ NumberOfJobs: 0
 Site: SWT2_CPB
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -1471,7 +1614,7 @@ NumberOfJobs: 0
 Site: SWT2_CPB
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jose Caballero 649
@@ -1484,7 +1627,7 @@ NumberOfJobs: 0
 Site: SWT2_CPB
 Group: atlas
 EarliestEndTime: 1409634000
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -1509,8 +1652,21 @@ NumberOfJobs: 0
 %%
 Site: UCSDT2
 Group: cms
+EarliestEndTime: 1411534800
+LatestEndTime: 1411707600
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: UCSDT2
+Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1523,7 +1679,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1409806800
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot11/vocms0167.cern.ch
@@ -1536,7 +1692,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -1549,7 +1705,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1410152400
-LatestEndTime: 1411362000
+LatestEndTime: 1411534800
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=capalmer/CN=694531/CN=Chris Palmer
@@ -1562,7 +1718,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1409720400
-LatestEndTime: 1410930000
+LatestEndTime: 1411621200
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=rebassoo/CN=673313/CN=Finn O'Neill Rebassoo
@@ -1575,7 +1731,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sani/CN=559914/CN=Matteo Sani
@@ -1588,7 +1744,7 @@ NumberOfJobs: 0
 Site: UCSDT2
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1653,7 +1809,7 @@ NumberOfJobs: 0
 Site: UERJ
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1665,8 +1821,21 @@ NumberOfJobs: 0
 %%
 Site: UFlorida-HPC
 Group: cms
+EarliestEndTime: 1411707600
+LatestEndTime: 1411707600
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: UFlorida-HPC
+Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1692,7 +1861,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -1705,7 +1874,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1718,7 +1887,7 @@ NumberOfJobs: 0
 Site: UFlorida-HPC
 Group: cms
 EarliestEndTime: 1411362000
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=pilot01/test-008.t2.ucsd.edu
@@ -1743,6 +1912,19 @@ NumberOfJobs: 0
 %%
 Site: USCMS-FNAL-WC1
 Group: cms
+EarliestEndTime: 1411534800
+LatestEndTime: 1411707600
+Month: 09
+Year: 2014
+GlobalUserName: /C=DE/O=GermanGrid/OU=KIT/CN=Stefan Wayand
+WallDuration: 0
+CpuDuration: 0
+NormalisedWallDuration: 0
+NormalisedCpuDuration: 0
+NumberOfJobs: 0
+%%
+Site: USCMS-FNAL-WC1
+Group: cms
 EarliestEndTime: 1410066000
 LatestEndTime: 1410411600
 Month: 09
@@ -1757,7 +1939,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1410411600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /C=DE/O=GermanGrid/OU=uni-hamburg/CN=Teresa Lenz
@@ -1783,7 +1965,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilot10/vocms0167.cern.ch
@@ -1796,7 +1978,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=computers/CN=cmspilotjob/vocms157.cern.ch
@@ -1835,7 +2017,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=ch/DC=cern/OU=Organic Units/OU=Users/CN=sciaba/CN=430796/CN=Andrea Sciaba
@@ -1848,7 +2030,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1411102800
-LatestEndTime: 1411102800
+LatestEndTime: 1411448400
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=pilot/cmsgwms-frontend.fnal.gov
@@ -1861,7 +2043,7 @@ NumberOfJobs: 0
 Site: USCMS-FNAL-WC1
 Group: cms
 EarliestEndTime: 1409979600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=Services/CN=pilot01/test-008.t2.ucsd.edu
@@ -1874,7 +2056,7 @@ NumberOfJobs: 0
 Site: UTA_SWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=John Hover
@@ -1887,7 +2069,7 @@ NumberOfJobs: 0
 Site: UTA_SWT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Jose Caballero 649
@@ -1913,7 +2095,7 @@ NumberOfJobs: 0
 Site: UTA_SWT2
 Group: atlas
 EarliestEndTime: 1409634000
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: /DC=com/DC=DigiCert-Grid/O=Open Science Grid/OU=People/CN=Saul Youssef 93
@@ -1939,7 +2121,7 @@ NumberOfJobs: 0
 Site: WT2
 Group: atlas
 EarliestEndTime: 1409547600
-LatestEndTime: 1411448400
+LatestEndTime: 1411707600
 Month: 09
 Year: 2014
 GlobalUserName: Generic atlas user
