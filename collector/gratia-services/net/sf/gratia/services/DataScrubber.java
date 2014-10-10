@@ -285,7 +285,7 @@ public class DataScrubber {
          String selectCmd = ( "select record.id from " + className +
                              " record where " + whereClause );
          List ids = GetList(selectCmd, limit, msg);
-         if (ids.size() == 0) return 0;
+         if ((ids == null) || (ids.size() == 0)) return 0;
          Session session = null;
          try {
             session = HibernateWrapper.getSession();
