@@ -25,8 +25,8 @@ function validate {
 The $cfg does not exist.";usage;exit 1
   fi
 
-  [ ! -d "$svnsrc" ] && logerr "You sure you are on the right node.
-The source directory does not exist: $svnsrc"
+  [ ! -d "$srcdir" ] && logerr "You sure you are on the right node.
+The source directory does not exist: $srcdir"
 
   webapps="$(grep  '^WebappsDir' $cfg |awk '{print $2}')"
   [ ! -d "$webapps" ] && logerr "WebappsDir does not exist: $webapps"
@@ -43,8 +43,8 @@ The source directory does not exist: $svnsrc"
   vos="$(grep  '^VOFilterFile' $cfg |awk '{print $2}')"
   [ ! -f "$vos" ] && logerr "VOFilterFile does not exist: $vos"
 
-  source=/usr/local/gratia-apel/bin
-  [ ! -d "$source" ] && logerr "executable directory does not exist: $source"
+  executables=/usr/local/gratia-apel/bin
+  [ ! -d "$executables" ] && logerr "executable directory does not exist: $executables"
 
   [ "$(type svn &>/dev/null;echo $?)" != "0" ] && logerr "svn does not appear to be installed on this node"
  
@@ -58,7 +58,7 @@ function copy_file {
 function check_webapps {
   [   -z "$webapps" ] && logerr "(check_webapps function: webapps variable not set"
   [ ! -d "$webapps" ] && logerr "WebappsDir does not exist: $webapps"
-  svndir=$svnsrc/webapps
+  svndir=$srcdir/webapps
   logit "Checking $svndir"
   files="$(ls $webapps)" 
   for file in $files
@@ -81,7 +81,7 @@ function check_webapps {
 function check_apel_updates {
   [   -z "$updates" ] && logerr "(check_apel_updates function: updates variable not set"
   [ ! -d "$updates" ] && logerr "UpdatesDir does not exist: $updates"
-  svndir=$svnsrc/apel-updates
+  svndir=$srcdir/apel-updates
   logit "Checking $svndir"
   files="$(ls $updates)" 
   for file in $files
@@ -104,25 +104,22 @@ function check_apel_updates {
 function check_reportable_sites {
   [   -z "$sites" ] && logerr "(check_reportable_sites function: sites variable not set"
   [ ! -f "$sites" ] && logerr "SiteFilterFile does not exist: $sites"
-  svndir=$svnsrc
-  file=$(basename $sites)
-  logit "Checking $svndir/$file"
-  if [ ! -f "$svndir/$file" ];then
-    logerr "Something is seriously wrong. 
-This file should always exist: $svndir/$file"
-  fi
-  rtn="$(diff $sites $svndir/$file &>/dev/null ;echo $?)"
+  file=$srcdir/etc/$(basename $sites)
+  logit "Checking $file"
+  [ ! -f "$file" ] && logerr "source file does not exist: $file"
+  rtn="$(diff $sites $file &>/dev/null ;echo $?)"
   if [ "$rtn" != "0" ];then
-    logit "... update $file"
-    copy_file $sites $svndir/.
+    logit "... update $(basename $file)"
+    copy_file $sites $file
   fi
 }
 #---------------
 function check_reportable_sites_history {
   [   -z "$sitehistory" ] && logerr "(check_reportable_sites function: sitehistory variable not set"
   [ ! -d "$sitehistory" ] && logerr "SiteFilterHistory does not exist: $sitehistory"
-  svndir=$svnsrc/lcg-reportableSites.history
+  svndir=$srcdir/etc/lcg-reportableSites.history
   logit "Checking $svndir"
+  [ ! -d "$svndir" ] && logerr "source directory does not exist: $svndir"
   files="$(ls $sitehistory)" 
   for file in $files
   do
@@ -143,26 +140,24 @@ function check_reportable_sites_history {
 function check_reportable_vos {
   [   -z "$vos" ] && logerr "(check_reportable_vos function: vos variable not set"
   [ ! -f "$vos" ] && logerr "VOFilterFile does not exist: $vos"
-  svndir=$svnsrc
-  file=$(basename $vos)
-  logit "Checking $svndir/$file"
-  if [ ! -f "$svndir/$file" ];then
-    logerr "Something is seriously wrong. 
-This file should always exist: $svndir/$file"
-  fi
-  rtn="$(diff $vos $svndir/$file &>/dev/null ;echo $?)"
+  file=$srcdir/etc/$(basename $vos)
+  logit "Checking $file"
+  [ ! -f "$file" ] && logerr "source file does not exist: $file"
+
+  rtn="$(diff $vos $file &>/dev/null ;echo $?)"
   if [ "$rtn" != "0" ];then
-    logit "... update $file"
-    copy_file $vos $svndir/.
+    logit "... update $(basename $file)"
+    copy_file $vos $file
   fi
 }
 #---------------
 function check_source {
-  [   -z "$source" ] && logerr "(check_source function: source variable not set"
-  [ ! -d "$source" ] && logerr "Source file dir does not exist: $source"
-  svndir=$svnsrc
-  logit "Checking $svndir for source file changes"
-  files="$(ls $source/*.py $source/*.sh)" 
+  [   -z "$executables" ] && logerr "(check_source function: executables variable not set"
+  [ ! -d "$executables" ] && logerr "Executables dir does not exist: $executables"
+  svndir=$srcdir/bin
+  logit "Checking $svndir for executable file changes"
+  [ ! -d "$svndir" ] && logerr "Source repo dir does not exist: $svndir"
+  files="$(ls $executables/*.py $executables/*.sh)" 
   for file in $files
   do
     file=$(basename $file)
@@ -172,7 +167,7 @@ function check_source {
       logit "... add $file"
       continue
     fi
-    rtn="$(diff $source/$file $svndir/$file &>/dev/null ;echo $?)"
+    rtn="$(diff $executables/$file $svndir/$file &>/dev/null ;echo $?)"
     if [ "$rtn" != "0" ];then
       logit "... update $file"
     fi
@@ -180,11 +175,10 @@ function check_source {
 }
 #---------------
 function check_svn {
-  [   -z "$svnsrc" ] && logerr "(check_svn function: source variable not set"
-  [ ! -d "$svnsrc" ] && logerr "Source file dir does not exist: $source"
-  svndir=$svnsrc
-  logit "Checking svn"
-  cd $svndir
+  [   -z "$srcdir" ] && logerr "(check_svn function: source variable not set"
+  [ ! -d "$srcdir" ] && logerr "Source repo dir does not exist: $source"
+  logit "Checking source repo: $srcdir"
+  cd $srcdir
 #  svn status --show-updates 2>&1 |egrep -v "rpms|tarballs" 1>>$tmpfile 2>&1
   svn status 2>&1 |egrep -v "rpms|tarballs" 1>>$tmpfile 2>&1
   cd - 1>>$tmpfile 2>&1
@@ -213,8 +207,8 @@ function usage {
 PGM=$(basename $0)
 cfg="$1"
 to_mail="$2"
-svnsrc=$HOME/cdcvs/gratia/interfaces/gratia-apel
-svnsrc=$HOME/cdcvs/gratia/interfaces/ssm.apel-lcg
+srcdir=$HOME/cdcvs/gratia/interfaces/ssm.apel-lcg
+srcdir=$HOME/cdcvs/gratia/interfaces/gratia-apel
 tmpfile=/tmp/$PGM.log
 >$tmpfile
 svn_updates_required=0
