@@ -118,6 +118,10 @@
 #     Changed NFs per Bob Ball (goc ticket 21285)
 #        AGLT2          from 10.29 to 9.26
 #
+# 10/20/14 (Scott Teige)
+#     Changed NFs per Bob Ball (goc ticket 21285)
+#        AGLT2          from 9.26 to 9.42
+#
 ##################################################################
 #
 #-- Site  ------- HEPSpec2006
@@ -147,7 +151,7 @@ UERJ               10486
 #--- ATLAS Tier 2 -----
 BNL-ATLAS           10050
 #--- ATLAS Tier 2 -----  
-AGLT2               9260
+AGLT2               9420
 BU_ATLAS_Tier2      9320
 HU_ATLAS_Tier2      9440
 LUCILLE             9100
