@@ -36,9 +36,12 @@ function get_mysql_attributes {
   DBREADERPASSWD=`grep   ^service.reporting.password $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
   DBROOTPASSWD=`grep     ^service.mysql.rootpassword $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
 
-# HK this is new as of September 2014
-  DBROOTUSER=`grep       ^service.mysql.rootuser     $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
-  echo $DBROOTUSER
+# HK this is new as of September 2014, and updated on October 7th 2014
+  DBROOTUSER=`grep ^service.mysql.rootuser     $AUTHORIZATIONS | tr '=' ' ' | awk '{print $NF;}'`
+  if [ "x$DBROOTUSER" = "x" ]  || [ $DBROOTUSER = "service.mysql.rootuser" ]
+  then
+    DBROOTUSER=root
+  fi
 }
 
 #-------------------------------
@@ -89,14 +92,13 @@ function validate_mysql_config {
   echo "... port: $DBPORT"
 }
 
-
-
 #-------------------------------
 #-------------------------------
 #-------------------------------
 function check_if_root_passwd_set {
   # Attempts to determine if the root password has been set already
-  echo "quit" | mysql -B --unbuffered  --user=root --port=$DBPORT &>/dev/null;rtn=$?
+#HK  echo "quit" | mysql -B --unbuffered  --user=root --port=$DBPORT &>/dev/null;rtn=$?
+  echo "quit" | mysql -B --unbuffered  --user=$DBROOTUSER --port=$DBPORT &>/dev/null;rtn=$?
   if [ "$rtn" = "0" ];then
     ROOT_SET=0 
     echo "... root password has not been set yet."
@@ -125,36 +127,6 @@ function verify_root_pswd {
 #-------------------------------
 #-------------------------------
 #-------------------------------
-function check_if_root_passwd_set_remote {
-  ssh $MSHOST "echo \"quit\" | mysql -B --unbuffered --user=root &>/dev/null";rtn=$?
-  if [ "$rtn" = "0" ];then
-    ROOT_SET=0 
-    echo "... root password has not been set yet."
-  else
-    ROOT_SET=1
-    echo "... root password has already been set."
-  fi
-}
-function verify_root_pswd_remote {
-  [ "$ROOT_SET" = "0" ] && return
-  echo "... verifying if root password is correct"
-
-  ssh $MSHOST "echo \"quit\" | mysql -B --unbuffered --user=root --password=${DBROOTPASSWD} &>/dev/null";rtn=$?
-#HK> for remote, mysql_arguments function is not working
-#  echo "quit" | mysql `mysql_arguments` &>/dev/null;rtn=$?
-#  rm -f $TMPPSWD
-  if [ "$rtn" != "0" ];then 
-    echo "The root mysql password has already been set and the one specified in the "
-    echo "Gratia authorization file does not match:"
-    echo "  File: $AUTHORIZATIONS"
-    echo "  Attribute: service.mysql.rootpassword"
-    echo "Please correct."
-    exit 1
-  fi
-}
-
-
-
 
 #-------------------------------
 function mysql_arguments {
@@ -166,7 +138,8 @@ function mysql_arguments {
     passwd_arg=" --defaults-extra-file=$TMPPSWD "
     create_tmp_passwd_file
   fi
-  echo "$passwd_arg -B --unbuffered  --user=root --port=$DBPORT" 
+#HK  echo "$passwd_arg -B --unbuffered  --user=root --port=$DBPORT" 
+  echo "$passwd_arg -B --unbuffered  --user=$DBROOTUSER --port=$DBPORT" 
 }
 # HK> used only in function mysql_arguments() above
 function create_tmp_passwd_file {
@@ -177,10 +150,6 @@ EOF
   chmod 600 $TMPPSWD
 }
 #-------------------------------
-
-
-
-
 
 
 #-------------------------------
@@ -196,7 +165,7 @@ function create_gratia_sql_updates_file {
     fi
     cat >$TMPSQL <<EOF
 use mysql;
-UPDATE user SET PASSWORD=PASSWORD("$DBROOTPASSWD") WHERE User = 'root';
+UPDATE user SET PASSWORD=PASSWORD("$DBROOTPASSWD") WHERE User = '$DBROOTUSER';
 FLUSH PRIVILEGES;
 EOF
   fi
@@ -209,8 +178,8 @@ GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBUSER'@'localhost'   IDENTIFIED BY '$DBP
 GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBUSER'@'$host'       IDENTIFIED BY '$DBPASSWD';
 GRANT SELECT,EXECUTE ON $DBNAME.* TO '$DBREADER'@'localhost' IDENTIFIED BY '$DBREADERPASSWD';
 GRANT SELECT,EXECUTE ON $DBNAME.* TO '$DBREADER'@'$host'     IDENTIFIED BY '$DBREADERPASSWD';
-GRANT ALL PRIVILEGES ON $DBNAME.* TO 'root'@'localhost'      IDENTIFIED BY '$DBROOTPASSWD';
-GRANT ALL PRIVILEGES ON $DBNAME.* TO 'root'@'$DBHOST'        IDENTIFIED BY '$DBROOTPASSWD';
+GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBROOTUSER'@'localhost' IDENTIFIED BY '$DBROOTPASSWD';
+GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBROOTUSER'@'$DBHOST'   IDENTIFIED BY '$DBROOTPASSWD';
 EOF
   chmod 600 $TMPSQL
 }
@@ -231,66 +200,47 @@ function update_mysql {
 #----------------------------
 function update_mysql_remote {
 
-  if [ "$ROOT_SET" = "0" ];then 
-    echo "... creating the root password specified" 
+# HK> have to remove this if block here, in order to deal with the situation where the DBA did not set the password for the root user
+#  if [ "$ROOT_SET" = "0" ];then 
+    echo "Remote>... creating the root password specified" 
     if [ "x$DBROOTPASSWD" = "x" ] || [ $DBROOTPASSWD = "service.mysql.rootpassword" ];then
       DBROOTPASSWD=""
     fi
-  fi
-#HK> Normally DBROOTPASSWD is set by get_mysql_attributes
-#HK> The function check_if_root_passwd_set()  and function verify_root_pswd() directly tries to use mysql as root without password to see if the root password is set or not
-# If rootpasswd is not set, set it to null
-# If rootpasswd is yes set, just make sure that it is same as DBROOTPASSWD
-#HK> if the root password is NOT set, i.e. if it is set to service.mysql.rootpassword, then we manually set     DBROOTPASSWD=""
-#HK> because
-# if  service.mysql.rootpassword=
-# then          grep     ^service.mysql.rootpassword service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'
-# returns       service.mysql.rootpassword
-# i.e. DBROOTPASSWD=service.mysql.rootpassword
-# if service.mysql.rootpassword=password
-# then          grep     ^service.mysql.rootpassword service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'
-# returns       messi
-# i.e. DBROOTPASSWD=password
-##HK> Important thing is, we assume       DBROOTPASSWD for both root@MSHOST and root@GSHOST
+#  fi
 
-    echo "... creating $DBNAME database and updating privileges"
+    echo "Remote>... creating $DBNAME database and updating privileges"
 
 # HK> We used to aggressively conduct the following 3 commands, but as of September 2014, we simply trust MySQL DBA to have done these commands for us.
 #    ssh $MSHOST "mysql -uroot --password=${DBROOTPASSWD} --execute  'GRANT ALL PRIVILEGES ON        *.* TO \"root\"@\"$GSHOST\"    IDENTIFIED BY \"$DBROOTPASSWD\"'    mysql"
 #    ssh $MSHOST "mysql -uroot --password=${DBROOTPASSWD} --execute  'GRANT ALL PRIVILEGES ON \$DBNAME.* TO \"root\"@\"$GSHOST\"    IDENTIFIED BY \"$DBROOTPASSWD\"'    mysql"
-#    mysql -h $MSHOST -uroot --password=${DBROOTPASSWD}  --execute  "update user set Grant_priv=\"Y\" where Host=\"$GSHOST\" and User=\"root\"         " mysql
+#    mysql   -h $MSHOST -uroot --password=${DBROOTPASSWD} --execute  "update user set Grant_priv=\"Y\" where Host=\"$GSHOST\" and User=\"root\"         " mysql
 
     mysql -h $MSHOST -u${DBROOTUSER} --password=${DBROOTPASSWD}  --execute  "CREATE database $DBNAME CHARACTER SET latin1 COLLATE latin1_swedish_ci"
-    mysql -h $MSHOST -u${DBROOTUSER}  --password=${DBROOTPASSWD}  --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO   \"$DBUSER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBPASSWD\""       mysql
-    mysql -h $MSHOST -u${DBROOTUSER}  --password=${DBROOTPASSWD}  --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO   \"root\"@\"$GSHOST\"  IDENTIFIED BY \"$DBROOTPASSWD\""       mysql
-    mysql -h $MSHOST -u${DBROOTUSER}  --password=${DBROOTPASSWD}  --execute  "GRANT SELECT,EXECUTE ON $DBNAME.* TO \"$DBREADER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBREADERPASSWD\"" mysql
+    rtn=$?                                                                                                                                                                                                
+    if [ "$rtn" != "0" ];then                                                                                                                                                                             
+      echo "Attempt to create a gratia database in the remote MySQL node failed, but the script can proceed"
+    fi
+
+    mysql -h $MSHOST -u${DBROOTUSER} --password=${DBROOTPASSWD}  --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO   \"$DBUSER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBPASSWD\""       mysql
+    rtn=$?
+#    echo "rtn2 = $rtn"
+    if [ "$rtn" != "0" ];then
+      echo "Attempt to grant all privileges to the gratia user in the remote MySQL node failed"
+      exit 1
+    fi
+
+    mysql -h $MSHOST -u${DBROOTUSER} --password=${DBROOTPASSWD}  --execute  "GRANT SELECT,EXECUTE ON $DBNAME.* TO \"$DBREADER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBREADERPASSWD\"" mysql
+    rtn=$?
+#    echo "rtn3 = $rtn"
+    if [ "$rtn" != "0" ];then
+      echo "Attempt to grant select,execute privileges to the reader user in the remote MySQL node failed"
+      exit 1
+    fi
+
+# HK> October 7th 2014, I realized that the following command has already been executed by MS DBA.
+#    mysql -h $MSHOST -u${DBROOTUSER} --password=${DBROOTPASSWD}  --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO   \"root\"@\"$GSHOST\"  IDENTIFIED BY \"$DBROOTPASSWD\""       mysql
+
 }
-
-# The final strategy is as follows
-# If GS and MS are different, we have to ask DBA of MySQL node to do the following
-#mysql> use mysql;
-#mysql> grant all privileges on      *.* to "root"@"gratianode.fnal.gov" identified by "password";
-#mysql> update user set Grant_priv="Y"  where Host="gratianode.fnal.gov" and User="root";
-#mysql> grant all privileges on gratia.* to "root"@"gratianode.fnal.gov" identified by "password";
-# and the DBA should let GS admin know if "root" and "password" are different strings
-
-# GS node admin should assign those strings from MS DBA to DBROOTUSER and DBROOTPASSWOD as defined in service-authorization.properties
-# install-database script will simply use DBROOTUSER and DBROOTPASSWOD as defined in service-authorization.properties
-# and will assume that DBROOTUSER in MySQL node has Grant_priv=Y
-# and execute the following commands
-
-# mysql -h $MS -u${DBROOTUSER} --password=${DBROOTPASSWD} --execute  "CREATE database $DBNAME CHARACTER SET latin1 COLLATE latin1_swedish_ci"
-# mysql -h $MS -u${DBROOTUSER} --password=${DBROOTPASSWD} --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO    \"$DBUSER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBPASSWD\""       mysql
-# mysql -h $MS -u${DBROOTUSER} --password=${DBROOTPASSWD} --execute  "GRANT SELECT,EXECUTE ON $DBNAME.* TO  \"$DBREADER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBREADERPASSWD\"" mysql
-# mysql -h $MS -u${DBROOTUSER} --password=${DBROOTPASSWD} --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO \"DBROOTUSER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBROOTPASSWD\""   mysql
-
-# And make sure post-install is also using DBROOTUSER, not root
-
-
-
-
-
-
 
 ### MAIN ######################################################
 #set -x
@@ -337,13 +287,6 @@ update_mysql
 else
 
 echo "GS and MS running in two nodes"
-##HK> Important thing is, for remote case, we do not have remote versions of
-# verify_mysql_installed, verify_mysql_running , validate_mysql_config
-# i.e. we assume that MS is installed and running with correct configuration
-# we just proceed to the root password and privilege
-#check_if_root_passwd_set_remote
-#verify_root_pswd_remote
-
 update_mysql_remote
 fi
 

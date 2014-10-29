@@ -23,6 +23,15 @@ function preprocess_proc() {
 
 DBROOTPASSWD=`grep     ^service.mysql.rootpassword /etc/gratia/services/service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'`
 DBROOTUSER=`grep       ^service.mysql.rootuser     /etc/gratia/services/service-authorization.properties | tr '=' ' ' | awk '{print $NF;}'`
+if [ "x$DBROOTUSER" = "x" ] || [ $DBROOTUSER = "service.mysql.rootuser" ]
+then
+   DBROOTUSER="root"
+fi
+if [ "x$DBROOTPASSWD" = "x" ] || [ $DBROOTPASSWD = "service.mysql.rootpassword" ]
+then
+   DBROOTPASSWD=""
+fi
+
 
 dbname=`grep ^service.mysql.url /etc/gratia/services/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $5;}'`
 dbhost=`grep ^service.mysql.url /etc/gratia/services/service-configuration.properties | tr ':' ' ' | tr '/' ' ' | awk '{print $3;}'`

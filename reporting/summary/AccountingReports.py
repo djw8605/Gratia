@@ -2809,7 +2809,9 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
                 current[k] = (0,0,0.00,0)
                 delta_njobs = negate(prev[k][0])
                 delta_wall = negate(prev[k][1])
-                if(prev[k][2] != "NULL"):
+# HK> This is to deal with Efficiency and VOEfficiency missing error reported by Steve Timm and BNL
+# by HK         if(prev[k][2] != "NULL"):
+                if(prev[k][2] != "NULL") and (prev[k][3] != "NULL") :
                     delta_cpuToWall = negate(float(prev[k][2]))
                     delta_eff = negate(int(prev[k][3]))
                 else:
@@ -2818,7 +2820,9 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
             elif (k in prev) and (k in current):
                 delta_njobs = int(current[k][0]) - int(prev[k][0])
                 delta_wall = current[k][1] - prev[k][1]
-                if(current[k][2] != "NULL" and prev[k][2] != "NULL"):
+# HK> This is to deal with Efficiency and VOEfficiency missing error reported by Steve Timm and BNL
+# by HK         if(current[k][2] != "NULL" and prev[k][2] != "NULL"):
+                if(current[k][2] != "NULL" and prev[k][2] != "NULL")  and (current[k][3] != "NULL" and prev[k][3] != "NULL") :
                     delta_cpuToWall = float(current[k][2]) - float(prev[k][2])
                     delta_eff = float(current[k][3]) - float(prev[k][3])
                 else:
@@ -2826,7 +2830,9 @@ def EfficiencyRange(what, range_end = datetime.date.today(),
                     delta_eff = "n/a"
             njobs_sum+= int(current[k][0])
             wall_sum+= int(current[k][1])
-            if(current[k][2] != "NULL"):
+# HK> This is to deal with Efficiency and VOEfficiency missing error reported by Steve Timm and BNL
+# by HK     if(current[k][2] != "NULL"):
+            if(current[k][2] != "NULL") and (current[k][3] != "NULL")  :
                 eff_sum+= float(current[k][3])
                 cpuToWall_sum+= float(current[k][2]) 
             delta_njobs_sum+= int(delta_njobs)

@@ -2,7 +2,7 @@ Name: gratia
 Summary: Gratia OSG accounting system
 Group: Applications/System
 #Version: 1.13.12
-Version: 1.15.1
+Version: 1.16.1
 Release: 1%{?dist}
 License: GPL
 Group: Applications/System
@@ -42,7 +42,7 @@ Requires: tomcat6
 
 Requires: osg-version 
 Requires: emi-trustmanager-tomcat
-Requires: mysql-server
+#Requires: mysql-server
 Requires: vo-client-edgmkgridmap
 Requires: grid-certificates
 # The following requirement makes sure we get the RPM that provides this,
@@ -237,6 +237,15 @@ fi
 
 
 %changelog
+* Fri Oct 29 2014 Hyunwoo Kim - 1.16.1
+- install-database is debugged. now letting local mysql rootuser have different name other than root
+
+* Fri Oct 10 2014 Hyunwoo Kim - 1.16.0
+- Basically equivalent to 1.15.2 which was a test version and was improved from 1.15.1. Also Marco modified DataScrubber.java
+
+* Tue Oct 09 2014 Hyunwoo Kim - 1.15.2
+- Modified install-database and post-install to handle MySQL root user, removed mysql-server dependency from gratia.spec
+
 * Thu Sep 04 2014 Hyunwoo Kim - 1.15.1
 - better install-database,post-install,service-authorization.properties,hibernate.cfg.xml to handle MySQL 5 6
 
