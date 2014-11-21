@@ -33,7 +33,7 @@ function get_tempfile {
   echo "$outpath" 
 }
 # trap will remove the files also if ctrl+c is used
-TMPPSWD="`get_tempfile /tmp/.${PGM}.pwsd.$$`"   # very temporary passwd file
+TMPPSWD="`get_tempfile /tmp/.${PGM}.pswd.$$`"   # very temporary passwd file
 TMPSQL="`get_tempfile /tmp/.${PGM}.sql.$$`"     # very temporary sql file
 trap 'rm -f "$TMPPSWD" "$TMPSQL"' EXIT
 
@@ -209,7 +209,7 @@ function mysql_arguments {
   # so as not to show the password in the mysql execution.
   local passwd_arg=""
   if [ "$ROOT_SET" = "1" ]; then 
-    passwd_arg=' --defaults-extra-file="$TMPPSWD" '
+    passwd_arg=" --defaults-extra-file=$TMPPSWD "
     create_tmp_passwd_file
   fi
   echo "$passwd_arg -B --unbuffered  --user=$DBROOTUSER --port=$DBPORT" 
@@ -285,7 +285,7 @@ function update_mysql {
   rm -f "$TMPPSWD"
   if [ $rtn -ne 0 ]; then
     echo "ERROR: The attempt to create/update the Gratia database failed."
-    echo "Try to sun manually the commands on the server:"
+    echo "Try to run manually the commands on the server:"
     cat "$TMPSQL"
     rm -f "$TMPSQL"
     exit 1
@@ -297,11 +297,13 @@ function update_mysql {
 function update_mysql_remote {
   [ -z "$QUIET" ] && echo "... creating $DBNAME database and updating privileges on the remote server"
 
-  cat "$TMPSQL" | mysql --host $MSHOST `mysql_arguments`; rtn=$?
+  # An error like: "mysql: unknown variable 'defaults-extra-file=..."
+  # may happen when defaults-extra-file is not the first option (misleading message)
+  cat "$TMPSQL" | mysql `mysql_arguments` --host $MSHOST; rtn=$?
   rm -f "$TMPPSWD"
   if [ $rtn -ne 0 ]; then
     echo "ERROR: The attempt to create the Gratia database and its users on the remote server failed."
-    echo "Try to sun manually the commands on the remote server:"
+    echo "Try to run manually the commands on the remote server:"
     cat "$TMPSQL"
     rm -f "$TMPSQL"
     exit 1
@@ -309,56 +311,14 @@ function update_mysql_remote {
 
 }
 
-#----------------------------
-function update_mysql_remote_old {
-
-# HK> have to remove this if block here, in order to deal with the situation where the DBA did not set the password for the root user
-#  if [ "$ROOT_SET" = "0" ];then 
-    echo "Remote>... creating the root password specified" 
-    if [ "x$DBROOTPASSWD" = "x" ] || [ $DBROOTPASSWD = "service.mysql.rootpassword" ];then
-      DBROOTPASSWD=""
-    fi
-#  fi
-
-    echo "Remote>... creating $DBNAME database and updating privileges"
-
-# HK> We used to aggressively conduct the following 3 commands, but as of September 2014, we simply trust MySQL DBA to have done these commands for us.
-#    ssh $MSHOST "mysql -uroot --password=${DBROOTPASSWD} --execute  'GRANT ALL PRIVILEGES ON        *.* TO \"root\"@\"$GSHOST\"    IDENTIFIED BY \"$DBROOTPASSWD\"'    mysql"
-#    ssh $MSHOST "mysql -uroot --password=${DBROOTPASSWD} --execute  'GRANT ALL PRIVILEGES ON \$DBNAME.* TO \"root\"@\"$GSHOST\"    IDENTIFIED BY \"$DBROOTPASSWD\"'    mysql"
-#    mysql   -h $MSHOST -uroot --password=${DBROOTPASSWD} --execute  "update user set Grant_priv=\"Y\" where Host=\"$GSHOST\" and User=\"root\"         " mysql
-
-    mysql -h $MSHOST -u${DBROOTUSER} --password=${DBROOTPASSWD}  --execute  "CREATE database $DBNAME CHARACTER SET latin1 COLLATE latin1_swedish_ci"
-    rtn=$?                                                                                                                                                                                                
-    if [ "$rtn" != "0" ];then                                                                                                                                                                             
-      echo "Attempt to create a gratia database in the remote MySQL node failed, but the script can proceed"
-    fi
-
-    mysql -h $MSHOST -u${DBROOTUSER} --password=${DBROOTPASSWD}  --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO   \"$DBUSER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBPASSWD\""       mysql
-    rtn=$?
-#    echo "rtn2 = $rtn"
-    if [ "$rtn" != "0" ];then
-      echo "Attempt to grant all privileges to the gratia user in the remote MySQL node failed"
-      exit 1
-    fi
-
-    mysql -h $MSHOST -u${DBROOTUSER} --password=${DBROOTPASSWD}  --execute  "GRANT SELECT,EXECUTE ON $DBNAME.* TO \"$DBREADER\"@\"$GSHOST\"  IDENTIFIED BY \"$DBREADERPASSWD\"" mysql
-    rtn=$?
-#    echo "rtn3 = $rtn"
-    if [ "$rtn" != "0" ];then
-      echo "Attempt to grant select,execute privileges to the reader user in the remote MySQL node failed"
-      exit 1
-    fi
-
-# HK> October 7th 2014, I realized that the following command has already been executed by MS DBA.
-#    mysql -h $MSHOST -u${DBROOTUSER} --password=${DBROOTPASSWD}  --execute  "GRANT ALL PRIVILEGES ON $DBNAME.* TO   \"root\"@\"$GSHOST\"  IDENTIFIED BY \"$DBROOTPASSWD\""       mysql
-
-}
 
 ### MAIN ######################################################
 #set -x
 
 PRINT_ONLY=
 QUIET=
+# Assume root password is set if unable to check
+ROOT_SET=1
 
 while getopts h?pq option
 do
