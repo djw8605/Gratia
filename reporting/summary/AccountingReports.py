@@ -668,7 +668,7 @@ def GetListOfOSGRegisteredVO(voStatus, beginDate, endDate):
               (longname,description) = pair
            except:
               if not printederror:
-                 LogToFile("Gratia Reports GetListOfRegisteredVO unable to parse the result of: "+cmd)
+                 LogToFile("Gratia Reports GetListOfRegisteredVO unable to parse the result of: "+filter)
                  sys.stderr.write("Gratia Reports GetListOfRegisteredVO unable to parse data, one example is: "+pair+"\n")
                  printederror = True
               LogToFile("Gratia Reports GetListOfRegisteredVO unable to parse: "+pair)
