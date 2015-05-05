@@ -1,0 +1,36 @@
+GRATIA Software
+---------------
+
+
+Package: gratia-probe (SRPM, multiple RPMs)
+Dir: probe
+
+
+Package: gratia (SRPM/RPM) Gratia service or collector
+Dir: admin-util build-scripts collector common docs scripts
+
+
+Package: gratia-reporting-email (SRPM/RPM)
+Dir: reporting
+
+
+Interfaces have their own packages
+
+Package: gratia-apel (SRPM/RPM)
+Dir: interfaces/ssm.apel-lcg
+
+Package: gratia-gold (SRPM/RPM)
+Dir: interfaces/xsede
+
+Other interfaces are deployed from the source
+Dir: interfaces
+
+
+Package: redirex
+Dir: redirex
+
+
+Parckage: scoreboard
+Dir: scoreboard (in the scoreboard branch)
+
+
