@@ -128,12 +128,12 @@ function start() {
     parseOptions
     # start tomcat with jscv
     if [[ -n "$JSVC" ]] && [[ -x "$JSVC" ]] && [[ -n "$TOMCAT_USER" ]]; then
-      echo -n ".. using jsvc .. sleeping 10"
+      echo -n ".. using jsvc .. waiting up to 300s"
       if [ -x "/usr/share/gratia/configure_urlredirect" ];then
          /usr/share/gratia/configure_urlredirect $CATALINA_HOME
       fi
       export JAVA_HOME
-      JSVC_ARGS="-wait 10 $JSVC_ARGS"
+      JSVC_ARGS="-wait 300 $JSVC_ARGS"
       $JSVC $JSVC_ARGS
       RETVAL=$?
     else
@@ -151,7 +151,11 @@ function start() {
         log_success_msg
         touch /var/lock/subsys/${NAME}
     else
-        log_failure_msg "Error code ${RETVAL}"
+        if [[ -n "$JSVC" ]]; then
+            log_failure_msg "Error code ${RETVAL}; if jsvc timeout check if tomcat is running"
+        else
+            log_failure_msg "Error code ${RETVAL}"
+        fi
     fi
     if [ "$DISTRIB_ID" = "MandrivaLinux" ]; then
         echo
@@ -252,6 +256,7 @@ function checkpidfile()
       if [ -d "/proc/${kpid}" ]; then
 # The pid file exists and the process is running
           RETVAL="0"
+          return
       else
 # The pid file exists but the process is not running
          RETVAL="1"
