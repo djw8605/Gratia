@@ -34,6 +34,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.exception.*;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 public class BacklogHistory extends HttpServlet {
    
    static final Pattern yesMatcher = Pattern.compile("^[YyTt1]");
@@ -154,7 +156,7 @@ public class BacklogHistory extends HttpServlet {
       //
       writer.write(fgPreamble);
       writer.write("<h4 align=\"center\">");
-      writer.write(name);
+      writer.write(StringEscapeUtils.escapeXml(name));
       writer.write(" on ");      
       writer.write(fProxy.getName());
       writer.write("</h4>\n");
