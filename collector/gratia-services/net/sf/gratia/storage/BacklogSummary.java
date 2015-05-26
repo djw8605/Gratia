@@ -3,6 +3,8 @@ package net.sf.gratia.storage;
 import java.util.Date;
 import java.util.List;
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.hibernate.Query;
@@ -261,7 +263,7 @@ public class BacklogSummary
    private static final String fgSelectHourlyCommand = "select bshid, " + fgSelectCommand + "Hourly";
    private static final String fgSelectDailyCommand = "select bsdid, " + fgSelectCommand + "Daily";
 
-   public static List<BacklogSummary> getList(Session session, String what, String selection)
+   public static List<BacklogSummary> getList(Session session, String what, String selection, Map<String,Object> parameters)
    {
       String command;
       if (what.equals("Hourly")) {
@@ -270,6 +272,8 @@ public class BacklogSummary
          command = fgSelectDailyCommand + " " + selection;
       }
       Query rq = session.createSQLQuery(command);
+      for (Map.Entry<String, Object> e : parameters.entrySet())
+          rq.setParameter(e.getKey(), e.getValue());
       List<BacklogSummary> result = new java.util.LinkedList<BacklogSummary>();
       List<Object[]> data = rq.list();
       for ( Object[] values : data ) {
@@ -299,6 +303,12 @@ public class BacklogSummary
          result.add(backlog);
       }
       return result;
+   }
+
+   public static List<BacklogSummary> getList(Session session, String what, String selection)
+   {
+       Map<String,Object> emptyMap = new HashMap<String,Object>();
+       return getList(session, what, selection, emptyMap);
    }
    
 }

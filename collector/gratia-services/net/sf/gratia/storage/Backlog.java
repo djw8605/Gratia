@@ -3,6 +3,8 @@ package net.sf.gratia.storage;
 import java.util.Date;
 import java.util.List;
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.hibernate.Query;
@@ -163,10 +165,12 @@ public class Backlog
    "UNIQUE KEY index1 (EntityType, Name))";
    private static final String fgSelectCommand = "select ServerDate,EntityType,Name,nRecords,xmlFiles,tarFiles,serviceBacklog,maxPendingFiles,bundleSize,prevServerDate,prevRecords,prevServiceBacklog from BacklogStatistics";
 
-   public static List<Backlog> getList(Session session, String selection)
+   public static List<Backlog> getList(Session session, String selection, Map<String,Object> parameters)
    {
       String command = fgSelectCommand + selection;
       Query rq = session.createSQLQuery(command);
+      for (Map.Entry<String, Object> e : parameters.entrySet())
+          rq.setParameter(e.getKey(), e.getValue());
       List<Backlog> result = new java.util.LinkedList<Backlog>();
       List<Object[]> data = rq.list();
       for ( Object[] values : data ) {
@@ -188,5 +192,10 @@ public class Backlog
       }
       return result;
    }
+   public static List<Backlog> getList(Session session, String selection)
+    {
+        Map<String,Object> emptyMap = new HashMap<String,Object>();
+        return getList(session, selection, emptyMap);
+    }
    
 }

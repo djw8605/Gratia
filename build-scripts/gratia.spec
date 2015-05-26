@@ -2,8 +2,8 @@ Name: gratia
 Summary: Gratia OSG accounting system
 Group: Applications/System
 #Version: 1.13.12
-Version: 1.16.1
-Release: 1%{?dist}
+Version: 1.16.2
+Release: 0.0%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/

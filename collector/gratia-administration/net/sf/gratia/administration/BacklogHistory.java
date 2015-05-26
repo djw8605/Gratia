@@ -334,9 +334,11 @@ public class BacklogHistory extends HttpServlet {
       try {
          session = HibernateWrapper.getCheckedSession();
          Transaction tx = session.beginTransaction();
-         summary = Backlog.getList(session, " where Name = '" + name + "' order by ServerDate ");
-         hourly = BacklogSummary.getList(session,"Hourly", " where Name = '" + name + "' order by EventDate desc");
-         daily = BacklogSummary.getList(session,"Daily", " where Name = '" + name + "' order by EventDate desc");
+         HashMap<String,Object> parameters = new HashMap<String,Object>();
+         parameters.put("name",name);
+         summary = Backlog.getList(session, " where Name = :name order by ServerDate ", parameters);
+         hourly = BacklogSummary.getList(session,"Hourly", " where Name = :name order by EventDate desc", parameters);
+         daily = BacklogSummary.getList(session,"Daily", " where Name = :name order by EventDate desc", parameters);
          tx.commit();
          session.close();
       } catch (Exception e) {
