@@ -137,7 +137,7 @@ while [[ -n "$1" ]]; do
       stored)
         #proc="/usr/share/gratia/sql/build-stored-procedures.sql"
         set -- "$@" stored-extra-3 stored-1 stored-2 stored-3 stored-4 stored-5
-        if [[ `hostname -f` == *.fnal.gov ]]; then
+        if [[ `hostname -f` == *.fnal.gov  && "x$DBROOTUSER" == "xroot" ]]; then
           set -- "$@" proc-edit-permission
         fi
         continue
