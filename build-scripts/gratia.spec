@@ -3,7 +3,7 @@ Summary: Gratia OSG accounting system
 Group: Applications/System
 #Version: 1.13.12
 Version: 1.16.2
-Release: 0.0%{?dist}
+Release: 1%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -237,6 +237,12 @@ fi
 
 
 %changelog
+* Thu May 28 2015 Kevin Retzke - 1.16.2
+- Patched potential vulnerabilities in Gratia service administration interface
+- Fixed tomcat6.jsvc init script status, increased timeout
+- Improved post-install and install-database scripts, fixed issues with remote and/or
+  unprivileged database access
+
 * Fri Oct 29 2014 Hyunwoo Kim - 1.16.1
 - install-database is debugged. now letting local mysql rootuser have different name other than root
 
