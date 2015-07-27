@@ -137,7 +137,7 @@ AJUR:BEGIN
 
   -- Basic data checks
   IF n_ResourceType IS NOT NULL AND
-     n_ResourceType NOT IN ('Batch', 'BatchPilot', 'GridMonitor', 'RawCPU', 'Backfill', 'Storage', 'Transfer') THEN
+     n_ResourceType NOT IN ('Batch', 'BatchPilot', 'OneVM', 'AWSVM','GridMonitor', 'RawCPU', 'Backfill', 'Storage', 'Transfer') THEN
      SET x_Description = CONCAT("ERROR: Unsupported ResourceType: ",n_ResourceType);
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'add_JUR_to_summary', inputDbid, x_Description);
@@ -466,7 +466,7 @@ DJUR:BEGIN
 
   -- Basic data checks
   IF n_ResourceType IS NOT NULL AND
-     n_ResourceType NOT IN ('Batch', 'BatchPilot', 'GridMonitor', 'RawCPU', 'Backfill', 'Storage', 'Transfer') THEN
+     n_ResourceType NOT IN ('Batch', 'BatchPilot','OneVM', 'AWSVM', 'GridMonitor', 'RawCPU', 'Backfill', 'Storage', 'Transfer') THEN
      SET x_Description = CONCAT("ERROR: Unsupported ResourceType: ",n_ResourceType);
      INSERT INTO trace(eventtime, procName, p1, sqlQuery)
       VALUES(UTC_TIMESTAMP(), 'del_JUR_from_summary', inputDbid, x_Description);
