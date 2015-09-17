@@ -31,8 +31,8 @@ public class DatabaseMaintenance {
 
    static final String dq = "\"";
    static final String comma = ",";
-   static final int gratiaDatabaseVersion = 93;
-   static final int latestDBVersionRequiringStoredProcedureLoad = gratiaDatabaseVersion;
+   static final int gratiaDatabaseVersion = 94;
+   static final int latestDBVersionRequiringStoredProcedureLoad = 93;
    static final int latestDBVersionRequiringSummaryViewLoad = 92;
    static final int latestDBVersionRequiringSummaryTriggerLoad = 93;
    static final int latestDBVersionRequiringTableStatisticsRefresh = 87;
@@ -566,6 +566,26 @@ public class DatabaseMaintenance {
       }
       return 0;
    }
+
+    private boolean tableHasColumn(String table, String column) {
+        Statement statement;
+        ResultSet resultSet;
+
+        String cmd = "show columns from " + table + " where Field = '" + column + "'";
+
+        try {
+            Logging.log("Executing: " + cmd);
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(cmd);
+            if (resultSet.next()) {
+                return true;
+            }
+            Logging.log("Command: OK: " + cmd);
+        } catch (Exception e) {
+            Logging.warning("Command: Error: " + cmd + " : " + e);
+        }
+        return false;
+    }
 
    public void SiteDefaults() {
       Statement statement;
@@ -1355,13 +1375,24 @@ public class DatabaseMaintenance {
          }  
 
          schemaOnlyLowerBound = 92;
-         schemaOnlyUpperBound = gratiaDatabaseVersion;
+         schemaOnlyUpperBound = 93;
          if ((current >= schemaOnlyLowerBound) && (current < schemaOnlyUpperBound)) {
              // Stored procedures, trigger procedures only.
             Logging.fine("DatabaseMaintenance: Gratia database upgraded from " + current + " to " + schemaOnlyUpperBound);
             current = schemaOnlyUpperBound;
             UpdateDbVersion(current);
          }
+
+          // update from 93 to 94
+          if (current == 93) {
+              if (!AddPKToAuxTables()) {
+                  Logging.log(LogLevel.SEVERE,"DatabaseMaintenance: FAILED to update database from " + current + " to " + (current + 1));
+                  return false;
+              }
+              Logging.log("DatabaseMaintenance: Gratia database upgraded from " + current + " to " + (current + 1));
+              current = current + 1;
+              UpdateDbVersion(current);
+          }
 
          if ( liveVersion != gratiaDatabaseVersion  ) {
            Logging.log(LogLevel.SEVERE,"DatabaseMaintenance: FAILED to update database from " + current + " to " + gratiaDatabaseVersion);
@@ -1725,6 +1756,58 @@ public class DatabaseMaintenance {
       }
       return true;
    }
+
+    private boolean AddPKToAuxTables() {
+        // Add primary key to JobUsageRecord auxiliary tables
+        String tables[] = {"Disk", "Memory", "Swap", "Network", "TimeDuration", "TimeInstant",
+                "ServiceLevel", "PhaseResource", "VolumeResource", "ConsumableResource", "Resource"};
+        try {
+            for (String table : tables) {
+                Logging.info("Adding primary key to " + table);
+                // Create new table to modify
+                String newtable = table + "_new";
+                String command = "DROP TABLE IF EXISTS " + newtable;
+                if (Execute(command) < 0) {
+                    return false;
+                }
+                command = "CREATE TABLE " + newtable + " LIKE " + table;
+                if (Execute(command) < 0) {
+                    return false;
+                }
+                // see if table already contains pkid column, maybe added by hibernate. Remove if so.
+                if (tableHasColumn(newtable, "pkid")) {
+                    command = "ALTER TABLE " + newtable + " DROP COLUMN pkid";
+                    if (Execute(command) < 0) {
+                        return false;
+                    }
+                    command = "ALTER TABLE " + table + " DROP COLUMN pkid";
+                    if (Execute(command) < 0) {
+                        return false;
+                    }
+                }
+                // add primary key column and foreign constraint
+                command = "ALTER TABLE " + newtable + " ADD COLUMN pkid bigint(20) NOT NULL PRIMARY KEY AUTO_INCREMENT, " +
+                        "ADD CONSTRAINT FOREIGN KEY (dbid) REFERENCES JobUsageRecord (dbid) ON DELETE CASCADE";
+                if (Execute(command) < 0) {
+                    return false;
+                }
+                // copy data into new table, creating primary key
+                command = "INSERT INTO " + newtable + " SELECT *,null FROM " + table;
+                if (Execute(command) < 0) {
+                    return false;
+                }
+                // rename tables, keeping old
+                command = "RENAME TABLE " + table + " TO " + table + "_old, " + newtable + " TO " + table;
+                if (Execute(command) < 0) {
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            Logging.warning("Command: Error: " + e);
+            return false;
+        }
+        return true;
+    }
 
    private String prettySize(Long number) {
       return prettySize(number, 1100);

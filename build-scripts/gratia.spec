@@ -2,7 +2,7 @@ Name: gratia
 Summary: Gratia OSG accounting system
 Group: Applications/System
 #Version: 1.13.12
-Version: 1.16.2
+Version: 1.16.3
 Release: 1%{?dist}
 License: GPL
 Group: Applications/System
@@ -237,6 +237,10 @@ fi
 
 
 %changelog
+* Thu Sep 17 2015 Kevin Retzke - 1.16.3
+- Added primary keys to JobUsageRecord auxiliary tables (e.g. Disk, Network) and
+   DatabaseMaintenance routine to migrate schema.
+
 * Thu May 28 2015 Kevin Retzke - 1.16.2
 - Patched potential vulnerabilities in Gratia service administration interface
 - Fixed tomcat6.jsvc init script status, increased timeout

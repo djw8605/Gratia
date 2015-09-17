@@ -128,7 +128,10 @@
        <property name="Value" column="Host" type="text"/>
        <property name="Description" column="HostDescription" />
    </component>
-   <bag name="Disk" table="Disk" >
+   <idbag name="Disk" table="Disk" >
+       <collection-id column="pkid" type="long">
+           <generator class="identity"/>
+       </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -138,8 +141,11 @@
           <property name="Type" />
           <property name="Description" />
        </composite-element>
-   </bag>
-   <bag name="Memory" table="Memory" >
+   </idbag>
+   <idbag name="Memory" table="Memory" >
+       <collection-id column="pkid" type="long">
+           <generator class="identity"/>
+       </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -149,8 +155,11 @@
           <property name="Type" />
           <property name="Description" />
        </composite-element>
-   </bag>
-   <bag name="Swap" table="Swap" >
+   </idbag>
+   <idbag name="Swap" table="Swap" >
+       <collection-id column="pkid" type="long">
+           <generator class="identity"/>
+       </collection-id>
        <key column="dbid"/>
        <composite-element class="net.sf.gratia.storage.ResourceElement">
           <property name="Value" />
@@ -160,8 +169,11 @@
           <property name="Type" />
           <property name="Description" />
        </composite-element>
-   </bag>
-   <bag name="Network" table="Network" >
+   </idbag>
+   <idbag name="Network" table="Network" >
+       <collection-id column="pkid" type="long">
+           <generator class="identity"/>
+       </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -170,32 +182,44 @@
           <property name="Metrics" />
           <property name="Description" />
        </composite-element>
-   </bag>
-   <bag name="TimeDuration" table="TimeDuration" >
+   </idbag>
+   <idbag name="TimeDuration" table="TimeDuration" >
+       <collection-id column="pkid" type="long">
+           <generator class="identity"/>
+       </collection-id>
        <key column="dbid"/>
        <composite-element class="DurationElement">
           <property name="Value"  />
           <property name="Description" />
           <property name="Type" />
        </composite-element>
-   </bag>
-  <bag name="TimeInstant" table="TimeInstant" >
+   </idbag>
+  <idbag name="TimeInstant" table="TimeInstant" >
+      <collection-id column="pkid" type="long">
+          <generator class="identity"/>
+      </collection-id>
        <key column="dbid"/>
        <composite-element class="DateElement">
           <property name="Value"  />
           <property name="Description" />
           <property name="Type" />
        </composite-element>
-   </bag>
-   <bag name="ServiceLevel" table="ServiceLevel" >
+   </idbag>
+   <idbag name="ServiceLevel" table="ServiceLevel" >
+       <collection-id column="pkid" type="long">
+           <generator class="identity"/>
+       </collection-id>
        <key column="dbid"/>
        <composite-element class="StringElement">
           <property name="Value"  />
           <property name="Description" />
           <property name="Type" />
        </composite-element>
-   </bag>
-   <bag name="PhaseResource" table="PhaseResource" >
+   </idbag>
+   <idbag name="PhaseResource" table="PhaseResource" >
+       <collection-id column="pkid" type="long">
+           <generator class="identity"/>
+       </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -203,8 +227,11 @@
           <property name="PhaseUnit" />
           <property name="Description" />
        </composite-element>
-   </bag>
-   <bag name="VolumeResource" table="VolumeResource" >
+   </idbag>
+   <idbag name="VolumeResource" table="VolumeResource" >
+       <collection-id column="pkid" type="long">
+           <generator class="identity"/>
+       </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
@@ -212,22 +239,28 @@
           <property name="StorageUnit" />
           <property name="Description" />
        </composite-element>
-   </bag>
-   <bag name="ConsumableResource" table="ConsumableResource" >
+   </idbag>
+   <idbag name="ConsumableResource" table="ConsumableResource" >
+       <collection-id column="pkid" type="long">
+           <generator class="identity"/>
+       </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
           <property name="Value" />
           <property name="Unit" />
           <property name="Description" />
        </composite-element>
-   </bag>
-   <bag name="Resource" table="Resource" >
+   </idbag>
+   <idbag name="Resource" table="Resource" >
+       <collection-id column="pkid" type="long">
+           <generator class="identity"/>
+       </collection-id>
        <key column="dbid"/>
        <composite-element class="StringElement">
           <property name="Value" />
           <property name="Description" />
        </composite-element>
-   </bag>
+   </idbag>
 
    <set name="TDSet" table="TDCorr" inverse="true">
       <key column="dbid" />
