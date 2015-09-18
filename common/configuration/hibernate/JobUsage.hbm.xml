@@ -130,7 +130,7 @@
    </component>
    <idbag name="Disk" table="Disk" >
        <collection-id column="pkid" type="long">
-           <generator class="identity"/>
+           <generator class="hilo"/>
        </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
@@ -144,7 +144,7 @@
    </idbag>
    <idbag name="Memory" table="Memory" >
        <collection-id column="pkid" type="long">
-           <generator class="identity"/>
+           <generator class="hilo"/>
        </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
@@ -158,7 +158,7 @@
    </idbag>
    <idbag name="Swap" table="Swap" >
        <collection-id column="pkid" type="long">
-           <generator class="identity"/>
+           <generator class="hilo"/>
        </collection-id>
        <key column="dbid"/>
        <composite-element class="net.sf.gratia.storage.ResourceElement">
@@ -172,7 +172,7 @@
    </idbag>
    <idbag name="Network" table="Network" >
        <collection-id column="pkid" type="long">
-           <generator class="identity"/>
+           <generator class="hilo"/>
        </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
@@ -185,7 +185,7 @@
    </idbag>
    <idbag name="TimeDuration" table="TimeDuration" >
        <collection-id column="pkid" type="long">
-           <generator class="identity"/>
+           <generator class="hilo"/>
        </collection-id>
        <key column="dbid"/>
        <composite-element class="DurationElement">
@@ -196,7 +196,7 @@
    </idbag>
   <idbag name="TimeInstant" table="TimeInstant" >
       <collection-id column="pkid" type="long">
-          <generator class="identity"/>
+          <generator class="hilo"/>
       </collection-id>
        <key column="dbid"/>
        <composite-element class="DateElement">
@@ -207,7 +207,7 @@
    </idbag>
    <idbag name="ServiceLevel" table="ServiceLevel" >
        <collection-id column="pkid" type="long">
-           <generator class="identity"/>
+           <generator class="hilo"/>
        </collection-id>
        <key column="dbid"/>
        <composite-element class="StringElement">
@@ -218,7 +218,7 @@
    </idbag>
    <idbag name="PhaseResource" table="PhaseResource" >
        <collection-id column="pkid" type="long">
-           <generator class="identity"/>
+           <generator class="hilo"/>
        </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
@@ -230,7 +230,7 @@
    </idbag>
    <idbag name="VolumeResource" table="VolumeResource" >
        <collection-id column="pkid" type="long">
-           <generator class="identity"/>
+           <generator class="hilo"/>
        </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
@@ -242,7 +242,7 @@
    </idbag>
    <idbag name="ConsumableResource" table="ConsumableResource" >
        <collection-id column="pkid" type="long">
-           <generator class="identity"/>
+           <generator class="hilo"/>
        </collection-id>
        <key column="dbid"/>
        <composite-element class="ResourceElement">
@@ -253,7 +253,7 @@
    </idbag>
    <idbag name="Resource" table="Resource" >
        <collection-id column="pkid" type="long">
-           <generator class="identity"/>
+           <generator class="hilo"/>
        </collection-id>
        <key column="dbid"/>
        <composite-element class="StringElement">

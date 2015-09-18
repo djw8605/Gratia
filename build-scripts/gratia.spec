@@ -3,7 +3,7 @@ Summary: Gratia OSG accounting system
 Group: Applications/System
 #Version: 1.13.12
 Version: 1.16.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPL
 Group: Applications/System
 URL: http://sourceforge.net/projects/gratia/
@@ -237,6 +237,9 @@ fi
 
 
 %changelog
+* Fri Sep 18 2015 Kevin Retzke - 1.16.3-2
+- Changed primary key id generator to hilo for compatability with MySQL cluster.
+
 * Thu Sep 17 2015 Kevin Retzke - 1.16.3
 - Added primary keys to JobUsageRecord auxiliary tables (e.g. Disk, Network) and
    DatabaseMaintenance routine to migrate schema.
