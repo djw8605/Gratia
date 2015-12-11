@@ -33,6 +33,8 @@ function find_tomcat_version {
     export TOMCAT_VERSION=tomcat5    
   elif [ -r "/etc/tomcat6/tomcat6.conf" ];then
     export TOMCAT_VERSION=tomcat6    
+  elif [ -r "/etc/tomcat/tomcat.conf" ];then
+    export TOMCAT_VERSION=tomcat
   else
     logerr "Unable to determine tomcat version"
   fi
@@ -63,6 +65,9 @@ function verify_jsvc_installed {
                   JSVC_FILE=/usr/sbin/jsvc
                    ;;
       "tomcat6" )  JAR_FILES=":/usr/share/java/jakarta-commons-daemon.jar:\$CATALINA_HOME/bin/tomcat-juli.jar" 
+                   JSVC_FILE=/usr/bin/jsvc
+                   ;;
+      "tomcat" )   JAR_FILES=":/usr/share/java/commons-daemon.jar"
                    JSVC_FILE=/usr/bin/jsvc
                    ;;
             * ) logerr "The tomcat version could not be detected" ;;
@@ -107,6 +112,8 @@ function configuring_tomcat {
 	fi
         ;;
       "tomcat6" )
+         ;;
+      "tomcat" )
          ;;
         * ) logerr "This version of tomcat is not supported: $TOMCAT_VERSION" ;;
     esac
